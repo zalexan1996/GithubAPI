@@ -1,0 +1,93 @@
+
+<#
+.SYNOPSIS
+Lists all workflow runs for a repository. You can use parameters to narrow the list of results. For more information about using parameters, see Parameters.
+Anyone with read access to the repository can use this endpoint. If the repository is private you must use an access token with the repo scope. GitHub Apps must have the actions:read permission to use this endpoint.
+
+        
+.PARAMETER accept
+Setting toapplication/vnd.github.v3+json is recommended.
+         
+.PARAMETER owner
+
+         
+.PARAMETER repo
+
+         
+.PARAMETER actor
+Returns someone's workflow runs. Use the login for the user who created the push associated with the check suite or workflow run.
+         
+.PARAMETER branch
+Returns workflow runs associated with a branch. Use the name of the branch of the push.
+         
+.PARAMETER event
+Returns workflow run triggered by the event you specify. For example, push, pull_request or issue. For more information, see "Events that trigger workflows."
+         
+.PARAMETER status
+Returns workflow runs with the check run status or conclusion that you specify. For example, a conclusion can be success or a status can be in_progress. Only GitHub can set a status of waiting or requested. For a list of the possible status and conclusion options, see "Create a check run."
+         
+.PARAMETER per_page
+Results per page (max 100)
+Default: 30
+         
+.PARAMETER page
+Page number of the results to fetch.
+Default: 1
+         
+.PARAMETER created
+Returns workflow runs created within the given date-time range. For more information on the syntax, see "Understanding the search syntax."
+         
+.PARAMETER exclude_pull_requests
+If true pull requests are omitted from the response (empty array).
+         
+.PARAMETER check_suite_id
+Returns workflow runs with the check_suite_id that you specify.
+
+
+.LINK
+https://docs.github.com/en/rest/reference/actions
+#>
+Function List-WorkflowRunsForARepository
+{
+    [CmdletBinding()]
+    Param(
+		[Parameter(Mandatory=$FALSE)][string]$accept,
+		[Parameter(Mandatory=$FALSE)][string]$owner,
+		[Parameter(Mandatory=$FALSE)][string]$repo,
+		[Parameter(Mandatory=$FALSE)][string]$actor,
+		[Parameter(Mandatory=$FALSE)][string]$branch,
+		[Parameter(Mandatory=$FALSE)][string]$event,
+		[Parameter(Mandatory=$FALSE)][string]$status,
+		[Parameter(Mandatory=$FALSE)][string]$per_page,
+		[Parameter(Mandatory=$FALSE)][string]$page,
+		[Parameter(Mandatory=$FALSE)][string]$created,
+		[Parameter(Mandatory=$FALSE)][string]$exclude_pull_requests,
+		[Parameter(Mandatory=$FALSE)][string]$check_suite_id
+    )
+    $QueryStrings = @("actor=$actor","branch=$branch","event=$event","status=$status","per_page=$per_page","page=$page","created=$created","exclude_pull_requests=$exclude_pull_requests","check_suite_id=$check_suite_id") | ? { $PSBoundParameters.ContainsKey($_) }
+
+    
+    if (![String]::IsNullOrEmpty($QueryStrings))
+    {
+        $FinalURL = "https://api.github.com/repos/$owner/$repo/actions/runs?$($QueryStrings -join '&')"
+    }
+    else
+    {
+        $FinalURL = "https://api.github.com/repos/$owner/$repo/actions/runs"
+    }
+
+
+    $Headers = @{
+        "Authorization" = "token $Script:GithubToken"
+		"accept" = "$accept"
+    }
+
+    $Body = @{
+        
+    }
+
+    $Output = Invoke-RestMethod -Method GET -Uri "$FinalURL" -Headers $Headers -Body $Body -ResponseHeadersVariable $ResponseHeaders
+
+    $Output | Write-Output
+}
+
