@@ -1,4 +1,3 @@
-
 <#
 .SYNOPSIS
 In order to get a user's membership with an organization, the authenticated user must be an organization member. The state parameter in the response can be used to identify the user's membership status.
@@ -25,7 +24,17 @@ Function Get-OrganizationMembershipForAUser
 		[Parameter(Mandatory=$FALSE)][string]$org,
 		[Parameter(Mandatory=$FALSE)][string]$username
     )
-    $QueryStrings = @() | ? { $PSBoundParameters.ContainsKey($_) }
+    $QueryStrings = @(
+        
+    ) | ? { $PSBoundParameters.ContainsKey($_) }
+
+
+    $Body = @{}
+    @( 
+         
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Body[$_] = $PSBoundParameters[$_] }
+
+
 
     
     if (![String]::IsNullOrEmpty($QueryStrings))
@@ -39,16 +48,13 @@ Function Get-OrganizationMembershipForAUser
 
 
     $Headers = @{
-        "Authorization" = "token $Script:GithubToken"
+        "Authorization" = "token $Global:GithubToken"
 		"accept" = "$accept"
     }
 
-    $Body = @{
-        
-    }
-
-    $Output = Invoke-RestMethod -Method GET -Uri "$FinalURL" -Headers $Headers -Body $Body -ResponseHeadersVariable $ResponseHeaders
+    Write-Verbose ($Body | ConvertTo-JSON)
+    $Output = Invoke-RestMethod -Method GET -Uri "$FinalURL" -Headers $Headers -Body ($Body | ConvertTo-JSON) -ResponseHeadersVariable ResponseHeaders
+    
 
     $Output | Write-Output
 }
-

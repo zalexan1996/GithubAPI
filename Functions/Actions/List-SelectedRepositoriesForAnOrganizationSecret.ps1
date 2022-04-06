@@ -1,4 +1,3 @@
-
 <#
 .SYNOPSIS
 Lists all repositories that have been selected when the visibility for repository access to a secret is set to selected. You must authenticate using an access token with the admin:org scope to use this endpoint. GitHub Apps must have the secrets organization permission to use this endpoint.
@@ -32,10 +31,21 @@ Function List-SelectedRepositoriesForAnOrganizationSecret
 		[Parameter(Mandatory=$FALSE)][string]$accept,
 		[Parameter(Mandatory=$FALSE)][string]$org,
 		[Parameter(Mandatory=$FALSE)][string]$secret_name,
-		[Parameter(Mandatory=$FALSE)][string]$page,
-		[Parameter(Mandatory=$FALSE)][string]$per_page
+		[Parameter(Mandatory=$FALSE)][int]$page,
+		[Parameter(Mandatory=$FALSE)][int]$per_page
     )
-    $QueryStrings = @("page=$page","per_page=$per_page") | ? { $PSBoundParameters.ContainsKey($_) }
+    $QueryStrings = @(
+        "page=$page",
+		"per_page=$per_page"
+    ) | ? { $PSBoundParameters.ContainsKey($_) }
+
+
+    $Body = @{}
+    @( 
+         
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Body[$_] = $PSBoundParameters[$_] }
+
+
 
     
     if (![String]::IsNullOrEmpty($QueryStrings))
@@ -49,16 +59,13 @@ Function List-SelectedRepositoriesForAnOrganizationSecret
 
 
     $Headers = @{
-        "Authorization" = "token $Script:GithubToken"
+        "Authorization" = "token $Global:GithubToken"
 		"accept" = "$accept"
     }
 
-    $Body = @{
-        
-    }
-
-    $Output = Invoke-RestMethod -Method GET -Uri "$FinalURL" -Headers $Headers -Body $Body -ResponseHeadersVariable $ResponseHeaders
+    Write-Verbose ($Body | ConvertTo-JSON)
+    $Output = Invoke-RestMethod -Method GET -Uri "$FinalURL" -Headers $Headers -Body ($Body | ConvertTo-JSON) -ResponseHeadersVariable ResponseHeaders
+    
 
     $Output | Write-Output
 }
-

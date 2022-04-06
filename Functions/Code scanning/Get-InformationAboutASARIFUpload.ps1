@@ -1,4 +1,3 @@
-
 <#
 .SYNOPSIS
 Gets information about a SARIF upload, including the status and the URL of the analysis that was uploaded so that you can retrieve details of the analysis. For more information, see "Get a code scanning analysis for a repository." You must use an access token with the security_events scope to use this endpoint with private repos, the public_repo scope also grants permission to read security events on public repos only. GitHub Apps must have the security_events read permission to use this endpoint.
@@ -29,7 +28,17 @@ Function Get-InformationAboutASARIFUpload
 		[Parameter(Mandatory=$FALSE)][string]$repo,
 		[Parameter(Mandatory=$FALSE)][string]$sarif_id
     )
-    $QueryStrings = @() | ? { $PSBoundParameters.ContainsKey($_) }
+    $QueryStrings = @(
+        
+    ) | ? { $PSBoundParameters.ContainsKey($_) }
+
+
+    $Body = @{}
+    @( 
+         
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Body[$_] = $PSBoundParameters[$_] }
+
+
 
     
     if (![String]::IsNullOrEmpty($QueryStrings))
@@ -43,16 +52,13 @@ Function Get-InformationAboutASARIFUpload
 
 
     $Headers = @{
-        "Authorization" = "token $Script:GithubToken"
+        "Authorization" = "token $Global:GithubToken"
 		"accept" = "$accept"
     }
 
-    $Body = @{
-        
-    }
-
-    $Output = Invoke-RestMethod -Method GET -Uri "$FinalURL" -Headers $Headers -Body $Body -ResponseHeadersVariable $ResponseHeaders
+    Write-Verbose ($Body | ConvertTo-JSON)
+    $Output = Invoke-RestMethod -Method GET -Uri "$FinalURL" -Headers $Headers -Body ($Body | ConvertTo-JSON) -ResponseHeadersVariable ResponseHeaders
+    
 
     $Output | Write-Output
 }
-

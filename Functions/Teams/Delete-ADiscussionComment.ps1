@@ -1,4 +1,3 @@
-
 <#
 .SYNOPSIS
 Deletes a comment on a team discussion. OAuth access tokens require the write:discussion scope.
@@ -31,10 +30,20 @@ Function Delete-ADiscussionComment
 		[Parameter(Mandatory=$FALSE)][string]$accept,
 		[Parameter(Mandatory=$FALSE)][string]$org,
 		[Parameter(Mandatory=$FALSE)][string]$team_slug,
-		[Parameter(Mandatory=$FALSE)][string]$discussion_number,
-		[Parameter(Mandatory=$FALSE)][string]$comment_number
+		[Parameter(Mandatory=$FALSE)][int]$discussion_number,
+		[Parameter(Mandatory=$FALSE)][int]$comment_number
     )
-    $QueryStrings = @() | ? { $PSBoundParameters.ContainsKey($_) }
+    $QueryStrings = @(
+        
+    ) | ? { $PSBoundParameters.ContainsKey($_) }
+
+
+    $Body = @{}
+    @( 
+         
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Body[$_] = $PSBoundParameters[$_] }
+
+
 
     
     if (![String]::IsNullOrEmpty($QueryStrings))
@@ -48,16 +57,13 @@ Function Delete-ADiscussionComment
 
 
     $Headers = @{
-        "Authorization" = "token $Script:GithubToken"
+        "Authorization" = "token $Global:GithubToken"
 		"accept" = "$accept"
     }
 
-    $Body = @{
-        
-    }
-
-    $Output = Invoke-RestMethod -Method DELETE -Uri "$FinalURL" -Headers $Headers -Body $Body -ResponseHeadersVariable $ResponseHeaders
+    Write-Verbose ($Body | ConvertTo-JSON)
+    $Output = Invoke-RestMethod -Method DELETE -Uri "$FinalURL" -Headers $Headers -Body ($Body | ConvertTo-JSON) -ResponseHeadersVariable ResponseHeaders
+    
 
     $Output | Write-Output
 }
-

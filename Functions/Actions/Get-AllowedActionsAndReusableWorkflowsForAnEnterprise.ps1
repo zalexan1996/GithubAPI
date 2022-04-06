@@ -1,4 +1,3 @@
-
 <#
 .SYNOPSIS
 Gets the selected actions and reusable workflows that are allowed in an enterprise. To use this endpoint, the enterprise permission policy for allowed_actions must be configured to selected. For more information, see "Set GitHub Actions permissions for an enterprise."
@@ -22,7 +21,17 @@ Function Get-AllowedActionsAndReusableWorkflowsForAnEnterprise
 		[Parameter(Mandatory=$FALSE)][string]$accept,
 		[Parameter(Mandatory=$FALSE)][string]$enterprise
     )
-    $QueryStrings = @() | ? { $PSBoundParameters.ContainsKey($_) }
+    $QueryStrings = @(
+        
+    ) | ? { $PSBoundParameters.ContainsKey($_) }
+
+
+    $Body = @{}
+    @( 
+         
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Body[$_] = $PSBoundParameters[$_] }
+
+
 
     
     if (![String]::IsNullOrEmpty($QueryStrings))
@@ -36,16 +45,13 @@ Function Get-AllowedActionsAndReusableWorkflowsForAnEnterprise
 
 
     $Headers = @{
-        "Authorization" = "token $Script:GithubToken"
+        "Authorization" = "token $Global:GithubToken"
 		"accept" = "$accept"
     }
 
-    $Body = @{
-        
-    }
-
-    $Output = Invoke-RestMethod -Method GET -Uri "$FinalURL" -Headers $Headers -Body $Body -ResponseHeadersVariable $ResponseHeaders
+    Write-Verbose ($Body | ConvertTo-JSON)
+    $Output = Invoke-RestMethod -Method GET -Uri "$FinalURL" -Headers $Headers -Body ($Body | ConvertTo-JSON) -ResponseHeadersVariable ResponseHeaders
+    
 
     $Output | Write-Output
 }
-

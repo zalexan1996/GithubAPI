@@ -1,4 +1,3 @@
-
 <#
 .SYNOPSIS
 Note: The SCIM API endpoints for enterprise accounts are currently in beta and are subject to change.
@@ -32,12 +31,25 @@ Function List-ProvisionedSCIMGroupsForAnEnterprise
     Param(
 		[Parameter(Mandatory=$FALSE)][string]$accept,
 		[Parameter(Mandatory=$FALSE)][string]$enterprise,
-		[Parameter(Mandatory=$FALSE)][string]$startIndex,
-		[Parameter(Mandatory=$FALSE)][string]$count,
+		[Parameter(Mandatory=$FALSE)][int]$startIndex,
+		[Parameter(Mandatory=$FALSE)][int]$count,
 		[Parameter(Mandatory=$FALSE)][string]$filter,
 		[Parameter(Mandatory=$FALSE)][string]$excludedAttributes
     )
-    $QueryStrings = @("startIndex=$startIndex","count=$count","filter=$filter","excludedAttributes=$excludedAttributes") | ? { $PSBoundParameters.ContainsKey($_) }
+    $QueryStrings = @(
+        "startIndex=$startIndex",
+		"count=$count",
+		"filter=$filter",
+		"excludedAttributes=$excludedAttributes"
+    ) | ? { $PSBoundParameters.ContainsKey($_) }
+
+
+    $Body = @{}
+    @( 
+         
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Body[$_] = $PSBoundParameters[$_] }
+
+
 
     
     if (![String]::IsNullOrEmpty($QueryStrings))
@@ -51,16 +63,13 @@ Function List-ProvisionedSCIMGroupsForAnEnterprise
 
 
     $Headers = @{
-        "Authorization" = "token $Script:GithubToken"
+        "Authorization" = "token $Global:GithubToken"
 		"accept" = "$accept"
     }
 
-    $Body = @{
-        
-    }
-
-    $Output = Invoke-RestMethod -Method GET -Uri "$FinalURL" -Headers $Headers -Body $Body -ResponseHeadersVariable $ResponseHeaders
+    Write-Verbose ($Body | ConvertTo-JSON)
+    $Output = Invoke-RestMethod -Method GET -Uri "$FinalURL" -Headers $Headers -Body ($Body | ConvertTo-JSON) -ResponseHeadersVariable ResponseHeaders
+    
 
     $Output | Write-Output
 }
-

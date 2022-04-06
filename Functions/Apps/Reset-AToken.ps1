@@ -1,4 +1,3 @@
-
 <#
 .SYNOPSIS
 OAuth applications can use this API method to reset a valid OAuth token without end-user involvement. Applications must save the "token" property in the response because changes take effect immediately. You must use Basic Authentication when accessing this endpoint, using the OAuth application's client_id and client_secret as the username and password. Invalid tokens will return 404 NOT FOUND.
@@ -25,7 +24,17 @@ Function Reset-AToken
 		[Parameter(Mandatory=$FALSE)][string]$client_id,
 		[Parameter(Mandatory=$FALSE)][string]$access_token
     )
-    $QueryStrings = @() | ? { $PSBoundParameters.ContainsKey($_) }
+    $QueryStrings = @(
+        
+    ) | ? { $PSBoundParameters.ContainsKey($_) }
+
+
+    $Body = @{}
+    @( 
+        "access_token" 
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Body[$_] = $PSBoundParameters[$_] }
+
+
 
     
     if (![String]::IsNullOrEmpty($QueryStrings))
@@ -39,16 +48,13 @@ Function Reset-AToken
 
 
     $Headers = @{
-        "Authorization" = "token $Script:GithubToken"
+        "Authorization" = "token $Global:GithubToken"
 		"accept" = "$accept"
     }
 
-    $Body = @{
-        	"access_token" = "$access_token"
-    }
-
-    $Output = Invoke-RestMethod -Method PATCH -Uri "$FinalURL" -Headers $Headers -Body $Body -ResponseHeadersVariable $ResponseHeaders
+    Write-Verbose ($Body | ConvertTo-JSON)
+    $Output = Invoke-RestMethod -Method PATCH -Uri "$FinalURL" -Headers $Headers -Body ($Body | ConvertTo-JSON) -ResponseHeadersVariable ResponseHeaders
+    
 
     $Output | Write-Output
 }
-

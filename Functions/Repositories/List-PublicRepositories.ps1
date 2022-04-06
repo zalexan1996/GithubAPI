@@ -1,4 +1,3 @@
-
 <#
 .SYNOPSIS
 Lists all public repositories in the order that they were created.
@@ -22,9 +21,19 @@ Function List-PublicRepositories
     [CmdletBinding()]
     Param(
 		[Parameter(Mandatory=$FALSE)][string]$accept,
-		[Parameter(Mandatory=$FALSE)][string]$since
+		[Parameter(Mandatory=$FALSE)][int]$since
     )
-    $QueryStrings = @("since=$since") | ? { $PSBoundParameters.ContainsKey($_) }
+    $QueryStrings = @(
+        "since=$since"
+    ) | ? { $PSBoundParameters.ContainsKey($_) }
+
+
+    $Body = @{}
+    @( 
+         
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Body[$_] = $PSBoundParameters[$_] }
+
+
 
     
     if (![String]::IsNullOrEmpty($QueryStrings))
@@ -38,16 +47,13 @@ Function List-PublicRepositories
 
 
     $Headers = @{
-        "Authorization" = "token $Script:GithubToken"
+        "Authorization" = "token $Global:GithubToken"
 		"accept" = "$accept"
     }
 
-    $Body = @{
-        
-    }
-
-    $Output = Invoke-RestMethod -Method GET -Uri "$FinalURL" -Headers $Headers -Body $Body -ResponseHeadersVariable $ResponseHeaders
+    Write-Verbose ($Body | ConvertTo-JSON)
+    $Output = Invoke-RestMethod -Method GET -Uri "$FinalURL" -Headers $Headers -Body ($Body | ConvertTo-JSON) -ResponseHeadersVariable ResponseHeaders
+    
 
     $Output | Write-Output
 }
-

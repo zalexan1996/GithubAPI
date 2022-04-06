@@ -1,4 +1,3 @@
-
 <#
 .SYNOPSIS
 Note: To dismiss a pull request review on a protected branch, you must be a repository administrator or be included in the list of people or teams who can dismiss pull request reviews.
@@ -36,12 +35,23 @@ Function Dismiss-AReviewForAPullRequest
 		[Parameter(Mandatory=$FALSE)][string]$accept,
 		[Parameter(Mandatory=$FALSE)][string]$owner,
 		[Parameter(Mandatory=$FALSE)][string]$repo,
-		[Parameter(Mandatory=$FALSE)][string]$pull_number,
-		[Parameter(Mandatory=$FALSE)][string]$review_id,
+		[Parameter(Mandatory=$FALSE)][int]$pull_number,
+		[Parameter(Mandatory=$FALSE)][int]$review_id,
 		[Parameter(Mandatory=$FALSE)][string]$message,
 		[Parameter(Mandatory=$FALSE)][string]$event
     )
-    $QueryStrings = @() | ? { $PSBoundParameters.ContainsKey($_) }
+    $QueryStrings = @(
+        
+    ) | ? { $PSBoundParameters.ContainsKey($_) }
+
+
+    $Body = @{}
+    @( 
+        "message",
+		"event" 
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Body[$_] = $PSBoundParameters[$_] }
+
+
 
     
     if (![String]::IsNullOrEmpty($QueryStrings))
@@ -55,17 +65,13 @@ Function Dismiss-AReviewForAPullRequest
 
 
     $Headers = @{
-        "Authorization" = "token $Script:GithubToken"
+        "Authorization" = "token $Global:GithubToken"
 		"accept" = "$accept"
     }
 
-    $Body = @{
-        	"message" = "$message"
-	"event" = "$event"
-    }
-
-    $Output = Invoke-RestMethod -Method PUT -Uri "$FinalURL" -Headers $Headers -Body $Body -ResponseHeadersVariable $ResponseHeaders
+    Write-Verbose ($Body | ConvertTo-JSON)
+    $Output = Invoke-RestMethod -Method PUT -Uri "$FinalURL" -Headers $Headers -Body ($Body | ConvertTo-JSON) -ResponseHeadersVariable ResponseHeaders
+    
 
     $Output | Write-Output
 }
-

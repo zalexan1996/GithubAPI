@@ -1,4 +1,3 @@
-
 <#
 .SYNOPSIS
 Start a source import to a GitHub repository using GitHub Importer.
@@ -45,7 +44,21 @@ Function Start-AnImport
 		[Parameter(Mandatory=$FALSE)][string]$vcs_password,
 		[Parameter(Mandatory=$FALSE)][string]$tfvc_project
     )
-    $QueryStrings = @() | ? { $PSBoundParameters.ContainsKey($_) }
+    $QueryStrings = @(
+        
+    ) | ? { $PSBoundParameters.ContainsKey($_) }
+
+
+    $Body = @{}
+    @( 
+        "vcs_url",
+		"vcs",
+		"vcs_username",
+		"vcs_password",
+		"tfvc_project" 
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Body[$_] = $PSBoundParameters[$_] }
+
+
 
     
     if (![String]::IsNullOrEmpty($QueryStrings))
@@ -59,20 +72,13 @@ Function Start-AnImport
 
 
     $Headers = @{
-        "Authorization" = "token $Script:GithubToken"
+        "Authorization" = "token $Global:GithubToken"
 		"accept" = "$accept"
     }
 
-    $Body = @{
-        	"vcs_url" = "$vcs_url"
-	"vcs" = "$vcs"
-	"vcs_username" = "$vcs_username"
-	"vcs_password" = "$vcs_password"
-	"tfvc_project" = "$tfvc_project"
-    }
-
-    $Output = Invoke-RestMethod -Method PUT -Uri "$FinalURL" -Headers $Headers -Body $Body -ResponseHeadersVariable $ResponseHeaders
+    Write-Verbose ($Body | ConvertTo-JSON)
+    $Output = Invoke-RestMethod -Method PUT -Uri "$FinalURL" -Headers $Headers -Body ($Body | ConvertTo-JSON) -ResponseHeadersVariable ResponseHeaders
+    
 
     $Output | Write-Output
 }
-

@@ -1,4 +1,3 @@
-
 <#
 .SYNOPSIS
 Provision organization membership for a user, and send an activation email to the email address.
@@ -19,14 +18,8 @@ The name of the user, suitable for display to end-users
 .PARAMETER name
 Required.
          
-.PARAMETER Properties of thenameobject
-
-         
 .PARAMETER emails
 Required. user emails
-         
-.PARAMETER Properties of theemailsitems
-
          
 .PARAMETER schemas
 
@@ -52,16 +45,31 @@ Function Provision-AndInviteASCIMUser
 		[Parameter(Mandatory=$FALSE)][string]$org,
 		[Parameter(Mandatory=$FALSE)][string]$userName,
 		[Parameter(Mandatory=$FALSE)][string]$displayName,
-		[Parameter(Mandatory=$FALSE)][string]$name,
-		[Parameter(Mandatory=$FALSE)][string]$Properties of thenameobject,
-		[Parameter(Mandatory=$FALSE)][string]$emails,
-		[Parameter(Mandatory=$FALSE)][string]$Properties of theemailsitems,
-		[Parameter(Mandatory=$FALSE)][string]$schemas,
+		[Parameter(Mandatory=$FALSE)][object]$name,
+		[Parameter(Mandatory=$FALSE)][object[]]$emails,
+		[Parameter(Mandatory=$FALSE)][string[]]$schemas,
 		[Parameter(Mandatory=$FALSE)][string]$externalId,
-		[Parameter(Mandatory=$FALSE)][string]$groups,
-		[Parameter(Mandatory=$FALSE)][string]$active
+		[Parameter(Mandatory=$FALSE)][string[]]$groups,
+		[Parameter(Mandatory=$FALSE)][bool]$active
     )
-    $QueryStrings = @() | ? { $PSBoundParameters.ContainsKey($_) }
+    $QueryStrings = @(
+        
+    ) | ? { $PSBoundParameters.ContainsKey($_) }
+
+
+    $Body = @{}
+    @( 
+        "userName",
+		"displayName",
+		"name",
+		"emails",
+		"schemas",
+		"externalId",
+		"groups",
+		"active" 
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Body[$_] = $PSBoundParameters[$_] }
+
+
 
     
     if (![String]::IsNullOrEmpty($QueryStrings))
@@ -75,23 +83,13 @@ Function Provision-AndInviteASCIMUser
 
 
     $Headers = @{
-        "Authorization" = "token $Script:GithubToken"
+        "Authorization" = "token $Global:GithubToken"
 		"accept" = "$accept"
     }
 
-    $Body = @{
-        	"userName" = "$userName"
-	"displayName" = "$displayName"
-	"name" = "$name"
-	"emails" = "$emails"
-	"schemas" = "$schemas"
-	"externalId" = "$externalId"
-	"groups" = "$groups"
-	"active" = "$active"
-    }
-
-    $Output = Invoke-RestMethod -Method POST -Uri "$FinalURL" -Headers $Headers -Body $Body -ResponseHeadersVariable $ResponseHeaders
+    Write-Verbose ($Body | ConvertTo-JSON)
+    $Output = Invoke-RestMethod -Method POST -Uri "$FinalURL" -Headers $Headers -Body ($Body | ConvertTo-JSON) -ResponseHeadersVariable ResponseHeaders
+    
 
     $Output | Write-Output
 }
-

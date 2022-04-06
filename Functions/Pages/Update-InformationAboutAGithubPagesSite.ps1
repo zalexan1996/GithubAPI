@@ -1,4 +1,3 @@
-
 <#
 .SYNOPSIS
 Updates information for a GitHub Pages site. For more information, see "About GitHub Pages.
@@ -37,11 +36,24 @@ Function Update-InformationAboutAGithubPagesSite
 		[Parameter(Mandatory=$FALSE)][string]$owner,
 		[Parameter(Mandatory=$FALSE)][string]$repo,
 		[Parameter(Mandatory=$FALSE)][string]$cname,
-		[Parameter(Mandatory=$FALSE)][string]$https_enforced,
-		[Parameter(Mandatory=$FALSE)][string]$public,
+		[Parameter(Mandatory=$FALSE)][bool]$https_enforced,
+		[Parameter(Mandatory=$FALSE)][bool]$public,
 		[Parameter(Mandatory=$FALSE)][string]$source
     )
-    $QueryStrings = @() | ? { $PSBoundParameters.ContainsKey($_) }
+    $QueryStrings = @(
+        
+    ) | ? { $PSBoundParameters.ContainsKey($_) }
+
+
+    $Body = @{}
+    @( 
+        "cname",
+		"https_enforced",
+		"public",
+		"source" 
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Body[$_] = $PSBoundParameters[$_] }
+
+
 
     
     if (![String]::IsNullOrEmpty($QueryStrings))
@@ -55,19 +67,13 @@ Function Update-InformationAboutAGithubPagesSite
 
 
     $Headers = @{
-        "Authorization" = "token $Script:GithubToken"
+        "Authorization" = "token $Global:GithubToken"
 		"accept" = "$accept"
     }
 
-    $Body = @{
-        	"cname" = "$cname"
-	"https_enforced" = "$https_enforced"
-	"public" = "$public"
-	"source" = "$source"
-    }
-
-    $Output = Invoke-RestMethod -Method PUT -Uri "$FinalURL" -Headers $Headers -Body $Body -ResponseHeadersVariable $ResponseHeaders
+    Write-Verbose ($Body | ConvertTo-JSON)
+    $Output = Invoke-RestMethod -Method PUT -Uri "$FinalURL" -Headers $Headers -Body ($Body | ConvertTo-JSON) -ResponseHeadersVariable ResponseHeaders
+    
 
     $Output | Write-Output
 }
-

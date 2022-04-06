@@ -1,4 +1,3 @@
-
 <#
 .SYNOPSIS
 Users with push access in a repository can create commit statuses for a given SHA.
@@ -49,7 +48,20 @@ Function Create-ACommitStatus
 		[Parameter(Mandatory=$FALSE)][string]$description,
 		[Parameter(Mandatory=$FALSE)][string]$context
     )
-    $QueryStrings = @() | ? { $PSBoundParameters.ContainsKey($_) }
+    $QueryStrings = @(
+        
+    ) | ? { $PSBoundParameters.ContainsKey($_) }
+
+
+    $Body = @{}
+    @( 
+        "state",
+		"target_url",
+		"description",
+		"context" 
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Body[$_] = $PSBoundParameters[$_] }
+
+
 
     
     if (![String]::IsNullOrEmpty($QueryStrings))
@@ -63,19 +75,13 @@ Function Create-ACommitStatus
 
 
     $Headers = @{
-        "Authorization" = "token $Script:GithubToken"
+        "Authorization" = "token $Global:GithubToken"
 		"accept" = "$accept"
     }
 
-    $Body = @{
-        	"state" = "$state"
-	"target_url" = "$target_url"
-	"description" = "$description"
-	"context" = "$context"
-    }
-
-    $Output = Invoke-RestMethod -Method POST -Uri "$FinalURL" -Headers $Headers -Body $Body -ResponseHeadersVariable $ResponseHeaders
+    Write-Verbose ($Body | ConvertTo-JSON)
+    $Output = Invoke-RestMethod -Method POST -Uri "$FinalURL" -Headers $Headers -Body ($Body | ConvertTo-JSON) -ResponseHeadersVariable ResponseHeaders
+    
 
     $Output | Write-Output
 }
-

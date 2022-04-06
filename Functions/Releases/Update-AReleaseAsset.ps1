@@ -1,4 +1,3 @@
-
 <#
 .SYNOPSIS
 Users with push access to the repository can edit a release asset.
@@ -36,12 +35,24 @@ Function Update-AReleaseAsset
 		[Parameter(Mandatory=$FALSE)][string]$accept,
 		[Parameter(Mandatory=$FALSE)][string]$owner,
 		[Parameter(Mandatory=$FALSE)][string]$repo,
-		[Parameter(Mandatory=$FALSE)][string]$asset_id,
+		[Parameter(Mandatory=$FALSE)][int]$asset_id,
 		[Parameter(Mandatory=$FALSE)][string]$name,
 		[Parameter(Mandatory=$FALSE)][string]$label,
 		[Parameter(Mandatory=$FALSE)][string]$state
     )
-    $QueryStrings = @() | ? { $PSBoundParameters.ContainsKey($_) }
+    $QueryStrings = @(
+        
+    ) | ? { $PSBoundParameters.ContainsKey($_) }
+
+
+    $Body = @{}
+    @( 
+        "name",
+		"label",
+		"state" 
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Body[$_] = $PSBoundParameters[$_] }
+
+
 
     
     if (![String]::IsNullOrEmpty($QueryStrings))
@@ -55,18 +66,13 @@ Function Update-AReleaseAsset
 
 
     $Headers = @{
-        "Authorization" = "token $Script:GithubToken"
+        "Authorization" = "token $Global:GithubToken"
 		"accept" = "$accept"
     }
 
-    $Body = @{
-        	"name" = "$name"
-	"label" = "$label"
-	"state" = "$state"
-    }
-
-    $Output = Invoke-RestMethod -Method PATCH -Uri "$FinalURL" -Headers $Headers -Body $Body -ResponseHeadersVariable $ResponseHeaders
+    Write-Verbose ($Body | ConvertTo-JSON)
+    $Output = Invoke-RestMethod -Method PATCH -Uri "$FinalURL" -Headers $Headers -Body ($Body | ConvertTo-JSON) -ResponseHeadersVariable ResponseHeaders
+    
 
     $Output | Write-Output
 }
-

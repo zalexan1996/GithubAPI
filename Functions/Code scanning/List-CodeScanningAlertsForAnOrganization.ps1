@@ -1,4 +1,3 @@
-
 <#
 .SYNOPSIS
 Lists all code scanning alerts for the default branch (usually main or master) for all eligible repositories in an organization. To use this endpoint, you must be an administrator or security manager for the organization, and you must use an access token with the repo scope or security_events scope.
@@ -48,13 +47,29 @@ Function List-CodeScanningAlertsForAnOrganization
 		[Parameter(Mandatory=$FALSE)][string]$org,
 		[Parameter(Mandatory=$FALSE)][string]$before,
 		[Parameter(Mandatory=$FALSE)][string]$after,
-		[Parameter(Mandatory=$FALSE)][string]$page,
-		[Parameter(Mandatory=$FALSE)][string]$per_page,
+		[Parameter(Mandatory=$FALSE)][int]$page,
+		[Parameter(Mandatory=$FALSE)][int]$per_page,
 		[Parameter(Mandatory=$FALSE)][string]$direction,
 		[Parameter(Mandatory=$FALSE)][string]$state,
 		[Parameter(Mandatory=$FALSE)][string]$sort
     )
-    $QueryStrings = @("before=$before","after=$after","page=$page","per_page=$per_page","direction=$direction","state=$state","sort=$sort") | ? { $PSBoundParameters.ContainsKey($_) }
+    $QueryStrings = @(
+        "before=$before",
+		"after=$after",
+		"page=$page",
+		"per_page=$per_page",
+		"direction=$direction",
+		"state=$state",
+		"sort=$sort"
+    ) | ? { $PSBoundParameters.ContainsKey($_) }
+
+
+    $Body = @{}
+    @( 
+         
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Body[$_] = $PSBoundParameters[$_] }
+
+
 
     
     if (![String]::IsNullOrEmpty($QueryStrings))
@@ -68,16 +83,13 @@ Function List-CodeScanningAlertsForAnOrganization
 
 
     $Headers = @{
-        "Authorization" = "token $Script:GithubToken"
+        "Authorization" = "token $Global:GithubToken"
 		"accept" = "$accept"
     }
 
-    $Body = @{
-        
-    }
-
-    $Output = Invoke-RestMethod -Method GET -Uri "$FinalURL" -Headers $Headers -Body $Body -ResponseHeadersVariable $ResponseHeaders
+    Write-Verbose ($Body | ConvertTo-JSON)
+    $Output = Invoke-RestMethod -Method GET -Uri "$FinalURL" -Headers $Headers -Body ($Body | ConvertTo-JSON) -ResponseHeadersVariable ResponseHeaders
+    
 
     $Output | Write-Output
 }
-

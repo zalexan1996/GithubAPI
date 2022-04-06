@@ -1,4 +1,3 @@
-
 <#
 .SYNOPSIS
 Create or update an environment with protection rules, such as required reviewers. For more information about environment protection rules, see "Environments."
@@ -40,11 +39,23 @@ Function Create-OrUpdateAnEnvironment
 		[Parameter(Mandatory=$FALSE)][string]$owner,
 		[Parameter(Mandatory=$FALSE)][string]$repo,
 		[Parameter(Mandatory=$FALSE)][string]$environment_name,
-		[Parameter(Mandatory=$FALSE)][string]$wait_timer,
+		[Parameter(Mandatory=$FALSE)][int]$wait_timer,
 		[Parameter(Mandatory=$FALSE)][string]$reviewers,
 		[Parameter(Mandatory=$FALSE)][string]$deployment_branch_policy
     )
-    $QueryStrings = @() | ? { $PSBoundParameters.ContainsKey($_) }
+    $QueryStrings = @(
+        
+    ) | ? { $PSBoundParameters.ContainsKey($_) }
+
+
+    $Body = @{}
+    @( 
+        "wait_timer",
+		"reviewers",
+		"deployment_branch_policy" 
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Body[$_] = $PSBoundParameters[$_] }
+
+
 
     
     if (![String]::IsNullOrEmpty($QueryStrings))
@@ -58,18 +69,13 @@ Function Create-OrUpdateAnEnvironment
 
 
     $Headers = @{
-        "Authorization" = "token $Script:GithubToken"
+        "Authorization" = "token $Global:GithubToken"
 		"accept" = "$accept"
     }
 
-    $Body = @{
-        	"wait_timer" = "$wait_timer"
-	"reviewers" = "$reviewers"
-	"deployment_branch_policy" = "$deployment_branch_policy"
-    }
-
-    $Output = Invoke-RestMethod -Method PUT -Uri "$FinalURL" -Headers $Headers -Body $Body -ResponseHeadersVariable $ResponseHeaders
+    Write-Verbose ($Body | ConvertTo-JSON)
+    $Output = Invoke-RestMethod -Method PUT -Uri "$FinalURL" -Headers $Headers -Body ($Body | ConvertTo-JSON) -ResponseHeadersVariable ResponseHeaders
+    
 
     $Output | Write-Output
 }
-

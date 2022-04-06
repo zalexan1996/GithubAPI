@@ -1,4 +1,3 @@
-
 <#
 .SYNOPSIS
 Allows you to add a new gist with one or more files.
@@ -27,10 +26,22 @@ Function Create-AGist
     Param(
 		[Parameter(Mandatory=$FALSE)][string]$accept,
 		[Parameter(Mandatory=$FALSE)][string]$description,
-		[Parameter(Mandatory=$FALSE)][string]$files,
+		[Parameter(Mandatory=$FALSE)][object]$files,
 		[Parameter(Mandatory=$FALSE)][string]$public
     )
-    $QueryStrings = @() | ? { $PSBoundParameters.ContainsKey($_) }
+    $QueryStrings = @(
+        
+    ) | ? { $PSBoundParameters.ContainsKey($_) }
+
+
+    $Body = @{}
+    @( 
+        "description",
+		"files",
+		"public" 
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Body[$_] = $PSBoundParameters[$_] }
+
+
 
     
     if (![String]::IsNullOrEmpty($QueryStrings))
@@ -44,18 +55,13 @@ Function Create-AGist
 
 
     $Headers = @{
-        "Authorization" = "token $Script:GithubToken"
+        "Authorization" = "token $Global:GithubToken"
 		"accept" = "$accept"
     }
 
-    $Body = @{
-        	"description" = "$description"
-	"files" = "$files"
-	"public" = "$public"
-    }
-
-    $Output = Invoke-RestMethod -Method POST -Uri "$FinalURL" -Headers $Headers -Body $Body -ResponseHeadersVariable $ResponseHeaders
+    Write-Verbose ($Body | ConvertTo-JSON)
+    $Output = Invoke-RestMethod -Method POST -Uri "$FinalURL" -Headers $Headers -Body ($Body | ConvertTo-JSON) -ResponseHeadersVariable ResponseHeaders
+    
 
     $Output | Write-Output
 }
-

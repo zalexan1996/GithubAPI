@@ -1,4 +1,3 @@
-
 <#
 .SYNOPSIS
 Sets the default workflow permissions granted to the GITHUB_TOKEN when running workflows in an organization, and sets if GitHub Actions can submit approving pull request reviews.
@@ -28,9 +27,20 @@ Function Set-DefaultWorkflowPermissions
 		[Parameter(Mandatory=$FALSE)][string]$accept,
 		[Parameter(Mandatory=$FALSE)][string]$org,
 		[Parameter(Mandatory=$FALSE)][string]$default_workflow_permissions,
-		[Parameter(Mandatory=$FALSE)][string]$can_approve_pull_request_reviews
+		[Parameter(Mandatory=$FALSE)][bool]$can_approve_pull_request_reviews
     )
-    $QueryStrings = @() | ? { $PSBoundParameters.ContainsKey($_) }
+    $QueryStrings = @(
+        
+    ) | ? { $PSBoundParameters.ContainsKey($_) }
+
+
+    $Body = @{}
+    @( 
+        "default_workflow_permissions",
+		"can_approve_pull_request_reviews" 
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Body[$_] = $PSBoundParameters[$_] }
+
+
 
     
     if (![String]::IsNullOrEmpty($QueryStrings))
@@ -44,17 +54,13 @@ Function Set-DefaultWorkflowPermissions
 
 
     $Headers = @{
-        "Authorization" = "token $Script:GithubToken"
+        "Authorization" = "token $Global:GithubToken"
 		"accept" = "$accept"
     }
 
-    $Body = @{
-        	"default_workflow_permissions" = "$default_workflow_permissions"
-	"can_approve_pull_request_reviews" = "$can_approve_pull_request_reviews"
-    }
-
-    $Output = Invoke-RestMethod -Method PUT -Uri "$FinalURL" -Headers $Headers -Body $Body -ResponseHeadersVariable $ResponseHeaders
+    Write-Verbose ($Body | ConvertTo-JSON)
+    $Output = Invoke-RestMethod -Method PUT -Uri "$FinalURL" -Headers $Headers -Body ($Body | ConvertTo-JSON) -ResponseHeadersVariable ResponseHeaders
+    
 
     $Output | Write-Output
 }
-

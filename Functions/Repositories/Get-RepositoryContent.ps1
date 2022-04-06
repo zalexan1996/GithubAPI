@@ -1,4 +1,3 @@
-
 <#
 .SYNOPSIS
 Gets the contents of a file or directory in a repository. Specify the file path or directory in :path. If you omit :path, you will receive the contents of the repository's root directory. See the description below regarding what the API response includes for directories.
@@ -45,7 +44,17 @@ Function Get-RepositoryContent
 		[Parameter(Mandatory=$FALSE)][string]$path,
 		[Parameter(Mandatory=$FALSE)][string]$ref
     )
-    $QueryStrings = @("ref=$ref") | ? { $PSBoundParameters.ContainsKey($_) }
+    $QueryStrings = @(
+        "ref=$ref"
+    ) | ? { $PSBoundParameters.ContainsKey($_) }
+
+
+    $Body = @{}
+    @( 
+         
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Body[$_] = $PSBoundParameters[$_] }
+
+
 
     
     if (![String]::IsNullOrEmpty($QueryStrings))
@@ -59,16 +68,13 @@ Function Get-RepositoryContent
 
 
     $Headers = @{
-        "Authorization" = "token $Script:GithubToken"
+        "Authorization" = "token $Global:GithubToken"
 		"accept" = "$accept"
     }
 
-    $Body = @{
-        
-    }
-
-    $Output = Invoke-RestMethod -Method GET -Uri "$FinalURL" -Headers $Headers -Body $Body -ResponseHeadersVariable $ResponseHeaders
+    Write-Verbose ($Body | ConvertTo-JSON)
+    $Output = Invoke-RestMethod -Method GET -Uri "$FinalURL" -Headers $Headers -Body ($Body | ConvertTo-JSON) -ResponseHeadersVariable ResponseHeaders
+    
 
     $Output | Write-Output
 }
-

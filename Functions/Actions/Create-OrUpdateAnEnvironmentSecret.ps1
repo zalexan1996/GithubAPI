@@ -1,4 +1,3 @@
-
 <#
 .SYNOPSIS
 Creates or updates an environment secret with an encrypted value. Encrypt your secret using LibSodium. You must authenticate using an access token with the repo scope to use this endpoint. GitHub Apps must have the secrets repository permission to use this endpoint.
@@ -81,13 +80,24 @@ Function Create-OrUpdateAnEnvironmentSecret
     [CmdletBinding()]
     Param(
 		[Parameter(Mandatory=$FALSE)][string]$accept,
-		[Parameter(Mandatory=$FALSE)][string]$repository_id,
+		[Parameter(Mandatory=$FALSE)][int]$repository_id,
 		[Parameter(Mandatory=$FALSE)][string]$environment_name,
 		[Parameter(Mandatory=$FALSE)][string]$secret_name,
 		[Parameter(Mandatory=$FALSE)][string]$encrypted_value,
 		[Parameter(Mandatory=$FALSE)][string]$key_id
     )
-    $QueryStrings = @() | ? { $PSBoundParameters.ContainsKey($_) }
+    $QueryStrings = @(
+        
+    ) | ? { $PSBoundParameters.ContainsKey($_) }
+
+
+    $Body = @{}
+    @( 
+        "encrypted_value",
+		"key_id" 
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Body[$_] = $PSBoundParameters[$_] }
+
+
 
     
     if (![String]::IsNullOrEmpty($QueryStrings))
@@ -101,17 +111,13 @@ Function Create-OrUpdateAnEnvironmentSecret
 
 
     $Headers = @{
-        "Authorization" = "token $Script:GithubToken"
+        "Authorization" = "token $Global:GithubToken"
 		"accept" = "$accept"
     }
 
-    $Body = @{
-        	"encrypted_value" = "$encrypted_value"
-	"key_id" = "$key_id"
-    }
-
-    $Output = Invoke-RestMethod -Method PUT -Uri "$FinalURL" -Headers $Headers -Body $Body -ResponseHeadersVariable $ResponseHeaders
+    Write-Verbose ($Body | ConvertTo-JSON)
+    $Output = Invoke-RestMethod -Method PUT -Uri "$FinalURL" -Headers $Headers -Body ($Body | ConvertTo-JSON) -ResponseHeadersVariable ResponseHeaders
+    
 
     $Output | Write-Output
 }
-

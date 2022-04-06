@@ -1,4 +1,3 @@
-
 <#
 .SYNOPSIS
 Lists review comments for all pull requests in a repository. By default, review comments are in ascending order by ID.
@@ -44,10 +43,24 @@ Function List-ReviewCommentsInARepository
 		[Parameter(Mandatory=$FALSE)][string]$sort,
 		[Parameter(Mandatory=$FALSE)][string]$direction,
 		[Parameter(Mandatory=$FALSE)][string]$since,
-		[Parameter(Mandatory=$FALSE)][string]$per_page,
-		[Parameter(Mandatory=$FALSE)][string]$page
+		[Parameter(Mandatory=$FALSE)][int]$per_page,
+		[Parameter(Mandatory=$FALSE)][int]$page
     )
-    $QueryStrings = @("sort=$sort","direction=$direction","since=$since","per_page=$per_page","page=$page") | ? { $PSBoundParameters.ContainsKey($_) }
+    $QueryStrings = @(
+        "sort=$sort",
+		"direction=$direction",
+		"since=$since",
+		"per_page=$per_page",
+		"page=$page"
+    ) | ? { $PSBoundParameters.ContainsKey($_) }
+
+
+    $Body = @{}
+    @( 
+         
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Body[$_] = $PSBoundParameters[$_] }
+
+
 
     
     if (![String]::IsNullOrEmpty($QueryStrings))
@@ -61,16 +74,13 @@ Function List-ReviewCommentsInARepository
 
 
     $Headers = @{
-        "Authorization" = "token $Script:GithubToken"
+        "Authorization" = "token $Global:GithubToken"
 		"accept" = "$accept"
     }
 
-    $Body = @{
-        
-    }
-
-    $Output = Invoke-RestMethod -Method GET -Uri "$FinalURL" -Headers $Headers -Body $Body -ResponseHeadersVariable $ResponseHeaders
+    Write-Verbose ($Body | ConvertTo-JSON)
+    $Output = Invoke-RestMethod -Method GET -Uri "$FinalURL" -Headers $Headers -Body ($Body | ConvertTo-JSON) -ResponseHeadersVariable ResponseHeaders
+    
 
     $Output | Write-Output
 }
-

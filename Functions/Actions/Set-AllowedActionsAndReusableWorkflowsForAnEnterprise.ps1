@@ -1,4 +1,3 @@
-
 <#
 .SYNOPSIS
 Sets the actions and reusable workflows that are allowed in an enterprise. To use this endpoint, the enterprise permission policy for allowed_actions must be configured to selected. For more information, see "Set GitHub Actions permissions for an enterprise."
@@ -30,11 +29,23 @@ Function Set-AllowedActionsAndReusableWorkflowsForAnEnterprise
     Param(
 		[Parameter(Mandatory=$FALSE)][string]$accept,
 		[Parameter(Mandatory=$FALSE)][string]$enterprise,
-		[Parameter(Mandatory=$FALSE)][string]$github_owned_allowed,
-		[Parameter(Mandatory=$FALSE)][string]$verified_allowed,
-		[Parameter(Mandatory=$FALSE)][string]$patterns_allowed
+		[Parameter(Mandatory=$FALSE)][bool]$github_owned_allowed,
+		[Parameter(Mandatory=$FALSE)][bool]$verified_allowed,
+		[Parameter(Mandatory=$FALSE)][string[]]$patterns_allowed
     )
-    $QueryStrings = @() | ? { $PSBoundParameters.ContainsKey($_) }
+    $QueryStrings = @(
+        
+    ) | ? { $PSBoundParameters.ContainsKey($_) }
+
+
+    $Body = @{}
+    @( 
+        "github_owned_allowed",
+		"verified_allowed",
+		"patterns_allowed" 
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Body[$_] = $PSBoundParameters[$_] }
+
+
 
     
     if (![String]::IsNullOrEmpty($QueryStrings))
@@ -48,18 +59,13 @@ Function Set-AllowedActionsAndReusableWorkflowsForAnEnterprise
 
 
     $Headers = @{
-        "Authorization" = "token $Script:GithubToken"
+        "Authorization" = "token $Global:GithubToken"
 		"accept" = "$accept"
     }
 
-    $Body = @{
-        	"github_owned_allowed" = "$github_owned_allowed"
-	"verified_allowed" = "$verified_allowed"
-	"patterns_allowed" = "$patterns_allowed"
-    }
-
-    $Output = Invoke-RestMethod -Method PUT -Uri "$FinalURL" -Headers $Headers -Body $Body -ResponseHeadersVariable $ResponseHeaders
+    Write-Verbose ($Body | ConvertTo-JSON)
+    $Output = Invoke-RestMethod -Method PUT -Uri "$FinalURL" -Headers $Headers -Body ($Body | ConvertTo-JSON) -ResponseHeadersVariable ResponseHeaders
+    
 
     $Output | Write-Output
 }
-

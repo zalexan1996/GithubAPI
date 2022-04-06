@@ -1,4 +1,3 @@
-
 <#
 .SYNOPSIS
 This endpoint triggers notifications. Creating content too quickly using this endpoint may result in secondary rate limiting. See "Secondary rate limits" and "Dealing with secondary rate limits" for details.
@@ -39,13 +38,26 @@ Function Merge-APullRequest
 		[Parameter(Mandatory=$FALSE)][string]$accept,
 		[Parameter(Mandatory=$FALSE)][string]$owner,
 		[Parameter(Mandatory=$FALSE)][string]$repo,
-		[Parameter(Mandatory=$FALSE)][string]$pull_number,
+		[Parameter(Mandatory=$FALSE)][int]$pull_number,
 		[Parameter(Mandatory=$FALSE)][string]$commit_title,
 		[Parameter(Mandatory=$FALSE)][string]$commit_message,
 		[Parameter(Mandatory=$FALSE)][string]$sha,
 		[Parameter(Mandatory=$FALSE)][string]$merge_method
     )
-    $QueryStrings = @() | ? { $PSBoundParameters.ContainsKey($_) }
+    $QueryStrings = @(
+        
+    ) | ? { $PSBoundParameters.ContainsKey($_) }
+
+
+    $Body = @{}
+    @( 
+        "commit_title",
+		"commit_message",
+		"sha",
+		"merge_method" 
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Body[$_] = $PSBoundParameters[$_] }
+
+
 
     
     if (![String]::IsNullOrEmpty($QueryStrings))
@@ -59,19 +71,13 @@ Function Merge-APullRequest
 
 
     $Headers = @{
-        "Authorization" = "token $Script:GithubToken"
+        "Authorization" = "token $Global:GithubToken"
 		"accept" = "$accept"
     }
 
-    $Body = @{
-        	"commit_title" = "$commit_title"
-	"commit_message" = "$commit_message"
-	"sha" = "$sha"
-	"merge_method" = "$merge_method"
-    }
-
-    $Output = Invoke-RestMethod -Method PUT -Uri "$FinalURL" -Headers $Headers -Body $Body -ResponseHeadersVariable $ResponseHeaders
+    Write-Verbose ($Body | ConvertTo-JSON)
+    $Output = Invoke-RestMethod -Method PUT -Uri "$FinalURL" -Headers $Headers -Body ($Body | ConvertTo-JSON) -ResponseHeadersVariable ResponseHeaders
+    
 
     $Output | Write-Output
 }
-

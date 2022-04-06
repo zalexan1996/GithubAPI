@@ -1,4 +1,3 @@
-
 <#
 .SYNOPSIS
 Note: The SCIM API endpoints for enterprise accounts are currently in beta and are subject to change.
@@ -29,7 +28,17 @@ Function Get-SCIMProvisioningInformationForAnEnterpriseGroup
 		[Parameter(Mandatory=$FALSE)][string]$scim_group_id,
 		[Parameter(Mandatory=$FALSE)][string]$excludedAttributes
     )
-    $QueryStrings = @("excludedAttributes=$excludedAttributes") | ? { $PSBoundParameters.ContainsKey($_) }
+    $QueryStrings = @(
+        "excludedAttributes=$excludedAttributes"
+    ) | ? { $PSBoundParameters.ContainsKey($_) }
+
+
+    $Body = @{}
+    @( 
+         
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Body[$_] = $PSBoundParameters[$_] }
+
+
 
     
     if (![String]::IsNullOrEmpty($QueryStrings))
@@ -43,16 +52,13 @@ Function Get-SCIMProvisioningInformationForAnEnterpriseGroup
 
 
     $Headers = @{
-        "Authorization" = "token $Script:GithubToken"
+        "Authorization" = "token $Global:GithubToken"
 		"accept" = "$accept"
     }
 
-    $Body = @{
-        
-    }
-
-    $Output = Invoke-RestMethod -Method GET -Uri "$FinalURL" -Headers $Headers -Body $Body -ResponseHeadersVariable $ResponseHeaders
+    Write-Verbose ($Body | ConvertTo-JSON)
+    $Output = Invoke-RestMethod -Method GET -Uri "$FinalURL" -Headers $Headers -Body ($Body | ConvertTo-JSON) -ResponseHeadersVariable ResponseHeaders
+    
 
     $Output | Write-Output
 }
-

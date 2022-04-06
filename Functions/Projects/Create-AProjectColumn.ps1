@@ -1,4 +1,3 @@
-
 <#
 .SYNOPSIS
 
@@ -22,10 +21,20 @@ Function Create-AProjectColumn
     [CmdletBinding()]
     Param(
 		[Parameter(Mandatory=$FALSE)][string]$accept,
-		[Parameter(Mandatory=$FALSE)][string]$project_id,
+		[Parameter(Mandatory=$FALSE)][int]$project_id,
 		[Parameter(Mandatory=$FALSE)][string]$name
     )
-    $QueryStrings = @() | ? { $PSBoundParameters.ContainsKey($_) }
+    $QueryStrings = @(
+        
+    ) | ? { $PSBoundParameters.ContainsKey($_) }
+
+
+    $Body = @{}
+    @( 
+        "name" 
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Body[$_] = $PSBoundParameters[$_] }
+
+
 
     
     if (![String]::IsNullOrEmpty($QueryStrings))
@@ -39,16 +48,13 @@ Function Create-AProjectColumn
 
 
     $Headers = @{
-        "Authorization" = "token $Script:GithubToken"
+        "Authorization" = "token $Global:GithubToken"
 		"accept" = "$accept"
     }
 
-    $Body = @{
-        	"name" = "$name"
-    }
-
-    $Output = Invoke-RestMethod -Method POST -Uri "$FinalURL" -Headers $Headers -Body $Body -ResponseHeadersVariable $ResponseHeaders
+    Write-Verbose ($Body | ConvertTo-JSON)
+    $Output = Invoke-RestMethod -Method POST -Uri "$FinalURL" -Headers $Headers -Body ($Body | ConvertTo-JSON) -ResponseHeadersVariable ResponseHeaders
+    
 
     $Output | Write-Output
 }
-

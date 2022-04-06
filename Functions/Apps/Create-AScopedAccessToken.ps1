@@ -1,4 +1,3 @@
-
 <#
 .SYNOPSIS
 Use a non-scoped user-to-server OAuth access token to create a repository scoped and/or permission scoped user-to-server OAuth access token. You can specify which repositories the token can access and which permissions are granted to the token. You must use Basic Authentication when accessing this endpoint, using the OAuth application's client_id and client_secret as the username and password. Invalid tokens will return 404 NOT FOUND.
@@ -27,9 +26,6 @@ The list of repository IDs to scope the user-to-server access token to. reposito
          
 .PARAMETER permissions
 The permissions granted to the user-to-server access token.
-         
-.PARAMETER Properties of thepermissionsobject
-
 
 
 .LINK
@@ -43,13 +39,27 @@ Function Create-AScopedAccessToken
 		[Parameter(Mandatory=$FALSE)][string]$client_id,
 		[Parameter(Mandatory=$FALSE)][string]$access_token,
 		[Parameter(Mandatory=$FALSE)][string]$target,
-		[Parameter(Mandatory=$FALSE)][string]$target_id,
-		[Parameter(Mandatory=$FALSE)][string]$repositories,
-		[Parameter(Mandatory=$FALSE)][string]$repository_ids,
-		[Parameter(Mandatory=$FALSE)][string]$permissions,
-		[Parameter(Mandatory=$FALSE)][string]$Properties of thepermissionsobject
+		[Parameter(Mandatory=$FALSE)][int]$target_id,
+		[Parameter(Mandatory=$FALSE)][string[]]$repositories,
+		[Parameter(Mandatory=$FALSE)][int[]]$repository_ids,
+		[Parameter(Mandatory=$FALSE)][object]$permissions
     )
-    $QueryStrings = @() | ? { $PSBoundParameters.ContainsKey($_) }
+    $QueryStrings = @(
+        
+    ) | ? { $PSBoundParameters.ContainsKey($_) }
+
+
+    $Body = @{}
+    @( 
+        "access_token",
+		"target",
+		"target_id",
+		"repositories",
+		"repository_ids",
+		"permissions" 
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Body[$_] = $PSBoundParameters[$_] }
+
+
 
     
     if (![String]::IsNullOrEmpty($QueryStrings))
@@ -63,21 +73,13 @@ Function Create-AScopedAccessToken
 
 
     $Headers = @{
-        "Authorization" = "token $Script:GithubToken"
+        "Authorization" = "token $Global:GithubToken"
 		"accept" = "$accept"
     }
 
-    $Body = @{
-        	"access_token" = "$access_token"
-	"target" = "$target"
-	"target_id" = "$target_id"
-	"repositories" = "$repositories"
-	"repository_ids" = "$repository_ids"
-	"permissions" = "$permissions"
-    }
-
-    $Output = Invoke-RestMethod -Method POST -Uri "$FinalURL" -Headers $Headers -Body $Body -ResponseHeadersVariable $ResponseHeaders
+    Write-Verbose ($Body | ConvertTo-JSON)
+    $Output = Invoke-RestMethod -Method POST -Uri "$FinalURL" -Headers $Headers -Body ($Body | ConvertTo-JSON) -ResponseHeadersVariable ResponseHeaders
+    
 
     $Output | Write-Output
 }
-

@@ -1,4 +1,3 @@
-
 <#
 .SYNOPSIS
 Lists secret scanning alerts for eligible repositories in an enterprise, from newest to oldest. To use this endpoint, you must be a member of the enterprise, and you must use an access token with the repo scope or security_events scope. Alerts are only returned for organizations in the enterprise for which you are an organization owner or a security manager.
@@ -42,11 +41,26 @@ Function List-SecretScanningAlertsForAnEnterprise
 		[Parameter(Mandatory=$FALSE)][string]$state,
 		[Parameter(Mandatory=$FALSE)][string]$secret_type,
 		[Parameter(Mandatory=$FALSE)][string]$resolution,
-		[Parameter(Mandatory=$FALSE)][string]$per_page,
+		[Parameter(Mandatory=$FALSE)][int]$per_page,
 		[Parameter(Mandatory=$FALSE)][string]$before,
 		[Parameter(Mandatory=$FALSE)][string]$after
     )
-    $QueryStrings = @("state=$state","secret_type=$secret_type","resolution=$resolution","per_page=$per_page","before=$before","after=$after") | ? { $PSBoundParameters.ContainsKey($_) }
+    $QueryStrings = @(
+        "state=$state",
+		"secret_type=$secret_type",
+		"resolution=$resolution",
+		"per_page=$per_page",
+		"before=$before",
+		"after=$after"
+    ) | ? { $PSBoundParameters.ContainsKey($_) }
+
+
+    $Body = @{}
+    @( 
+         
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Body[$_] = $PSBoundParameters[$_] }
+
+
 
     
     if (![String]::IsNullOrEmpty($QueryStrings))
@@ -60,16 +74,13 @@ Function List-SecretScanningAlertsForAnEnterprise
 
 
     $Headers = @{
-        "Authorization" = "token $Script:GithubToken"
+        "Authorization" = "token $Global:GithubToken"
 		"accept" = "$accept"
     }
 
-    $Body = @{
-        
-    }
-
-    $Output = Invoke-RestMethod -Method GET -Uri "$FinalURL" -Headers $Headers -Body $Body -ResponseHeadersVariable $ResponseHeaders
+    Write-Verbose ($Body | ConvertTo-JSON)
+    $Output = Invoke-RestMethod -Method GET -Uri "$FinalURL" -Headers $Headers -Body ($Body | ConvertTo-JSON) -ResponseHeadersVariable ResponseHeaders
+    
 
     $Output | Write-Output
 }
-

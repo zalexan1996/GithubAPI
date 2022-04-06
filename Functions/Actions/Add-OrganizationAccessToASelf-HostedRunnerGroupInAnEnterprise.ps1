@@ -1,4 +1,3 @@
-
 <#
 .SYNOPSIS
 Adds an organization to the list of selected organizations that can access a self-hosted runner group. The runner group must have visibility set to selected. For more information, see "Create a self-hosted runner group for an enterprise."
@@ -27,10 +26,20 @@ Function Add-OrganizationAccessToASelf-HostedRunnerGroupInAnEnterprise
     Param(
 		[Parameter(Mandatory=$FALSE)][string]$accept,
 		[Parameter(Mandatory=$FALSE)][string]$enterprise,
-		[Parameter(Mandatory=$FALSE)][string]$runner_group_id,
-		[Parameter(Mandatory=$FALSE)][string]$org_id
+		[Parameter(Mandatory=$FALSE)][int]$runner_group_id,
+		[Parameter(Mandatory=$FALSE)][int]$org_id
     )
-    $QueryStrings = @() | ? { $PSBoundParameters.ContainsKey($_) }
+    $QueryStrings = @(
+        
+    ) | ? { $PSBoundParameters.ContainsKey($_) }
+
+
+    $Body = @{}
+    @( 
+         
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Body[$_] = $PSBoundParameters[$_] }
+
+
 
     
     if (![String]::IsNullOrEmpty($QueryStrings))
@@ -44,16 +53,13 @@ Function Add-OrganizationAccessToASelf-HostedRunnerGroupInAnEnterprise
 
 
     $Headers = @{
-        "Authorization" = "token $Script:GithubToken"
+        "Authorization" = "token $Global:GithubToken"
 		"accept" = "$accept"
     }
 
-    $Body = @{
-        
-    }
-
-    $Output = Invoke-RestMethod -Method PUT -Uri "$FinalURL" -Headers $Headers -Body $Body -ResponseHeadersVariable $ResponseHeaders
+    Write-Verbose ($Body | ConvertTo-JSON)
+    $Output = Invoke-RestMethod -Method PUT -Uri "$FinalURL" -Headers $Headers -Body ($Body | ConvertTo-JSON) -ResponseHeadersVariable ResponseHeaders
+    
 
     $Output | Write-Output
 }
-

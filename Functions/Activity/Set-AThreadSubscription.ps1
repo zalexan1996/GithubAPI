@@ -1,4 +1,3 @@
-
 <#
 .SYNOPSIS
 If you are watching a repository, you receive notifications for all threads by default. Use this endpoint to ignore future notifications for threads until you comment on the thread or get an @mention.
@@ -24,10 +23,20 @@ Function Set-AThreadSubscription
     [CmdletBinding()]
     Param(
 		[Parameter(Mandatory=$FALSE)][string]$accept,
-		[Parameter(Mandatory=$FALSE)][string]$thread_id,
-		[Parameter(Mandatory=$FALSE)][string]$ignored
+		[Parameter(Mandatory=$FALSE)][int]$thread_id,
+		[Parameter(Mandatory=$FALSE)][bool]$ignored
     )
-    $QueryStrings = @() | ? { $PSBoundParameters.ContainsKey($_) }
+    $QueryStrings = @(
+        
+    ) | ? { $PSBoundParameters.ContainsKey($_) }
+
+
+    $Body = @{}
+    @( 
+        "ignored" 
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Body[$_] = $PSBoundParameters[$_] }
+
+
 
     
     if (![String]::IsNullOrEmpty($QueryStrings))
@@ -41,16 +50,13 @@ Function Set-AThreadSubscription
 
 
     $Headers = @{
-        "Authorization" = "token $Script:GithubToken"
+        "Authorization" = "token $Global:GithubToken"
 		"accept" = "$accept"
     }
 
-    $Body = @{
-        	"ignored" = "$ignored"
-    }
-
-    $Output = Invoke-RestMethod -Method PUT -Uri "$FinalURL" -Headers $Headers -Body $Body -ResponseHeadersVariable $ResponseHeaders
+    Write-Verbose ($Body | ConvertTo-JSON)
+    $Output = Invoke-RestMethod -Method PUT -Uri "$FinalURL" -Headers $Headers -Body ($Body | ConvertTo-JSON) -ResponseHeadersVariable ResponseHeaders
+    
 
     $Output | Write-Output
 }
-

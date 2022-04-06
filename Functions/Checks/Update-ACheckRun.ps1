@@ -1,4 +1,3 @@
-
 <#
 .SYNOPSIS
 Note: The Checks API only looks for pushes in the repository where the check suite or check run were created. Pushes to a branch in a forked repository are not detected and return an empty pull_requests array.
@@ -42,16 +41,8 @@ The time the check completed. This is a timestamp in ISO 8601 format: YYYY-MM-DD
 .PARAMETER output
 Check runs can accept a variety of data in the output object, including a title and summary and can optionally provide descriptive details about the run. See the output object description.
          
-.PARAMETER Properties of theoutputobject
-Properties of theannotationsitems
-Properties of theimagesitems
-
-         
 .PARAMETER actions
 Possible further actions the integrator can perform, which a user may trigger. Each action includes a label, identifier and description. A maximum of three actions are accepted. See the actions object description. To learn more about check runs and requested actions, see "Check runs and requested actions."
-         
-.PARAMETER Properties of theactionsitems
-
 
 
 .LINK
@@ -64,7 +55,7 @@ Function Update-ACheckRun
 		[Parameter(Mandatory=$FALSE)][string]$accept,
 		[Parameter(Mandatory=$FALSE)][string]$owner,
 		[Parameter(Mandatory=$FALSE)][string]$repo,
-		[Parameter(Mandatory=$FALSE)][string]$check_run_id,
+		[Parameter(Mandatory=$FALSE)][int]$check_run_id,
 		[Parameter(Mandatory=$FALSE)][string]$name,
 		[Parameter(Mandatory=$FALSE)][string]$details_url,
 		[Parameter(Mandatory=$FALSE)][string]$external_id,
@@ -72,14 +63,28 @@ Function Update-ACheckRun
 		[Parameter(Mandatory=$FALSE)][string]$status,
 		[Parameter(Mandatory=$FALSE)][string]$conclusion,
 		[Parameter(Mandatory=$FALSE)][string]$completed_at,
-		[Parameter(Mandatory=$FALSE)][string]$output,
-		[Parameter(Mandatory=$FALSE)][string]$Properties of theoutputobject
-Properties of theannotationsitems
-Properties of theimagesitems,
-		[Parameter(Mandatory=$FALSE)][string]$actions,
-		[Parameter(Mandatory=$FALSE)][string]$Properties of theactionsitems
+		[Parameter(Mandatory=$FALSE)][object]$output,
+		[Parameter(Mandatory=$FALSE)][object[]]$actions
     )
-    $QueryStrings = @() | ? { $PSBoundParameters.ContainsKey($_) }
+    $QueryStrings = @(
+        
+    ) | ? { $PSBoundParameters.ContainsKey($_) }
+
+
+    $Body = @{}
+    @( 
+        "name",
+		"details_url",
+		"external_id",
+		"started_at",
+		"status",
+		"conclusion",
+		"completed_at",
+		"output",
+		"actions" 
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Body[$_] = $PSBoundParameters[$_] }
+
+
 
     
     if (![String]::IsNullOrEmpty($QueryStrings))
@@ -93,24 +98,13 @@ Properties of theimagesitems,
 
 
     $Headers = @{
-        "Authorization" = "token $Script:GithubToken"
+        "Authorization" = "token $Global:GithubToken"
 		"accept" = "$accept"
     }
 
-    $Body = @{
-        	"name" = "$name"
-	"details_url" = "$details_url"
-	"external_id" = "$external_id"
-	"started_at" = "$started_at"
-	"status" = "$status"
-	"conclusion" = "$conclusion"
-	"completed_at" = "$completed_at"
-	"output" = "$output"
-	"actions" = "$actions"
-    }
-
-    $Output = Invoke-RestMethod -Method PATCH -Uri "$FinalURL" -Headers $Headers -Body $Body -ResponseHeadersVariable $ResponseHeaders
+    Write-Verbose ($Body | ConvertTo-JSON)
+    $Output = Invoke-RestMethod -Method PATCH -Uri "$FinalURL" -Headers $Headers -Body ($Body | ConvertTo-JSON) -ResponseHeadersVariable ResponseHeaders
+    
 
     $Output | Write-Output
 }
-

@@ -1,4 +1,3 @@
-
 <#
 .SYNOPSIS
 Creates a new discussion post on a team's page. OAuth access tokens require the write:discussion scope.
@@ -37,9 +36,21 @@ Function Create-ADiscussion
 		[Parameter(Mandatory=$FALSE)][string]$team_slug,
 		[Parameter(Mandatory=$FALSE)][string]$title,
 		[Parameter(Mandatory=$FALSE)][string]$body,
-		[Parameter(Mandatory=$FALSE)][string]$private
+		[Parameter(Mandatory=$FALSE)][bool]$private
     )
-    $QueryStrings = @() | ? { $PSBoundParameters.ContainsKey($_) }
+    $QueryStrings = @(
+        
+    ) | ? { $PSBoundParameters.ContainsKey($_) }
+
+
+    $Body = @{}
+    @( 
+        "title",
+		"body",
+		"private" 
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Body[$_] = $PSBoundParameters[$_] }
+
+
 
     
     if (![String]::IsNullOrEmpty($QueryStrings))
@@ -53,18 +64,13 @@ Function Create-ADiscussion
 
 
     $Headers = @{
-        "Authorization" = "token $Script:GithubToken"
+        "Authorization" = "token $Global:GithubToken"
 		"accept" = "$accept"
     }
 
-    $Body = @{
-        	"title" = "$title"
-	"body" = "$body"
-	"private" = "$private"
-    }
-
-    $Output = Invoke-RestMethod -Method POST -Uri "$FinalURL" -Headers $Headers -Body $Body -ResponseHeadersVariable $ResponseHeaders
+    Write-Verbose ($Body | ConvertTo-JSON)
+    $Output = Invoke-RestMethod -Method POST -Uri "$FinalURL" -Headers $Headers -Body ($Body | ConvertTo-JSON) -ResponseHeadersVariable ResponseHeaders
+    
 
     $Output | Write-Output
 }
-

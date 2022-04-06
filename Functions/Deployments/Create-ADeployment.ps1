@@ -1,4 +1,3 @@
-
 <#
 .SYNOPSIS
 Deployments offer a few configurable parameters with certain defaults.
@@ -73,15 +72,33 @@ Function Create-ADeployment
 		[Parameter(Mandatory=$FALSE)][string]$repo,
 		[Parameter(Mandatory=$FALSE)][string]$ref,
 		[Parameter(Mandatory=$FALSE)][string]$task,
-		[Parameter(Mandatory=$FALSE)][string]$auto_merge,
-		[Parameter(Mandatory=$FALSE)][string]$required_contexts,
+		[Parameter(Mandatory=$FALSE)][bool]$auto_merge,
+		[Parameter(Mandatory=$FALSE)][string[]]$required_contexts,
 		[Parameter(Mandatory=$FALSE)][string]$payload,
 		[Parameter(Mandatory=$FALSE)][string]$environment,
 		[Parameter(Mandatory=$FALSE)][string]$description,
-		[Parameter(Mandatory=$FALSE)][string]$transient_environment,
-		[Parameter(Mandatory=$FALSE)][string]$production_environment
+		[Parameter(Mandatory=$FALSE)][bool]$transient_environment,
+		[Parameter(Mandatory=$FALSE)][bool]$production_environment
     )
-    $QueryStrings = @() | ? { $PSBoundParameters.ContainsKey($_) }
+    $QueryStrings = @(
+        
+    ) | ? { $PSBoundParameters.ContainsKey($_) }
+
+
+    $Body = @{}
+    @( 
+        "ref",
+		"task",
+		"auto_merge",
+		"required_contexts",
+		"payload",
+		"environment",
+		"description",
+		"transient_environment",
+		"production_environment" 
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Body[$_] = $PSBoundParameters[$_] }
+
+
 
     
     if (![String]::IsNullOrEmpty($QueryStrings))
@@ -95,24 +112,13 @@ Function Create-ADeployment
 
 
     $Headers = @{
-        "Authorization" = "token $Script:GithubToken"
+        "Authorization" = "token $Global:GithubToken"
 		"accept" = "$accept"
     }
 
-    $Body = @{
-        	"ref" = "$ref"
-	"task" = "$task"
-	"auto_merge" = "$auto_merge"
-	"required_contexts" = "$required_contexts"
-	"payload" = "$payload"
-	"environment" = "$environment"
-	"description" = "$description"
-	"transient_environment" = "$transient_environment"
-	"production_environment" = "$production_environment"
-    }
-
-    $Output = Invoke-RestMethod -Method POST -Uri "$FinalURL" -Headers $Headers -Body $Body -ResponseHeadersVariable $ResponseHeaders
+    Write-Verbose ($Body | ConvertTo-JSON)
+    $Output = Invoke-RestMethod -Method POST -Uri "$FinalURL" -Headers $Headers -Body ($Body | ConvertTo-JSON) -ResponseHeadersVariable ResponseHeaders
+    
 
     $Output | Write-Output
 }
-

@@ -1,4 +1,3 @@
-
 <#
 .SYNOPSIS
 Gets the audit log for an organization. For more information, see "Reviewing the audit log for your organization."
@@ -52,9 +51,24 @@ Function Get-TheAuditLogForAnOrganization
 		[Parameter(Mandatory=$FALSE)][string]$after,
 		[Parameter(Mandatory=$FALSE)][string]$before,
 		[Parameter(Mandatory=$FALSE)][string]$order,
-		[Parameter(Mandatory=$FALSE)][string]$per_page
+		[Parameter(Mandatory=$FALSE)][int]$per_page
     )
-    $QueryStrings = @("phrase=$phrase","include=$include","after=$after","before=$before","order=$order","per_page=$per_page") | ? { $PSBoundParameters.ContainsKey($_) }
+    $QueryStrings = @(
+        "phrase=$phrase",
+		"include=$include",
+		"after=$after",
+		"before=$before",
+		"order=$order",
+		"per_page=$per_page"
+    ) | ? { $PSBoundParameters.ContainsKey($_) }
+
+
+    $Body = @{}
+    @( 
+         
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Body[$_] = $PSBoundParameters[$_] }
+
+
 
     
     if (![String]::IsNullOrEmpty($QueryStrings))
@@ -68,16 +82,13 @@ Function Get-TheAuditLogForAnOrganization
 
 
     $Headers = @{
-        "Authorization" = "token $Script:GithubToken"
+        "Authorization" = "token $Global:GithubToken"
 		"accept" = "$accept"
     }
 
-    $Body = @{
-        
-    }
-
-    $Output = Invoke-RestMethod -Method GET -Uri "$FinalURL" -Headers $Headers -Body $Body -ResponseHeadersVariable $ResponseHeaders
+    Write-Verbose ($Body | ConvertTo-JSON)
+    $Output = Invoke-RestMethod -Method GET -Uri "$FinalURL" -Headers $Headers -Body ($Body | ConvertTo-JSON) -ResponseHeadersVariable ResponseHeaders
+    
 
     $Output | Write-Output
 }
-

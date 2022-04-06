@@ -1,4 +1,3 @@
-
 <#
 .SYNOPSIS
 Returns a list of webhook deliveries for a webhook configured in an organization.
@@ -30,11 +29,22 @@ Function List-DeliveriesForAnOrganizationWebhook
     Param(
 		[Parameter(Mandatory=$FALSE)][string]$accept,
 		[Parameter(Mandatory=$FALSE)][string]$org,
-		[Parameter(Mandatory=$FALSE)][string]$hook_id,
-		[Parameter(Mandatory=$FALSE)][string]$per_page,
+		[Parameter(Mandatory=$FALSE)][int]$hook_id,
+		[Parameter(Mandatory=$FALSE)][int]$per_page,
 		[Parameter(Mandatory=$FALSE)][string]$cursor
     )
-    $QueryStrings = @("per_page=$per_page","cursor=$cursor") | ? { $PSBoundParameters.ContainsKey($_) }
+    $QueryStrings = @(
+        "per_page=$per_page",
+		"cursor=$cursor"
+    ) | ? { $PSBoundParameters.ContainsKey($_) }
+
+
+    $Body = @{}
+    @( 
+         
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Body[$_] = $PSBoundParameters[$_] }
+
+
 
     
     if (![String]::IsNullOrEmpty($QueryStrings))
@@ -48,16 +58,13 @@ Function List-DeliveriesForAnOrganizationWebhook
 
 
     $Headers = @{
-        "Authorization" = "token $Script:GithubToken"
+        "Authorization" = "token $Global:GithubToken"
 		"accept" = "$accept"
     }
 
-    $Body = @{
-        
-    }
-
-    $Output = Invoke-RestMethod -Method GET -Uri "$FinalURL" -Headers $Headers -Body $Body -ResponseHeadersVariable $ResponseHeaders
+    Write-Verbose ($Body | ConvertTo-JSON)
+    $Output = Invoke-RestMethod -Method GET -Uri "$FinalURL" -Headers $Headers -Body ($Body | ConvertTo-JSON) -ResponseHeadersVariable ResponseHeaders
+    
 
     $Output | Write-Output
 }
-

@@ -1,4 +1,3 @@
-
 <#
 .SYNOPSIS
 Creates a new repository using a repository template. Use the template_owner and template_repo route parameters to specify the repository to use as the template. The authenticated user must own or be a member of an organization that owns the repository. To check if a repository is available to use as a template, get the repository's information using the Get a repository endpoint and check that the is_template key is true.
@@ -46,10 +45,24 @@ Function Create-ARepositoryUsingATemplate
 		[Parameter(Mandatory=$FALSE)][string]$owner,
 		[Parameter(Mandatory=$FALSE)][string]$name,
 		[Parameter(Mandatory=$FALSE)][string]$description,
-		[Parameter(Mandatory=$FALSE)][string]$include_all_branches,
-		[Parameter(Mandatory=$FALSE)][string]$private
+		[Parameter(Mandatory=$FALSE)][bool]$include_all_branches,
+		[Parameter(Mandatory=$FALSE)][bool]$private
     )
-    $QueryStrings = @() | ? { $PSBoundParameters.ContainsKey($_) }
+    $QueryStrings = @(
+        
+    ) | ? { $PSBoundParameters.ContainsKey($_) }
+
+
+    $Body = @{}
+    @( 
+        "owner",
+		"name",
+		"description",
+		"include_all_branches",
+		"private" 
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Body[$_] = $PSBoundParameters[$_] }
+
+
 
     
     if (![String]::IsNullOrEmpty($QueryStrings))
@@ -63,20 +76,13 @@ Function Create-ARepositoryUsingATemplate
 
 
     $Headers = @{
-        "Authorization" = "token $Script:GithubToken"
+        "Authorization" = "token $Global:GithubToken"
 		"accept" = "$accept"
     }
 
-    $Body = @{
-        	"owner" = "$owner"
-	"name" = "$name"
-	"description" = "$description"
-	"include_all_branches" = "$include_all_branches"
-	"private" = "$private"
-    }
-
-    $Output = Invoke-RestMethod -Method POST -Uri "$FinalURL" -Headers $Headers -Body $Body -ResponseHeadersVariable $ResponseHeaders
+    Write-Verbose ($Body | ConvertTo-JSON)
+    $Output = Invoke-RestMethod -Method POST -Uri "$FinalURL" -Headers $Headers -Body ($Body | ConvertTo-JSON) -ResponseHeadersVariable ResponseHeaders
+    
 
     $Output | Write-Output
 }
-

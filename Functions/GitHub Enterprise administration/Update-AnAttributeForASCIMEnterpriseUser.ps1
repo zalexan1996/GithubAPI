@@ -1,4 +1,3 @@
-
 <#
 .SYNOPSIS
 Note: The SCIM API endpoints for enterprise accounts are currently in beta and are subject to change.
@@ -41,10 +40,21 @@ Function Update-AnAttributeForASCIMEnterpriseUser
 		[Parameter(Mandatory=$FALSE)][string]$accept,
 		[Parameter(Mandatory=$FALSE)][string]$enterprise,
 		[Parameter(Mandatory=$FALSE)][string]$scim_user_id,
-		[Parameter(Mandatory=$FALSE)][string]$schemas,
-		[Parameter(Mandatory=$FALSE)][string]$Operations
+		[Parameter(Mandatory=$FALSE)][string[]]$schemas,
+		[Parameter(Mandatory=$FALSE)][object[]]$Operations
     )
-    $QueryStrings = @() | ? { $PSBoundParameters.ContainsKey($_) }
+    $QueryStrings = @(
+        
+    ) | ? { $PSBoundParameters.ContainsKey($_) }
+
+
+    $Body = @{}
+    @( 
+        "schemas",
+		"Operations" 
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Body[$_] = $PSBoundParameters[$_] }
+
+
 
     
     if (![String]::IsNullOrEmpty($QueryStrings))
@@ -58,17 +68,13 @@ Function Update-AnAttributeForASCIMEnterpriseUser
 
 
     $Headers = @{
-        "Authorization" = "token $Script:GithubToken"
+        "Authorization" = "token $Global:GithubToken"
 		"accept" = "$accept"
     }
 
-    $Body = @{
-        	"schemas" = "$schemas"
-	"Operations" = "$Operations"
-    }
-
-    $Output = Invoke-RestMethod -Method PATCH -Uri "$FinalURL" -Headers $Headers -Body $Body -ResponseHeadersVariable $ResponseHeaders
+    Write-Verbose ($Body | ConvertTo-JSON)
+    $Output = Invoke-RestMethod -Method PATCH -Uri "$FinalURL" -Headers $Headers -Body ($Body | ConvertTo-JSON) -ResponseHeadersVariable ResponseHeaders
+    
 
     $Output | Write-Output
 }
-

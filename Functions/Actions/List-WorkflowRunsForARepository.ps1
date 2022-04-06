@@ -1,4 +1,3 @@
-
 <#
 .SYNOPSIS
 Lists all workflow runs for a repository. You can use parameters to narrow the list of results. For more information about using parameters, see Parameters.
@@ -58,13 +57,31 @@ Function List-WorkflowRunsForARepository
 		[Parameter(Mandatory=$FALSE)][string]$branch,
 		[Parameter(Mandatory=$FALSE)][string]$event,
 		[Parameter(Mandatory=$FALSE)][string]$status,
-		[Parameter(Mandatory=$FALSE)][string]$per_page,
-		[Parameter(Mandatory=$FALSE)][string]$page,
+		[Parameter(Mandatory=$FALSE)][int]$per_page,
+		[Parameter(Mandatory=$FALSE)][int]$page,
 		[Parameter(Mandatory=$FALSE)][string]$created,
-		[Parameter(Mandatory=$FALSE)][string]$exclude_pull_requests,
-		[Parameter(Mandatory=$FALSE)][string]$check_suite_id
+		[Parameter(Mandatory=$FALSE)][bool]$exclude_pull_requests,
+		[Parameter(Mandatory=$FALSE)][int]$check_suite_id
     )
-    $QueryStrings = @("actor=$actor","branch=$branch","event=$event","status=$status","per_page=$per_page","page=$page","created=$created","exclude_pull_requests=$exclude_pull_requests","check_suite_id=$check_suite_id") | ? { $PSBoundParameters.ContainsKey($_) }
+    $QueryStrings = @(
+        "actor=$actor",
+		"branch=$branch",
+		"event=$event",
+		"status=$status",
+		"per_page=$per_page",
+		"page=$page",
+		"created=$created",
+		"exclude_pull_requests=$exclude_pull_requests",
+		"check_suite_id=$check_suite_id"
+    ) | ? { $PSBoundParameters.ContainsKey($_) }
+
+
+    $Body = @{}
+    @( 
+         
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Body[$_] = $PSBoundParameters[$_] }
+
+
 
     
     if (![String]::IsNullOrEmpty($QueryStrings))
@@ -78,16 +95,13 @@ Function List-WorkflowRunsForARepository
 
 
     $Headers = @{
-        "Authorization" = "token $Script:GithubToken"
+        "Authorization" = "token $Global:GithubToken"
 		"accept" = "$accept"
     }
 
-    $Body = @{
-        
-    }
-
-    $Output = Invoke-RestMethod -Method GET -Uri "$FinalURL" -Headers $Headers -Body $Body -ResponseHeadersVariable $ResponseHeaders
+    Write-Verbose ($Body | ConvertTo-JSON)
+    $Output = Invoke-RestMethod -Method GET -Uri "$FinalURL" -Headers $Headers -Body ($Body | ConvertTo-JSON) -ResponseHeadersVariable ResponseHeaders
+    
 
     $Output | Write-Output
 }
-

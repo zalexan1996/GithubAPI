@@ -1,4 +1,3 @@
-
 <#
 .SYNOPSIS
 Creates a repository project board. Returns a 404 Not Found status if projects are disabled in the repository. If you do not have sufficient privileges to perform this action, a 401 Unauthorized or 410 Gone status is returned.
@@ -33,7 +32,18 @@ Function Create-ARepositoryProject
 		[Parameter(Mandatory=$FALSE)][string]$name,
 		[Parameter(Mandatory=$FALSE)][string]$body
     )
-    $QueryStrings = @() | ? { $PSBoundParameters.ContainsKey($_) }
+    $QueryStrings = @(
+        
+    ) | ? { $PSBoundParameters.ContainsKey($_) }
+
+
+    $Body = @{}
+    @( 
+        "name",
+		"body" 
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Body[$_] = $PSBoundParameters[$_] }
+
+
 
     
     if (![String]::IsNullOrEmpty($QueryStrings))
@@ -47,17 +57,13 @@ Function Create-ARepositoryProject
 
 
     $Headers = @{
-        "Authorization" = "token $Script:GithubToken"
+        "Authorization" = "token $Global:GithubToken"
 		"accept" = "$accept"
     }
 
-    $Body = @{
-        	"name" = "$name"
-	"body" = "$body"
-    }
-
-    $Output = Invoke-RestMethod -Method POST -Uri "$FinalURL" -Headers $Headers -Body $Body -ResponseHeadersVariable $ResponseHeaders
+    Write-Verbose ($Body | ConvertTo-JSON)
+    $Output = Invoke-RestMethod -Method POST -Uri "$FinalURL" -Headers $Headers -Body ($Body | ConvertTo-JSON) -ResponseHeadersVariable ResponseHeaders
+    
 
     $Output | Write-Output
 }
-

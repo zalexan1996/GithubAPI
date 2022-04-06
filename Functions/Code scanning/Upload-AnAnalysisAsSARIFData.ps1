@@ -1,4 +1,3 @@
-
 <#
 .SYNOPSIS
 Uploads SARIF data containing the results of a code scanning analysis to make the results available in a repository. You must use an access token with the security_events scope to use this endpoint for private repositories. You can also use tokens with the public_repo scope for public repositories only. GitHub Apps must have the security_events write permission to use this endpoint.
@@ -56,7 +55,22 @@ Function Upload-AnAnalysisAsSARIFData
 		[Parameter(Mandatory=$FALSE)][string]$started_at,
 		[Parameter(Mandatory=$FALSE)][string]$tool_name
     )
-    $QueryStrings = @() | ? { $PSBoundParameters.ContainsKey($_) }
+    $QueryStrings = @(
+        
+    ) | ? { $PSBoundParameters.ContainsKey($_) }
+
+
+    $Body = @{}
+    @( 
+        "commit_sha",
+		"ref",
+		"sarif",
+		"checkout_uri",
+		"started_at",
+		"tool_name" 
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Body[$_] = $PSBoundParameters[$_] }
+
+
 
     
     if (![String]::IsNullOrEmpty($QueryStrings))
@@ -70,21 +84,13 @@ Function Upload-AnAnalysisAsSARIFData
 
 
     $Headers = @{
-        "Authorization" = "token $Script:GithubToken"
+        "Authorization" = "token $Global:GithubToken"
 		"accept" = "$accept"
     }
 
-    $Body = @{
-        	"commit_sha" = "$commit_sha"
-	"ref" = "$ref"
-	"sarif" = "$sarif"
-	"checkout_uri" = "$checkout_uri"
-	"started_at" = "$started_at"
-	"tool_name" = "$tool_name"
-    }
-
-    $Output = Invoke-RestMethod -Method POST -Uri "$FinalURL" -Headers $Headers -Body $Body -ResponseHeadersVariable $ResponseHeaders
+    Write-Verbose ($Body | ConvertTo-JSON)
+    $Output = Invoke-RestMethod -Method POST -Uri "$FinalURL" -Headers $Headers -Body ($Body | ConvertTo-JSON) -ResponseHeadersVariable ResponseHeaders
+    
 
     $Output | Write-Output
 }
-

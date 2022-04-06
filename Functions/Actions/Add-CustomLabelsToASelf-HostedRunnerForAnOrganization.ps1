@@ -1,4 +1,3 @@
-
 <#
 .SYNOPSIS
 Add custom labels to a self-hosted runner configured in an organization.
@@ -27,10 +26,20 @@ Function Add-CustomLabelsToASelf-HostedRunnerForAnOrganization
     Param(
 		[Parameter(Mandatory=$FALSE)][string]$accept,
 		[Parameter(Mandatory=$FALSE)][string]$org,
-		[Parameter(Mandatory=$FALSE)][string]$runner_id,
-		[Parameter(Mandatory=$FALSE)][string]$labels
+		[Parameter(Mandatory=$FALSE)][int]$runner_id,
+		[Parameter(Mandatory=$FALSE)][string[]]$labels
     )
-    $QueryStrings = @() | ? { $PSBoundParameters.ContainsKey($_) }
+    $QueryStrings = @(
+        
+    ) | ? { $PSBoundParameters.ContainsKey($_) }
+
+
+    $Body = @{}
+    @( 
+        "labels" 
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Body[$_] = $PSBoundParameters[$_] }
+
+
 
     
     if (![String]::IsNullOrEmpty($QueryStrings))
@@ -44,16 +53,13 @@ Function Add-CustomLabelsToASelf-HostedRunnerForAnOrganization
 
 
     $Headers = @{
-        "Authorization" = "token $Script:GithubToken"
+        "Authorization" = "token $Global:GithubToken"
 		"accept" = "$accept"
     }
 
-    $Body = @{
-        	"labels" = "$labels"
-    }
-
-    $Output = Invoke-RestMethod -Method POST -Uri "$FinalURL" -Headers $Headers -Body $Body -ResponseHeadersVariable $ResponseHeaders
+    Write-Verbose ($Body | ConvertTo-JSON)
+    $Output = Invoke-RestMethod -Method POST -Uri "$FinalURL" -Headers $Headers -Body ($Body | ConvertTo-JSON) -ResponseHeadersVariable ResponseHeaders
+    
 
     $Output | Write-Output
 }
-

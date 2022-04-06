@@ -1,4 +1,3 @@
-
 <#
 .SYNOPSIS
 Updates the name and visibility of a self-hosted runner group in an enterprise.
@@ -23,6 +22,12 @@ Default: all
          
 .PARAMETER allows_public_repositories
 Whether the runner group can be used by public repositories.
+         
+.PARAMETER restricted_to_workflows
+If true, the runner group will be restricted to running only the workflows specified in the selected_workflows array.
+         
+.PARAMETER selected_workflows
+List of workflows the runner group should be allowed to run. This setting will be ignored unless restricted_to_workflows is set to true.
 
 
 .LINK
@@ -34,12 +39,28 @@ Function Update-ASelf-HostedRunnerGroupForAnEnterprise
     Param(
 		[Parameter(Mandatory=$FALSE)][string]$accept,
 		[Parameter(Mandatory=$FALSE)][string]$enterprise,
-		[Parameter(Mandatory=$FALSE)][string]$runner_group_id,
+		[Parameter(Mandatory=$FALSE)][int]$runner_group_id,
 		[Parameter(Mandatory=$FALSE)][string]$name,
 		[Parameter(Mandatory=$FALSE)][string]$visibility,
-		[Parameter(Mandatory=$FALSE)][string]$allows_public_repositories
+		[Parameter(Mandatory=$FALSE)][bool]$allows_public_repositories,
+		[Parameter(Mandatory=$FALSE)][bool]$restricted_to_workflows,
+		[Parameter(Mandatory=$FALSE)][string[]]$selected_workflows
     )
-    $QueryStrings = @() | ? { $PSBoundParameters.ContainsKey($_) }
+    $QueryStrings = @(
+        
+    ) | ? { $PSBoundParameters.ContainsKey($_) }
+
+
+    $Body = @{}
+    @( 
+        "name",
+		"visibility",
+		"allows_public_repositories",
+		"restricted_to_workflows",
+		"selected_workflows" 
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Body[$_] = $PSBoundParameters[$_] }
+
+
 
     
     if (![String]::IsNullOrEmpty($QueryStrings))
@@ -53,18 +74,13 @@ Function Update-ASelf-HostedRunnerGroupForAnEnterprise
 
 
     $Headers = @{
-        "Authorization" = "token $Script:GithubToken"
+        "Authorization" = "token $Global:GithubToken"
 		"accept" = "$accept"
     }
 
-    $Body = @{
-        	"name" = "$name"
-	"visibility" = "$visibility"
-	"allows_public_repositories" = "$allows_public_repositories"
-    }
-
-    $Output = Invoke-RestMethod -Method PATCH -Uri "$FinalURL" -Headers $Headers -Body $Body -ResponseHeadersVariable $ResponseHeaders
+    Write-Verbose ($Body | ConvertTo-JSON)
+    $Output = Invoke-RestMethod -Method PATCH -Uri "$FinalURL" -Headers $Headers -Body ($Body | ConvertTo-JSON) -ResponseHeadersVariable ResponseHeaders
+    
 
     $Output | Write-Output
 }
-

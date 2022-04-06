@@ -1,4 +1,3 @@
-
 <#
 .SYNOPSIS
 Remove a custom label from a self-hosted runner configured in an organization. Returns the remaining labels from the runner.
@@ -28,10 +27,20 @@ Function Remove-ACustomLabelFromASelf-HostedRunnerForAnOrganization
     Param(
 		[Parameter(Mandatory=$FALSE)][string]$accept,
 		[Parameter(Mandatory=$FALSE)][string]$org,
-		[Parameter(Mandatory=$FALSE)][string]$runner_id,
+		[Parameter(Mandatory=$FALSE)][int]$runner_id,
 		[Parameter(Mandatory=$FALSE)][string]$name
     )
-    $QueryStrings = @() | ? { $PSBoundParameters.ContainsKey($_) }
+    $QueryStrings = @(
+        
+    ) | ? { $PSBoundParameters.ContainsKey($_) }
+
+
+    $Body = @{}
+    @( 
+         
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Body[$_] = $PSBoundParameters[$_] }
+
+
 
     
     if (![String]::IsNullOrEmpty($QueryStrings))
@@ -45,16 +54,13 @@ Function Remove-ACustomLabelFromASelf-HostedRunnerForAnOrganization
 
 
     $Headers = @{
-        "Authorization" = "token $Script:GithubToken"
+        "Authorization" = "token $Global:GithubToken"
 		"accept" = "$accept"
     }
 
-    $Body = @{
-        
-    }
-
-    $Output = Invoke-RestMethod -Method DELETE -Uri "$FinalURL" -Headers $Headers -Body $Body -ResponseHeadersVariable $ResponseHeaders
+    Write-Verbose ($Body | ConvertTo-JSON)
+    $Output = Invoke-RestMethod -Method DELETE -Uri "$FinalURL" -Headers $Headers -Body ($Body | ConvertTo-JSON) -ResponseHeadersVariable ResponseHeaders
+    
 
     $Output | Write-Output
 }
-

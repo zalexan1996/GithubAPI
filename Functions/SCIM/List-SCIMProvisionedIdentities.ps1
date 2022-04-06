@@ -1,4 +1,3 @@
-
 <#
 .SYNOPSIS
 Retrieves a paginated list of all provisioned organization members, including pending invitations. If you provide the filter parameter, the resources for all matching provisions members are returned.
@@ -42,11 +41,23 @@ Function List-SCIMProvisionedIdentities
     Param(
 		[Parameter(Mandatory=$FALSE)][string]$accept,
 		[Parameter(Mandatory=$FALSE)][string]$org,
-		[Parameter(Mandatory=$FALSE)][string]$startIndex,
-		[Parameter(Mandatory=$FALSE)][string]$count,
+		[Parameter(Mandatory=$FALSE)][int]$startIndex,
+		[Parameter(Mandatory=$FALSE)][int]$count,
 		[Parameter(Mandatory=$FALSE)][string]$filter
     )
-    $QueryStrings = @("startIndex=$startIndex","count=$count","filter=$filter") | ? { $PSBoundParameters.ContainsKey($_) }
+    $QueryStrings = @(
+        "startIndex=$startIndex",
+		"count=$count",
+		"filter=$filter"
+    ) | ? { $PSBoundParameters.ContainsKey($_) }
+
+
+    $Body = @{}
+    @( 
+         
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Body[$_] = $PSBoundParameters[$_] }
+
+
 
     
     if (![String]::IsNullOrEmpty($QueryStrings))
@@ -60,16 +71,13 @@ Function List-SCIMProvisionedIdentities
 
 
     $Headers = @{
-        "Authorization" = "token $Script:GithubToken"
+        "Authorization" = "token $Global:GithubToken"
 		"accept" = "$accept"
     }
 
-    $Body = @{
-        
-    }
-
-    $Output = Invoke-RestMethod -Method GET -Uri "$FinalURL" -Headers $Headers -Body $Body -ResponseHeadersVariable $ResponseHeaders
+    Write-Verbose ($Body | ConvertTo-JSON)
+    $Output = Invoke-RestMethod -Method GET -Uri "$FinalURL" -Headers $Headers -Body ($Body | ConvertTo-JSON) -ResponseHeadersVariable ResponseHeaders
+    
 
     $Output | Write-Output
 }
-

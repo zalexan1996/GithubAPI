@@ -1,4 +1,3 @@
-
 <#
 .SYNOPSIS
 Create a comment for a commit using its :commit_sha.
@@ -43,10 +42,23 @@ Function Create-ACommitComment
 		[Parameter(Mandatory=$FALSE)][string]$commit_sha,
 		[Parameter(Mandatory=$FALSE)][string]$body,
 		[Parameter(Mandatory=$FALSE)][string]$path,
-		[Parameter(Mandatory=$FALSE)][string]$position,
-		[Parameter(Mandatory=$FALSE)][string]$line
+		[Parameter(Mandatory=$FALSE)][int]$position,
+		[Parameter(Mandatory=$FALSE)][int]$line
     )
-    $QueryStrings = @() | ? { $PSBoundParameters.ContainsKey($_) }
+    $QueryStrings = @(
+        
+    ) | ? { $PSBoundParameters.ContainsKey($_) }
+
+
+    $Body = @{}
+    @( 
+        "body",
+		"path",
+		"position",
+		"line" 
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Body[$_] = $PSBoundParameters[$_] }
+
+
 
     
     if (![String]::IsNullOrEmpty($QueryStrings))
@@ -60,19 +72,13 @@ Function Create-ACommitComment
 
 
     $Headers = @{
-        "Authorization" = "token $Script:GithubToken"
+        "Authorization" = "token $Global:GithubToken"
 		"accept" = "$accept"
     }
 
-    $Body = @{
-        	"body" = "$body"
-	"path" = "$path"
-	"position" = "$position"
-	"line" = "$line"
-    }
-
-    $Output = Invoke-RestMethod -Method POST -Uri "$FinalURL" -Headers $Headers -Body $Body -ResponseHeadersVariable $ResponseHeaders
+    Write-Verbose ($Body | ConvertTo-JSON)
+    $Output = Invoke-RestMethod -Method POST -Uri "$FinalURL" -Headers $Headers -Body ($Body | ConvertTo-JSON) -ResponseHeadersVariable ResponseHeaders
+    
 
     $Output | Write-Output
 }
-

@@ -1,4 +1,3 @@
-
 <#
 .SYNOPSIS
 Lists external groups available in an organization. You can query the groups using the display_name parameter, only groups with a group_name containing the text provided in the display_name parameter will be returned. You can also limit your page results using the per_page parameter. GitHub generates a url-encoded page token using a cursor value for where the next page begins. For more information on cursor pagination, see "Offset and Cursor Pagination explained."
@@ -31,11 +30,23 @@ Function List-ExternalGroupsInAnOrganization
     Param(
 		[Parameter(Mandatory=$FALSE)][string]$accept,
 		[Parameter(Mandatory=$FALSE)][string]$org,
-		[Parameter(Mandatory=$FALSE)][string]$per_page,
-		[Parameter(Mandatory=$FALSE)][string]$page,
+		[Parameter(Mandatory=$FALSE)][int]$per_page,
+		[Parameter(Mandatory=$FALSE)][int]$page,
 		[Parameter(Mandatory=$FALSE)][string]$display_name
     )
-    $QueryStrings = @("per_page=$per_page","page=$page","display_name=$display_name") | ? { $PSBoundParameters.ContainsKey($_) }
+    $QueryStrings = @(
+        "per_page=$per_page",
+		"page=$page",
+		"display_name=$display_name"
+    ) | ? { $PSBoundParameters.ContainsKey($_) }
+
+
+    $Body = @{}
+    @( 
+         
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Body[$_] = $PSBoundParameters[$_] }
+
+
 
     
     if (![String]::IsNullOrEmpty($QueryStrings))
@@ -49,16 +60,13 @@ Function List-ExternalGroupsInAnOrganization
 
 
     $Headers = @{
-        "Authorization" = "token $Script:GithubToken"
+        "Authorization" = "token $Global:GithubToken"
 		"accept" = "$accept"
     }
 
-    $Body = @{
-        
-    }
-
-    $Output = Invoke-RestMethod -Method GET -Uri "$FinalURL" -Headers $Headers -Body $Body -ResponseHeadersVariable $ResponseHeaders
+    Write-Verbose ($Body | ConvertTo-JSON)
+    $Output = Invoke-RestMethod -Method GET -Uri "$FinalURL" -Headers $Headers -Body ($Body | ConvertTo-JSON) -ResponseHeadersVariable ResponseHeaders
+    
 
     $Output | Write-Output
 }
-

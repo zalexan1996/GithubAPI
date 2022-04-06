@@ -1,4 +1,3 @@
-
 <#
 .SYNOPSIS
 Creates a new repository in the specified organization. The authenticated user must be a member of the organization.
@@ -87,23 +86,50 @@ Function Create-AnOrganizationRepository
 		[Parameter(Mandatory=$FALSE)][string]$name,
 		[Parameter(Mandatory=$FALSE)][string]$description,
 		[Parameter(Mandatory=$FALSE)][string]$homepage,
-		[Parameter(Mandatory=$FALSE)][string]$private,
+		[Parameter(Mandatory=$FALSE)][bool]$private,
 		[Parameter(Mandatory=$FALSE)][string]$visibility,
-		[Parameter(Mandatory=$FALSE)][string]$has_issues,
-		[Parameter(Mandatory=$FALSE)][string]$has_projects,
-		[Parameter(Mandatory=$FALSE)][string]$has_wiki,
-		[Parameter(Mandatory=$FALSE)][string]$is_template,
-		[Parameter(Mandatory=$FALSE)][string]$team_id,
-		[Parameter(Mandatory=$FALSE)][string]$auto_init,
+		[Parameter(Mandatory=$FALSE)][bool]$has_issues,
+		[Parameter(Mandatory=$FALSE)][bool]$has_projects,
+		[Parameter(Mandatory=$FALSE)][bool]$has_wiki,
+		[Parameter(Mandatory=$FALSE)][bool]$is_template,
+		[Parameter(Mandatory=$FALSE)][int]$team_id,
+		[Parameter(Mandatory=$FALSE)][bool]$auto_init,
 		[Parameter(Mandatory=$FALSE)][string]$gitignore_template,
 		[Parameter(Mandatory=$FALSE)][string]$license_template,
-		[Parameter(Mandatory=$FALSE)][string]$allow_squash_merge,
-		[Parameter(Mandatory=$FALSE)][string]$allow_merge_commit,
-		[Parameter(Mandatory=$FALSE)][string]$allow_rebase_merge,
-		[Parameter(Mandatory=$FALSE)][string]$allow_auto_merge,
-		[Parameter(Mandatory=$FALSE)][string]$delete_branch_on_merge
+		[Parameter(Mandatory=$FALSE)][bool]$allow_squash_merge,
+		[Parameter(Mandatory=$FALSE)][bool]$allow_merge_commit,
+		[Parameter(Mandatory=$FALSE)][bool]$allow_rebase_merge,
+		[Parameter(Mandatory=$FALSE)][bool]$allow_auto_merge,
+		[Parameter(Mandatory=$FALSE)][bool]$delete_branch_on_merge
     )
-    $QueryStrings = @() | ? { $PSBoundParameters.ContainsKey($_) }
+    $QueryStrings = @(
+        
+    ) | ? { $PSBoundParameters.ContainsKey($_) }
+
+
+    $Body = @{}
+    @( 
+        "name",
+		"description",
+		"homepage",
+		"private",
+		"visibility",
+		"has_issues",
+		"has_projects",
+		"has_wiki",
+		"is_template",
+		"team_id",
+		"auto_init",
+		"gitignore_template",
+		"license_template",
+		"allow_squash_merge",
+		"allow_merge_commit",
+		"allow_rebase_merge",
+		"allow_auto_merge",
+		"delete_branch_on_merge" 
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Body[$_] = $PSBoundParameters[$_] }
+
+
 
     
     if (![String]::IsNullOrEmpty($QueryStrings))
@@ -117,33 +143,13 @@ Function Create-AnOrganizationRepository
 
 
     $Headers = @{
-        "Authorization" = "token $Script:GithubToken"
+        "Authorization" = "token $Global:GithubToken"
 		"accept" = "$accept"
     }
 
-    $Body = @{
-        	"name" = "$name"
-	"description" = "$description"
-	"homepage" = "$homepage"
-	"private" = "$private"
-	"visibility" = "$visibility"
-	"has_issues" = "$has_issues"
-	"has_projects" = "$has_projects"
-	"has_wiki" = "$has_wiki"
-	"is_template" = "$is_template"
-	"team_id" = "$team_id"
-	"auto_init" = "$auto_init"
-	"gitignore_template" = "$gitignore_template"
-	"license_template" = "$license_template"
-	"allow_squash_merge" = "$allow_squash_merge"
-	"allow_merge_commit" = "$allow_merge_commit"
-	"allow_rebase_merge" = "$allow_rebase_merge"
-	"allow_auto_merge" = "$allow_auto_merge"
-	"delete_branch_on_merge" = "$delete_branch_on_merge"
-    }
-
-    $Output = Invoke-RestMethod -Method POST -Uri "$FinalURL" -Headers $Headers -Body $Body -ResponseHeadersVariable $ResponseHeaders
+    Write-Verbose ($Body | ConvertTo-JSON)
+    $Output = Invoke-RestMethod -Method POST -Uri "$FinalURL" -Headers $Headers -Body ($Body | ConvertTo-JSON) -ResponseHeadersVariable ResponseHeaders
+    
 
     $Output | Write-Output
 }
-

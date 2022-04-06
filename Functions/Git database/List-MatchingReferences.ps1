@@ -1,4 +1,3 @@
-
 <#
 .SYNOPSIS
 Returns an array of references from your Git database that match the supplied name. The :ref in the URL must be formatted as heads/<branch name> for branches and tags/<tag name> for tags. If the :ref doesn't exist in the repository, but existing refs start with :ref, they will be returned as an array.
@@ -39,10 +38,21 @@ Function List-MatchingReferences
 		[Parameter(Mandatory=$FALSE)][string]$owner,
 		[Parameter(Mandatory=$FALSE)][string]$repo,
 		[Parameter(Mandatory=$FALSE)][string]$ref,
-		[Parameter(Mandatory=$FALSE)][string]$per_page,
-		[Parameter(Mandatory=$FALSE)][string]$page
+		[Parameter(Mandatory=$FALSE)][int]$per_page,
+		[Parameter(Mandatory=$FALSE)][int]$page
     )
-    $QueryStrings = @("per_page=$per_page","page=$page") | ? { $PSBoundParameters.ContainsKey($_) }
+    $QueryStrings = @(
+        "per_page=$per_page",
+		"page=$page"
+    ) | ? { $PSBoundParameters.ContainsKey($_) }
+
+
+    $Body = @{}
+    @( 
+         
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Body[$_] = $PSBoundParameters[$_] }
+
+
 
     
     if (![String]::IsNullOrEmpty($QueryStrings))
@@ -56,16 +66,13 @@ Function List-MatchingReferences
 
 
     $Headers = @{
-        "Authorization" = "token $Script:GithubToken"
+        "Authorization" = "token $Global:GithubToken"
 		"accept" = "$accept"
     }
 
-    $Body = @{
-        
-    }
-
-    $Output = Invoke-RestMethod -Method GET -Uri "$FinalURL" -Headers $Headers -Body $Body -ResponseHeadersVariable $ResponseHeaders
+    Write-Verbose ($Body | ConvertTo-JSON)
+    $Output = Invoke-RestMethod -Method GET -Uri "$FinalURL" -Headers $Headers -Body ($Body | ConvertTo-JSON) -ResponseHeadersVariable ResponseHeaders
+    
 
     $Output | Write-Output
 }
-

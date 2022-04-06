@@ -1,4 +1,3 @@
-
 <#
 .SYNOPSIS
 Creates a new codespace, owned by the authenticated user.
@@ -32,9 +31,6 @@ Display name for this codespace
          
 .PARAMETER pull_request
 Required. Pull request number for this codespace
-         
-.PARAMETER Properties of thepull_requestobject
-
 
 
 .LINK
@@ -45,17 +41,33 @@ Function Create-ACodespaceForTheAuthenticatedUser
     [CmdletBinding()]
     Param(
 		[Parameter(Mandatory=$FALSE)][string]$accept,
-		[Parameter(Mandatory=$FALSE)][string]$repository_id,
+		[Parameter(Mandatory=$FALSE)][int]$repository_id,
 		[Parameter(Mandatory=$FALSE)][string]$ref,
 		[Parameter(Mandatory=$FALSE)][string]$location,
 		[Parameter(Mandatory=$FALSE)][string]$machine,
 		[Parameter(Mandatory=$FALSE)][string]$working_directory,
-		[Parameter(Mandatory=$FALSE)][string]$idle_timeout_minutes,
+		[Parameter(Mandatory=$FALSE)][int]$idle_timeout_minutes,
 		[Parameter(Mandatory=$FALSE)][string]$display_name,
-		[Parameter(Mandatory=$FALSE)][string]$pull_request,
-		[Parameter(Mandatory=$FALSE)][string]$Properties of thepull_requestobject
+		[Parameter(Mandatory=$FALSE)][object]$pull_request
     )
-    $QueryStrings = @() | ? { $PSBoundParameters.ContainsKey($_) }
+    $QueryStrings = @(
+        
+    ) | ? { $PSBoundParameters.ContainsKey($_) }
+
+
+    $Body = @{}
+    @( 
+        "repository_id",
+		"ref",
+		"location",
+		"machine",
+		"working_directory",
+		"idle_timeout_minutes",
+		"display_name",
+		"pull_request" 
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Body[$_] = $PSBoundParameters[$_] }
+
+
 
     
     if (![String]::IsNullOrEmpty($QueryStrings))
@@ -69,23 +81,13 @@ Function Create-ACodespaceForTheAuthenticatedUser
 
 
     $Headers = @{
-        "Authorization" = "token $Script:GithubToken"
+        "Authorization" = "token $Global:GithubToken"
 		"accept" = "$accept"
     }
 
-    $Body = @{
-        	"repository_id" = "$repository_id"
-	"ref" = "$ref"
-	"location" = "$location"
-	"machine" = "$machine"
-	"working_directory" = "$working_directory"
-	"idle_timeout_minutes" = "$idle_timeout_minutes"
-	"display_name" = "$display_name"
-	"pull_request" = "$pull_request"
-    }
-
-    $Output = Invoke-RestMethod -Method POST -Uri "$FinalURL" -Headers $Headers -Body $Body -ResponseHeadersVariable $ResponseHeaders
+    Write-Verbose ($Body | ConvertTo-JSON)
+    $Output = Invoke-RestMethod -Method POST -Uri "$FinalURL" -Headers $Headers -Body ($Body | ConvertTo-JSON) -ResponseHeadersVariable ResponseHeaders
+    
 
     $Output | Write-Output
 }
-

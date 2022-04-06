@@ -1,4 +1,3 @@
-
 <#
 .SYNOPSIS
 Gets a specific workflow run. Anyone with read access to the repository can use this endpoint. If the repository is private you must use an access token with the repo scope. GitHub Apps must have the actions:read permission to use this endpoint.
@@ -30,10 +29,20 @@ Function Get-AWorkflowRun
 		[Parameter(Mandatory=$FALSE)][string]$accept,
 		[Parameter(Mandatory=$FALSE)][string]$owner,
 		[Parameter(Mandatory=$FALSE)][string]$repo,
-		[Parameter(Mandatory=$FALSE)][string]$run_id,
-		[Parameter(Mandatory=$FALSE)][string]$exclude_pull_requests
+		[Parameter(Mandatory=$FALSE)][int]$run_id,
+		[Parameter(Mandatory=$FALSE)][bool]$exclude_pull_requests
     )
-    $QueryStrings = @("exclude_pull_requests=$exclude_pull_requests") | ? { $PSBoundParameters.ContainsKey($_) }
+    $QueryStrings = @(
+        "exclude_pull_requests=$exclude_pull_requests"
+    ) | ? { $PSBoundParameters.ContainsKey($_) }
+
+
+    $Body = @{}
+    @( 
+         
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Body[$_] = $PSBoundParameters[$_] }
+
+
 
     
     if (![String]::IsNullOrEmpty($QueryStrings))
@@ -47,16 +56,13 @@ Function Get-AWorkflowRun
 
 
     $Headers = @{
-        "Authorization" = "token $Script:GithubToken"
+        "Authorization" = "token $Global:GithubToken"
 		"accept" = "$accept"
     }
 
-    $Body = @{
-        
-    }
-
-    $Output = Invoke-RestMethod -Method GET -Uri "$FinalURL" -Headers $Headers -Body $Body -ResponseHeadersVariable $ResponseHeaders
+    Write-Verbose ($Body | ConvertTo-JSON)
+    $Output = Invoke-RestMethod -Method GET -Uri "$FinalURL" -Headers $Headers -Body ($Body | ConvertTo-JSON) -ResponseHeadersVariable ResponseHeaders
+    
 
     $Output | Write-Output
 }
-

@@ -1,4 +1,3 @@
-
 <#
 .SYNOPSIS
 Note: The SCIM API endpoints for enterprise accounts are currently in beta and are subject to change.
@@ -25,14 +24,8 @@ Required. The username for the user.
 .PARAMETER name
 Required.
          
-.PARAMETER Properties of thenameobject
-
-         
 .PARAMETER emails
 Required. List of user emails.
-         
-.PARAMETER Properties of theemailsitems
-
          
 .PARAMETER groups
 List of SCIM group IDs the user is a member of.
@@ -48,15 +41,27 @@ Function Set-SCIMInformationForAProvisionedEnterpriseUser
 		[Parameter(Mandatory=$FALSE)][string]$accept,
 		[Parameter(Mandatory=$FALSE)][string]$enterprise,
 		[Parameter(Mandatory=$FALSE)][string]$scim_user_id,
-		[Parameter(Mandatory=$FALSE)][string]$schemas,
+		[Parameter(Mandatory=$FALSE)][string[]]$schemas,
 		[Parameter(Mandatory=$FALSE)][string]$userName,
-		[Parameter(Mandatory=$FALSE)][string]$name,
-		[Parameter(Mandatory=$FALSE)][string]$Properties of thenameobject,
-		[Parameter(Mandatory=$FALSE)][string]$emails,
-		[Parameter(Mandatory=$FALSE)][string]$Properties of theemailsitems,
-		[Parameter(Mandatory=$FALSE)][string]$groups
+		[Parameter(Mandatory=$FALSE)][object]$name,
+		[Parameter(Mandatory=$FALSE)][object[]]$emails,
+		[Parameter(Mandatory=$FALSE)][object[]]$groups
     )
-    $QueryStrings = @() | ? { $PSBoundParameters.ContainsKey($_) }
+    $QueryStrings = @(
+        
+    ) | ? { $PSBoundParameters.ContainsKey($_) }
+
+
+    $Body = @{}
+    @( 
+        "schemas",
+		"userName",
+		"name",
+		"emails",
+		"groups" 
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Body[$_] = $PSBoundParameters[$_] }
+
+
 
     
     if (![String]::IsNullOrEmpty($QueryStrings))
@@ -70,20 +75,13 @@ Function Set-SCIMInformationForAProvisionedEnterpriseUser
 
 
     $Headers = @{
-        "Authorization" = "token $Script:GithubToken"
+        "Authorization" = "token $Global:GithubToken"
 		"accept" = "$accept"
     }
 
-    $Body = @{
-        	"schemas" = "$schemas"
-	"userName" = "$userName"
-	"name" = "$name"
-	"emails" = "$emails"
-	"groups" = "$groups"
-    }
-
-    $Output = Invoke-RestMethod -Method PUT -Uri "$FinalURL" -Headers $Headers -Body $Body -ResponseHeadersVariable $ResponseHeaders
+    Write-Verbose ($Body | ConvertTo-JSON)
+    $Output = Invoke-RestMethod -Method PUT -Uri "$FinalURL" -Headers $Headers -Body ($Body | ConvertTo-JSON) -ResponseHeadersVariable ResponseHeaders
+    
 
     $Output | Write-Output
 }
-

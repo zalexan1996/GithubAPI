@@ -1,4 +1,3 @@
-
 <#
 .SYNOPSIS
 Invite people to an organization by using their GitHub user ID or their email address. In order to create invitations in an organization, the authenticated user must be an organization owner.
@@ -37,12 +36,25 @@ Function Create-AnOrganizationInvitation
     Param(
 		[Parameter(Mandatory=$FALSE)][string]$accept,
 		[Parameter(Mandatory=$FALSE)][string]$org,
-		[Parameter(Mandatory=$FALSE)][string]$invitee_id,
+		[Parameter(Mandatory=$FALSE)][int]$invitee_id,
 		[Parameter(Mandatory=$FALSE)][string]$email,
 		[Parameter(Mandatory=$FALSE)][string]$role,
-		[Parameter(Mandatory=$FALSE)][string]$team_ids
+		[Parameter(Mandatory=$FALSE)][int[]]$team_ids
     )
-    $QueryStrings = @() | ? { $PSBoundParameters.ContainsKey($_) }
+    $QueryStrings = @(
+        
+    ) | ? { $PSBoundParameters.ContainsKey($_) }
+
+
+    $Body = @{}
+    @( 
+        "invitee_id",
+		"email",
+		"role",
+		"team_ids" 
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Body[$_] = $PSBoundParameters[$_] }
+
+
 
     
     if (![String]::IsNullOrEmpty($QueryStrings))
@@ -56,19 +68,13 @@ Function Create-AnOrganizationInvitation
 
 
     $Headers = @{
-        "Authorization" = "token $Script:GithubToken"
+        "Authorization" = "token $Global:GithubToken"
 		"accept" = "$accept"
     }
 
-    $Body = @{
-        	"invitee_id" = "$invitee_id"
-	"email" = "$email"
-	"role" = "$role"
-	"team_ids" = "$team_ids"
-    }
-
-    $Output = Invoke-RestMethod -Method POST -Uri "$FinalURL" -Headers $Headers -Body $Body -ResponseHeadersVariable $ResponseHeaders
+    Write-Verbose ($Body | ConvertTo-JSON)
+    $Output = Invoke-RestMethod -Method POST -Uri "$FinalURL" -Headers $Headers -Body ($Body | ConvertTo-JSON) -ResponseHeadersVariable ResponseHeaders
+    
 
     $Output | Write-Output
 }
-

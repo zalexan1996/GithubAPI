@@ -1,4 +1,3 @@
-
 <#
 .SYNOPSIS
 Configures a GitHub Pages site. For more information, see "About GitHub Pages."
@@ -15,9 +14,6 @@ Setting toapplication/vnd.github.v3+json is recommended.
          
 .PARAMETER source
 Required. The source branch and directory used to publish your Pages site.
-         
-.PARAMETER Properties of thesourceobject
-
 
 
 .LINK
@@ -30,10 +26,19 @@ Function Create-AGithubPagesSite
 		[Parameter(Mandatory=$FALSE)][string]$accept,
 		[Parameter(Mandatory=$FALSE)][string]$owner,
 		[Parameter(Mandatory=$FALSE)][string]$repo,
-		[Parameter(Mandatory=$FALSE)][string]$source,
-		[Parameter(Mandatory=$FALSE)][string]$Properties of thesourceobject
+		[Parameter(Mandatory=$FALSE)][object]$source
     )
-    $QueryStrings = @() | ? { $PSBoundParameters.ContainsKey($_) }
+    $QueryStrings = @(
+        
+    ) | ? { $PSBoundParameters.ContainsKey($_) }
+
+
+    $Body = @{}
+    @( 
+        "source" 
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Body[$_] = $PSBoundParameters[$_] }
+
+
 
     
     if (![String]::IsNullOrEmpty($QueryStrings))
@@ -47,16 +52,13 @@ Function Create-AGithubPagesSite
 
 
     $Headers = @{
-        "Authorization" = "token $Script:GithubToken"
+        "Authorization" = "token $Global:GithubToken"
 		"accept" = "$accept"
     }
 
-    $Body = @{
-        	"source" = "$source"
-    }
-
-    $Output = Invoke-RestMethod -Method POST -Uri "$FinalURL" -Headers $Headers -Body $Body -ResponseHeadersVariable $ResponseHeaders
+    Write-Verbose ($Body | ConvertTo-JSON)
+    $Output = Invoke-RestMethod -Method POST -Uri "$FinalURL" -Headers $Headers -Body ($Body | ConvertTo-JSON) -ResponseHeadersVariable ResponseHeaders
+    
 
     $Output | Write-Output
 }
-

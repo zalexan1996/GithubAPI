@@ -1,4 +1,3 @@
-
 <#
 .SYNOPSIS
 Find labels in a repository with names or descriptions that match search keywords. Returns up to 100 results per page.
@@ -41,14 +40,29 @@ Function Search-Labels
     [CmdletBinding()]
     Param(
 		[Parameter(Mandatory=$FALSE)][string]$accept,
-		[Parameter(Mandatory=$FALSE)][string]$repository_id,
+		[Parameter(Mandatory=$FALSE)][int]$repository_id,
 		[Parameter(Mandatory=$FALSE)][string]$q,
 		[Parameter(Mandatory=$FALSE)][string]$sort,
 		[Parameter(Mandatory=$FALSE)][string]$order,
-		[Parameter(Mandatory=$FALSE)][string]$per_page,
-		[Parameter(Mandatory=$FALSE)][string]$page
+		[Parameter(Mandatory=$FALSE)][int]$per_page,
+		[Parameter(Mandatory=$FALSE)][int]$page
     )
-    $QueryStrings = @("repository_id=$repository_id","q=$q","sort=$sort","order=$order","per_page=$per_page","page=$page") | ? { $PSBoundParameters.ContainsKey($_) }
+    $QueryStrings = @(
+        "repository_id=$repository_id",
+		"q=$q",
+		"sort=$sort",
+		"order=$order",
+		"per_page=$per_page",
+		"page=$page"
+    ) | ? { $PSBoundParameters.ContainsKey($_) }
+
+
+    $Body = @{}
+    @( 
+         
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Body[$_] = $PSBoundParameters[$_] }
+
+
 
     
     if (![String]::IsNullOrEmpty($QueryStrings))
@@ -62,16 +76,13 @@ Function Search-Labels
 
 
     $Headers = @{
-        "Authorization" = "token $Script:GithubToken"
+        "Authorization" = "token $Global:GithubToken"
 		"accept" = "$accept"
     }
 
-    $Body = @{
-        
-    }
-
-    $Output = Invoke-RestMethod -Method GET -Uri "$FinalURL" -Headers $Headers -Body $Body -ResponseHeadersVariable $ResponseHeaders
+    Write-Verbose ($Body | ConvertTo-JSON)
+    $Output = Invoke-RestMethod -Method GET -Uri "$FinalURL" -Headers $Headers -Body ($Body | ConvertTo-JSON) -ResponseHeadersVariable ResponseHeaders
+    
 
     $Output | Write-Output
 }
-

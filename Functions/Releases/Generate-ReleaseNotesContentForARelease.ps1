@@ -1,4 +1,3 @@
-
 <#
 .SYNOPSIS
 Generate a name and body describing a release. The body content will be markdown formatted and contain information like the changes since last release and users who contributed. The generated release notes are not saved anywhere. They are intended to be generated and used when creating a new release.
@@ -41,7 +40,20 @@ Function Generate-ReleaseNotesContentForARelease
 		[Parameter(Mandatory=$FALSE)][string]$previous_tag_name,
 		[Parameter(Mandatory=$FALSE)][string]$configuration_file_path
     )
-    $QueryStrings = @() | ? { $PSBoundParameters.ContainsKey($_) }
+    $QueryStrings = @(
+        
+    ) | ? { $PSBoundParameters.ContainsKey($_) }
+
+
+    $Body = @{}
+    @( 
+        "tag_name",
+		"target_commitish",
+		"previous_tag_name",
+		"configuration_file_path" 
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Body[$_] = $PSBoundParameters[$_] }
+
+
 
     
     if (![String]::IsNullOrEmpty($QueryStrings))
@@ -55,19 +67,13 @@ Function Generate-ReleaseNotesContentForARelease
 
 
     $Headers = @{
-        "Authorization" = "token $Script:GithubToken"
+        "Authorization" = "token $Global:GithubToken"
 		"accept" = "$accept"
     }
 
-    $Body = @{
-        	"tag_name" = "$tag_name"
-	"target_commitish" = "$target_commitish"
-	"previous_tag_name" = "$previous_tag_name"
-	"configuration_file_path" = "$configuration_file_path"
-    }
-
-    $Output = Invoke-RestMethod -Method POST -Uri "$FinalURL" -Headers $Headers -Body $Body -ResponseHeadersVariable $ResponseHeaders
+    Write-Verbose ($Body | ConvertTo-JSON)
+    $Output = Invoke-RestMethod -Method POST -Uri "$FinalURL" -Headers $Headers -Body ($Body | ConvertTo-JSON) -ResponseHeadersVariable ResponseHeaders
+    
 
     $Output | Write-Output
 }
-

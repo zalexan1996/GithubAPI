@@ -1,4 +1,3 @@
-
 <#
 .SYNOPSIS
 To create a team, the authenticated user must be a member or owner of {org}. By default, organization members can create teams. Organization owners can limit team creation to organization owners. For more information, see "Setting team creation permissions."
@@ -54,13 +53,29 @@ Function Create-ATeam
 		[Parameter(Mandatory=$FALSE)][string]$org,
 		[Parameter(Mandatory=$FALSE)][string]$name,
 		[Parameter(Mandatory=$FALSE)][string]$description,
-		[Parameter(Mandatory=$FALSE)][string]$maintainers,
-		[Parameter(Mandatory=$FALSE)][string]$repo_names,
+		[Parameter(Mandatory=$FALSE)][string[]]$maintainers,
+		[Parameter(Mandatory=$FALSE)][string[]]$repo_names,
 		[Parameter(Mandatory=$FALSE)][string]$privacy,
 		[Parameter(Mandatory=$FALSE)][string]$permission,
-		[Parameter(Mandatory=$FALSE)][string]$parent_team_id
+		[Parameter(Mandatory=$FALSE)][int]$parent_team_id
     )
-    $QueryStrings = @() | ? { $PSBoundParameters.ContainsKey($_) }
+    $QueryStrings = @(
+        
+    ) | ? { $PSBoundParameters.ContainsKey($_) }
+
+
+    $Body = @{}
+    @( 
+        "name",
+		"description",
+		"maintainers",
+		"repo_names",
+		"privacy",
+		"permission",
+		"parent_team_id" 
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Body[$_] = $PSBoundParameters[$_] }
+
+
 
     
     if (![String]::IsNullOrEmpty($QueryStrings))
@@ -74,22 +89,13 @@ Function Create-ATeam
 
 
     $Headers = @{
-        "Authorization" = "token $Script:GithubToken"
+        "Authorization" = "token $Global:GithubToken"
 		"accept" = "$accept"
     }
 
-    $Body = @{
-        	"name" = "$name"
-	"description" = "$description"
-	"maintainers" = "$maintainers"
-	"repo_names" = "$repo_names"
-	"privacy" = "$privacy"
-	"permission" = "$permission"
-	"parent_team_id" = "$parent_team_id"
-    }
-
-    $Output = Invoke-RestMethod -Method POST -Uri "$FinalURL" -Headers $Headers -Body $Body -ResponseHeadersVariable $ResponseHeaders
+    Write-Verbose ($Body | ConvertTo-JSON)
+    $Output = Invoke-RestMethod -Method POST -Uri "$FinalURL" -Headers $Headers -Body ($Body | ConvertTo-JSON) -ResponseHeadersVariable ResponseHeaders
+    
 
     $Output | Write-Output
 }
-

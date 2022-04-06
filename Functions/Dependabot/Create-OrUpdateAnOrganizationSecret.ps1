@@ -1,4 +1,3 @@
-
 <#
 .SYNOPSIS
 Creates or updates an organization secret with an encrypted value. Encrypt your secret using LibSodium. You must authenticate using an access token with the admin:org scope to use this endpoint. GitHub Apps must have the dependabot_secrets organization permission to use this endpoint.
@@ -92,9 +91,22 @@ Function Create-OrUpdateAnOrganizationSecret
 		[Parameter(Mandatory=$FALSE)][string]$encrypted_value,
 		[Parameter(Mandatory=$FALSE)][string]$key_id,
 		[Parameter(Mandatory=$FALSE)][string]$visibility,
-		[Parameter(Mandatory=$FALSE)][string]$selected_repository_ids
+		[Parameter(Mandatory=$FALSE)][string[]]$selected_repository_ids
     )
-    $QueryStrings = @() | ? { $PSBoundParameters.ContainsKey($_) }
+    $QueryStrings = @(
+        
+    ) | ? { $PSBoundParameters.ContainsKey($_) }
+
+
+    $Body = @{}
+    @( 
+        "encrypted_value",
+		"key_id",
+		"visibility",
+		"selected_repository_ids" 
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Body[$_] = $PSBoundParameters[$_] }
+
+
 
     
     if (![String]::IsNullOrEmpty($QueryStrings))
@@ -108,19 +120,13 @@ Function Create-OrUpdateAnOrganizationSecret
 
 
     $Headers = @{
-        "Authorization" = "token $Script:GithubToken"
+        "Authorization" = "token $Global:GithubToken"
 		"accept" = "$accept"
     }
 
-    $Body = @{
-        	"encrypted_value" = "$encrypted_value"
-	"key_id" = "$key_id"
-	"visibility" = "$visibility"
-	"selected_repository_ids" = "$selected_repository_ids"
-    }
-
-    $Output = Invoke-RestMethod -Method PUT -Uri "$FinalURL" -Headers $Headers -Body $Body -ResponseHeadersVariable $ResponseHeaders
+    Write-Verbose ($Body | ConvertTo-JSON)
+    $Output = Invoke-RestMethod -Method PUT -Uri "$FinalURL" -Headers $Headers -Body ($Body | ConvertTo-JSON) -ResponseHeadersVariable ResponseHeaders
+    
 
     $Output | Write-Output
 }
-

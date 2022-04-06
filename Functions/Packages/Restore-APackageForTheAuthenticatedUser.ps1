@@ -1,4 +1,3 @@
-
 <#
 .SYNOPSIS
 Restores a package owned by the authenticated user.
@@ -33,7 +32,17 @@ Function Restore-APackageForTheAuthenticatedUser
 		[Parameter(Mandatory=$FALSE)][string]$package_name,
 		[Parameter(Mandatory=$FALSE)][string]$token
     )
-    $QueryStrings = @("token=$token") | ? { $PSBoundParameters.ContainsKey($_) }
+    $QueryStrings = @(
+        "token=$token"
+    ) | ? { $PSBoundParameters.ContainsKey($_) }
+
+
+    $Body = @{}
+    @( 
+         
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Body[$_] = $PSBoundParameters[$_] }
+
+
 
     
     if (![String]::IsNullOrEmpty($QueryStrings))
@@ -47,16 +56,13 @@ Function Restore-APackageForTheAuthenticatedUser
 
 
     $Headers = @{
-        "Authorization" = "token $Script:GithubToken"
+        "Authorization" = "token $Global:GithubToken"
 		"accept" = "$accept"
     }
 
-    $Body = @{
-        
-    }
-
-    $Output = Invoke-RestMethod -Method POST -Uri "$FinalURL" -Headers $Headers -Body $Body -ResponseHeadersVariable $ResponseHeaders
+    Write-Verbose ($Body | ConvertTo-JSON)
+    $Output = Invoke-RestMethod -Method POST -Uri "$FinalURL" -Headers $Headers -Body ($Body | ConvertTo-JSON) -ResponseHeadersVariable ResponseHeaders
+    
 
     $Output | Write-Output
 }
-

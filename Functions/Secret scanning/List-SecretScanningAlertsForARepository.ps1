@@ -1,4 +1,3 @@
-
 <#
 .SYNOPSIS
 Lists secret scanning alerts for an eligible repository, from newest to oldest. To use this endpoint, you must be an administrator for the repository or for the organization that owns the repository, and you must use a personal access token with the repo scope or security_events scope. For public repositories, you may instead use the public_repo scope.
@@ -45,10 +44,24 @@ Function List-SecretScanningAlertsForARepository
 		[Parameter(Mandatory=$FALSE)][string]$state,
 		[Parameter(Mandatory=$FALSE)][string]$secret_type,
 		[Parameter(Mandatory=$FALSE)][string]$resolution,
-		[Parameter(Mandatory=$FALSE)][string]$page,
-		[Parameter(Mandatory=$FALSE)][string]$per_page
+		[Parameter(Mandatory=$FALSE)][int]$page,
+		[Parameter(Mandatory=$FALSE)][int]$per_page
     )
-    $QueryStrings = @("state=$state","secret_type=$secret_type","resolution=$resolution","page=$page","per_page=$per_page") | ? { $PSBoundParameters.ContainsKey($_) }
+    $QueryStrings = @(
+        "state=$state",
+		"secret_type=$secret_type",
+		"resolution=$resolution",
+		"page=$page",
+		"per_page=$per_page"
+    ) | ? { $PSBoundParameters.ContainsKey($_) }
+
+
+    $Body = @{}
+    @( 
+         
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Body[$_] = $PSBoundParameters[$_] }
+
+
 
     
     if (![String]::IsNullOrEmpty($QueryStrings))
@@ -62,16 +75,13 @@ Function List-SecretScanningAlertsForARepository
 
 
     $Headers = @{
-        "Authorization" = "token $Script:GithubToken"
+        "Authorization" = "token $Global:GithubToken"
 		"accept" = "$accept"
     }
 
-    $Body = @{
-        
-    }
-
-    $Output = Invoke-RestMethod -Method GET -Uri "$FinalURL" -Headers $Headers -Body $Body -ResponseHeadersVariable $ResponseHeaders
+    Write-Verbose ($Body | ConvertTo-JSON)
+    $Output = Invoke-RestMethod -Method GET -Uri "$FinalURL" -Headers $Headers -Body ($Body | ConvertTo-JSON) -ResponseHeadersVariable ResponseHeaders
+    
 
     $Output | Write-Output
 }
-

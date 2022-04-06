@@ -1,4 +1,3 @@
-
 <#
 .SYNOPSIS
 This endpoint triggers notifications. Creating content too quickly using this endpoint may result in secondary rate limiting. See "Secondary rate limits" and "Dealing with secondary rate limits" for details.
@@ -30,9 +29,6 @@ The review action you want to perform. The review actions include: APPROVE, REQU
          
 .PARAMETER comments
 Use the following table to specify the location, destination, and contents of the draft review comment.
-         
-.PARAMETER Properties of thecommentsitems
-
 
 
 .LINK
@@ -45,14 +41,26 @@ Function Create-AReviewForAPullRequest
 		[Parameter(Mandatory=$FALSE)][string]$accept,
 		[Parameter(Mandatory=$FALSE)][string]$owner,
 		[Parameter(Mandatory=$FALSE)][string]$repo,
-		[Parameter(Mandatory=$FALSE)][string]$pull_number,
+		[Parameter(Mandatory=$FALSE)][int]$pull_number,
 		[Parameter(Mandatory=$FALSE)][string]$commit_id,
 		[Parameter(Mandatory=$FALSE)][string]$body,
 		[Parameter(Mandatory=$FALSE)][string]$event,
-		[Parameter(Mandatory=$FALSE)][string]$comments,
-		[Parameter(Mandatory=$FALSE)][string]$Properties of thecommentsitems
+		[Parameter(Mandatory=$FALSE)][object[]]$comments
     )
-    $QueryStrings = @() | ? { $PSBoundParameters.ContainsKey($_) }
+    $QueryStrings = @(
+        
+    ) | ? { $PSBoundParameters.ContainsKey($_) }
+
+
+    $Body = @{}
+    @( 
+        "commit_id",
+		"body",
+		"event",
+		"comments" 
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Body[$_] = $PSBoundParameters[$_] }
+
+
 
     
     if (![String]::IsNullOrEmpty($QueryStrings))
@@ -66,19 +74,13 @@ Function Create-AReviewForAPullRequest
 
 
     $Headers = @{
-        "Authorization" = "token $Script:GithubToken"
+        "Authorization" = "token $Global:GithubToken"
 		"accept" = "$accept"
     }
 
-    $Body = @{
-        	"commit_id" = "$commit_id"
-	"body" = "$body"
-	"event" = "$event"
-	"comments" = "$comments"
-    }
-
-    $Output = Invoke-RestMethod -Method POST -Uri "$FinalURL" -Headers $Headers -Body $Body -ResponseHeadersVariable $ResponseHeaders
+    Write-Verbose ($Body | ConvertTo-JSON)
+    $Output = Invoke-RestMethod -Method POST -Uri "$FinalURL" -Headers $Headers -Body ($Body | ConvertTo-JSON) -ResponseHeadersVariable ResponseHeaders
+    
 
     $Output | Write-Output
 }
-

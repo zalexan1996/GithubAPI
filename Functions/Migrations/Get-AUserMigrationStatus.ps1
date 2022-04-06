@@ -1,4 +1,3 @@
-
 <#
 .SYNOPSIS
 Fetches a single user migration. The response includes the state of the migration, which can be one of the following values:
@@ -27,10 +26,20 @@ Function Get-AUserMigrationStatus
     [CmdletBinding()]
     Param(
 		[Parameter(Mandatory=$FALSE)][string]$accept,
-		[Parameter(Mandatory=$FALSE)][string]$migration_id,
-		[Parameter(Mandatory=$FALSE)][string]$exclude
+		[Parameter(Mandatory=$FALSE)][int]$migration_id,
+		[Parameter(Mandatory=$FALSE)][array]$exclude
     )
-    $QueryStrings = @("exclude=$exclude") | ? { $PSBoundParameters.ContainsKey($_) }
+    $QueryStrings = @(
+        "exclude=$exclude"
+    ) | ? { $PSBoundParameters.ContainsKey($_) }
+
+
+    $Body = @{}
+    @( 
+         
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Body[$_] = $PSBoundParameters[$_] }
+
+
 
     
     if (![String]::IsNullOrEmpty($QueryStrings))
@@ -44,16 +53,13 @@ Function Get-AUserMigrationStatus
 
 
     $Headers = @{
-        "Authorization" = "token $Script:GithubToken"
+        "Authorization" = "token $Global:GithubToken"
 		"accept" = "$accept"
     }
 
-    $Body = @{
-        
-    }
-
-    $Output = Invoke-RestMethod -Method GET -Uri "$FinalURL" -Headers $Headers -Body $Body -ResponseHeadersVariable $ResponseHeaders
+    Write-Verbose ($Body | ConvertTo-JSON)
+    $Output = Invoke-RestMethod -Method GET -Uri "$FinalURL" -Headers $Headers -Body ($Body | ConvertTo-JSON) -ResponseHeadersVariable ResponseHeaders
+    
 
     $Output | Write-Output
 }
-

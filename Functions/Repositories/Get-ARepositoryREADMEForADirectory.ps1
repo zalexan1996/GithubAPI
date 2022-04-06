@@ -1,4 +1,3 @@
-
 <#
 .SYNOPSIS
 Gets the README from a repository directory.
@@ -34,7 +33,17 @@ Function Get-ARepositoryREADMEForADirectory
 		[Parameter(Mandatory=$FALSE)][string]$dir,
 		[Parameter(Mandatory=$FALSE)][string]$ref
     )
-    $QueryStrings = @("ref=$ref") | ? { $PSBoundParameters.ContainsKey($_) }
+    $QueryStrings = @(
+        "ref=$ref"
+    ) | ? { $PSBoundParameters.ContainsKey($_) }
+
+
+    $Body = @{}
+    @( 
+         
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Body[$_] = $PSBoundParameters[$_] }
+
+
 
     
     if (![String]::IsNullOrEmpty($QueryStrings))
@@ -48,16 +57,13 @@ Function Get-ARepositoryREADMEForADirectory
 
 
     $Headers = @{
-        "Authorization" = "token $Script:GithubToken"
+        "Authorization" = "token $Global:GithubToken"
 		"accept" = "$accept"
     }
 
-    $Body = @{
-        
-    }
-
-    $Output = Invoke-RestMethod -Method GET -Uri "$FinalURL" -Headers $Headers -Body $Body -ResponseHeadersVariable $ResponseHeaders
+    Write-Verbose ($Body | ConvertTo-JSON)
+    $Output = Invoke-RestMethod -Method GET -Uri "$FinalURL" -Headers $Headers -Body ($Body | ConvertTo-JSON) -ResponseHeadersVariable ResponseHeaders
+    
 
     $Output | Write-Output
 }
-

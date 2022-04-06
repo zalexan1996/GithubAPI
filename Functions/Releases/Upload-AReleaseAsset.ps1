@@ -1,4 +1,3 @@
-
 <#
 .SYNOPSIS
 This endpoint makes use of a Hypermedia relation to determine which URL to access. The endpoint you call to upload release assets is specific to your release. Use the upload_url returned in the response of the Create a release endpoint to upload a release asset.
@@ -41,11 +40,22 @@ Function Upload-AReleaseAsset
 		[Parameter(Mandatory=$FALSE)][string]$accept,
 		[Parameter(Mandatory=$FALSE)][string]$owner,
 		[Parameter(Mandatory=$FALSE)][string]$repo,
-		[Parameter(Mandatory=$FALSE)][string]$release_id,
+		[Parameter(Mandatory=$FALSE)][int]$release_id,
 		[Parameter(Mandatory=$FALSE)][string]$name,
 		[Parameter(Mandatory=$FALSE)][string]$label
     )
-    $QueryStrings = @("name=$name","label=$label") | ? { $PSBoundParameters.ContainsKey($_) }
+    $QueryStrings = @(
+        "name=$name",
+		"label=$label"
+    ) | ? { $PSBoundParameters.ContainsKey($_) }
+
+
+    $Body = @{}
+    @( 
+         
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Body[$_] = $PSBoundParameters[$_] }
+
+
 
     
     if (![String]::IsNullOrEmpty($QueryStrings))
@@ -59,16 +69,13 @@ Function Upload-AReleaseAsset
 
 
     $Headers = @{
-        "Authorization" = "token $Script:GithubToken"
+        "Authorization" = "token $Global:GithubToken"
 		"accept" = "$accept"
     }
 
-    $Body = @{
-        
-    }
-
-    $Output = Invoke-RestMethod -Method POST -Uri "$FinalURL" -Headers $Headers -Body $Body -ResponseHeadersVariable $ResponseHeaders
+    Write-Verbose ($Body | ConvertTo-JSON)
+    $Output = Invoke-RestMethod -Method POST -Uri "$FinalURL" -Headers $Headers -Body ($Body | ConvertTo-JSON) -ResponseHeadersVariable ResponseHeaders
+    
 
     $Output | Write-Output
 }
-

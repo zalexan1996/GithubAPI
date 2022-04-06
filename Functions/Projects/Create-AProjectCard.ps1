@@ -1,4 +1,3 @@
-
 <#
 .SYNOPSIS
 
@@ -28,12 +27,24 @@ Function Create-AProjectCard
     [CmdletBinding()]
     Param(
 		[Parameter(Mandatory=$FALSE)][string]$accept,
-		[Parameter(Mandatory=$FALSE)][string]$column_id,
+		[Parameter(Mandatory=$FALSE)][int]$column_id,
 		[Parameter(Mandatory=$FALSE)][string]$note,
-		[Parameter(Mandatory=$FALSE)][string]$content_id,
+		[Parameter(Mandatory=$FALSE)][int]$content_id,
 		[Parameter(Mandatory=$FALSE)][string]$content_type
     )
-    $QueryStrings = @() | ? { $PSBoundParameters.ContainsKey($_) }
+    $QueryStrings = @(
+        
+    ) | ? { $PSBoundParameters.ContainsKey($_) }
+
+
+    $Body = @{}
+    @( 
+        "note",
+		"content_id",
+		"content_type" 
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Body[$_] = $PSBoundParameters[$_] }
+
+
 
     
     if (![String]::IsNullOrEmpty($QueryStrings))
@@ -47,18 +58,13 @@ Function Create-AProjectCard
 
 
     $Headers = @{
-        "Authorization" = "token $Script:GithubToken"
+        "Authorization" = "token $Global:GithubToken"
 		"accept" = "$accept"
     }
 
-    $Body = @{
-        	"note" = "$note"
-	"content_id" = "$content_id"
-	"content_type" = "$content_type"
-    }
-
-    $Output = Invoke-RestMethod -Method POST -Uri "$FinalURL" -Headers $Headers -Body $Body -ResponseHeadersVariable $ResponseHeaders
+    Write-Verbose ($Body | ConvertTo-JSON)
+    $Output = Invoke-RestMethod -Method POST -Uri "$FinalURL" -Headers $Headers -Body ($Body | ConvertTo-JSON) -ResponseHeadersVariable ResponseHeaders
+    
 
     $Output | Write-Output
 }
-

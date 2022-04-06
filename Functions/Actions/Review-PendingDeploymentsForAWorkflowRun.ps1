@@ -1,4 +1,3 @@
-
 <#
 .SYNOPSIS
 Approve or reject pending deployments that are waiting on approval by a required reviewer.
@@ -37,12 +36,24 @@ Function Review-PendingDeploymentsForAWorkflowRun
 		[Parameter(Mandatory=$FALSE)][string]$accept,
 		[Parameter(Mandatory=$FALSE)][string]$owner,
 		[Parameter(Mandatory=$FALSE)][string]$repo,
-		[Parameter(Mandatory=$FALSE)][string]$run_id,
-		[Parameter(Mandatory=$FALSE)][string]$environment_ids,
+		[Parameter(Mandatory=$FALSE)][int]$run_id,
+		[Parameter(Mandatory=$FALSE)][int[]]$environment_ids,
 		[Parameter(Mandatory=$FALSE)][string]$state,
 		[Parameter(Mandatory=$FALSE)][string]$comment
     )
-    $QueryStrings = @() | ? { $PSBoundParameters.ContainsKey($_) }
+    $QueryStrings = @(
+        
+    ) | ? { $PSBoundParameters.ContainsKey($_) }
+
+
+    $Body = @{}
+    @( 
+        "environment_ids",
+		"state",
+		"comment" 
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Body[$_] = $PSBoundParameters[$_] }
+
+
 
     
     if (![String]::IsNullOrEmpty($QueryStrings))
@@ -56,18 +67,13 @@ Function Review-PendingDeploymentsForAWorkflowRun
 
 
     $Headers = @{
-        "Authorization" = "token $Script:GithubToken"
+        "Authorization" = "token $Global:GithubToken"
 		"accept" = "$accept"
     }
 
-    $Body = @{
-        	"environment_ids" = "$environment_ids"
-	"state" = "$state"
-	"comment" = "$comment"
-    }
-
-    $Output = Invoke-RestMethod -Method POST -Uri "$FinalURL" -Headers $Headers -Body $Body -ResponseHeadersVariable $ResponseHeaders
+    Write-Verbose ($Body | ConvertTo-JSON)
+    $Output = Invoke-RestMethod -Method POST -Uri "$FinalURL" -Headers $Headers -Body ($Body | ConvertTo-JSON) -ResponseHeadersVariable ResponseHeaders
+    
 
     $Output | Write-Output
 }
-

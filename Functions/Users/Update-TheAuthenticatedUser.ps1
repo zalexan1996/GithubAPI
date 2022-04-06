@@ -1,4 +1,3 @@
-
 <#
 .SYNOPSIS
 Note: If your email is set to private and you send an email parameter as part of this request to update your profile, your privacy settings are still enforced: the email address will not be displayed on your public profile or via the API.
@@ -46,10 +45,27 @@ Function Update-TheAuthenticatedUser
 		[Parameter(Mandatory=$FALSE)][string]$twitter_username,
 		[Parameter(Mandatory=$FALSE)][string]$company,
 		[Parameter(Mandatory=$FALSE)][string]$location,
-		[Parameter(Mandatory=$FALSE)][string]$hireable,
+		[Parameter(Mandatory=$FALSE)][bool]$hireable,
 		[Parameter(Mandatory=$FALSE)][string]$bio
     )
-    $QueryStrings = @() | ? { $PSBoundParameters.ContainsKey($_) }
+    $QueryStrings = @(
+        
+    ) | ? { $PSBoundParameters.ContainsKey($_) }
+
+
+    $Body = @{}
+    @( 
+        "name",
+		"email",
+		"blog",
+		"twitter_username",
+		"company",
+		"location",
+		"hireable",
+		"bio" 
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Body[$_] = $PSBoundParameters[$_] }
+
+
 
     
     if (![String]::IsNullOrEmpty($QueryStrings))
@@ -63,23 +79,13 @@ Function Update-TheAuthenticatedUser
 
 
     $Headers = @{
-        "Authorization" = "token $Script:GithubToken"
+        "Authorization" = "token $Global:GithubToken"
 		"accept" = "$accept"
     }
 
-    $Body = @{
-        	"name" = "$name"
-	"email" = "$email"
-	"blog" = "$blog"
-	"twitter_username" = "$twitter_username"
-	"company" = "$company"
-	"location" = "$location"
-	"hireable" = "$hireable"
-	"bio" = "$bio"
-    }
-
-    $Output = Invoke-RestMethod -Method PATCH -Uri "$FinalURL" -Headers $Headers -Body $Body -ResponseHeadersVariable $ResponseHeaders
+    Write-Verbose ($Body | ConvertTo-JSON)
+    $Output = Invoke-RestMethod -Method PATCH -Uri "$FinalURL" -Headers $Headers -Body ($Body | ConvertTo-JSON) -ResponseHeadersVariable ResponseHeaders
+    
 
     $Output | Write-Output
 }
-

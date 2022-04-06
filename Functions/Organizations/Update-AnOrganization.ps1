@@ -1,4 +1,3 @@
-
 <#
 .SYNOPSIS
 Parameter Deprecation Notice: GitHub will replace and discontinue members_allowed_repository_creation_type in favor of more granular permissions. The new input parameters are members_can_create_public_repositories, members_can_create_private_repositories for all organizations and members_can_create_internal_repositories for organizations associated with an enterprise account using GitHub Enterprise Cloud or GitHub Enterprise Server 2.20+. For more information, see the blog post.
@@ -122,21 +121,50 @@ Function Update-AnOrganization
 		[Parameter(Mandatory=$FALSE)][string]$location,
 		[Parameter(Mandatory=$FALSE)][string]$name,
 		[Parameter(Mandatory=$FALSE)][string]$description,
-		[Parameter(Mandatory=$FALSE)][string]$has_organization_projects,
-		[Parameter(Mandatory=$FALSE)][string]$has_repository_projects,
+		[Parameter(Mandatory=$FALSE)][bool]$has_organization_projects,
+		[Parameter(Mandatory=$FALSE)][bool]$has_repository_projects,
 		[Parameter(Mandatory=$FALSE)][string]$default_repository_permission,
-		[Parameter(Mandatory=$FALSE)][string]$members_can_create_repositories,
-		[Parameter(Mandatory=$FALSE)][string]$members_can_create_internal_repositories,
-		[Parameter(Mandatory=$FALSE)][string]$members_can_create_private_repositories,
-		[Parameter(Mandatory=$FALSE)][string]$members_can_create_public_repositories,
+		[Parameter(Mandatory=$FALSE)][bool]$members_can_create_repositories,
+		[Parameter(Mandatory=$FALSE)][bool]$members_can_create_internal_repositories,
+		[Parameter(Mandatory=$FALSE)][bool]$members_can_create_private_repositories,
+		[Parameter(Mandatory=$FALSE)][bool]$members_can_create_public_repositories,
 		[Parameter(Mandatory=$FALSE)][string]$members_allowed_repository_creation_type,
-		[Parameter(Mandatory=$FALSE)][string]$members_can_create_pages,
-		[Parameter(Mandatory=$FALSE)][string]$members_can_create_public_pages,
-		[Parameter(Mandatory=$FALSE)][string]$members_can_create_private_pages,
-		[Parameter(Mandatory=$FALSE)][string]$members_can_fork_private_repositories,
+		[Parameter(Mandatory=$FALSE)][bool]$members_can_create_pages,
+		[Parameter(Mandatory=$FALSE)][bool]$members_can_create_public_pages,
+		[Parameter(Mandatory=$FALSE)][bool]$members_can_create_private_pages,
+		[Parameter(Mandatory=$FALSE)][bool]$members_can_fork_private_repositories,
 		[Parameter(Mandatory=$FALSE)][string]$blog
     )
-    $QueryStrings = @() | ? { $PSBoundParameters.ContainsKey($_) }
+    $QueryStrings = @(
+        
+    ) | ? { $PSBoundParameters.ContainsKey($_) }
+
+
+    $Body = @{}
+    @( 
+        "billing_email",
+		"company",
+		"email",
+		"twitter_username",
+		"location",
+		"name",
+		"description",
+		"has_organization_projects",
+		"has_repository_projects",
+		"default_repository_permission",
+		"members_can_create_repositories",
+		"members_can_create_internal_repositories",
+		"members_can_create_private_repositories",
+		"members_can_create_public_repositories",
+		"members_allowed_repository_creation_type",
+		"members_can_create_pages",
+		"members_can_create_public_pages",
+		"members_can_create_private_pages",
+		"members_can_fork_private_repositories",
+		"blog" 
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Body[$_] = $PSBoundParameters[$_] }
+
+
 
     
     if (![String]::IsNullOrEmpty($QueryStrings))
@@ -150,35 +178,13 @@ Function Update-AnOrganization
 
 
     $Headers = @{
-        "Authorization" = "token $Script:GithubToken"
+        "Authorization" = "token $Global:GithubToken"
 		"accept" = "$accept"
     }
 
-    $Body = @{
-        	"billing_email" = "$billing_email"
-	"company" = "$company"
-	"email" = "$email"
-	"twitter_username" = "$twitter_username"
-	"location" = "$location"
-	"name" = "$name"
-	"description" = "$description"
-	"has_organization_projects" = "$has_organization_projects"
-	"has_repository_projects" = "$has_repository_projects"
-	"default_repository_permission" = "$default_repository_permission"
-	"members_can_create_repositories" = "$members_can_create_repositories"
-	"members_can_create_internal_repositories" = "$members_can_create_internal_repositories"
-	"members_can_create_private_repositories" = "$members_can_create_private_repositories"
-	"members_can_create_public_repositories" = "$members_can_create_public_repositories"
-	"members_allowed_repository_creation_type" = "$members_allowed_repository_creation_type"
-	"members_can_create_pages" = "$members_can_create_pages"
-	"members_can_create_public_pages" = "$members_can_create_public_pages"
-	"members_can_create_private_pages" = "$members_can_create_private_pages"
-	"members_can_fork_private_repositories" = "$members_can_fork_private_repositories"
-	"blog" = "$blog"
-    }
-
-    $Output = Invoke-RestMethod -Method PATCH -Uri "$FinalURL" -Headers $Headers -Body $Body -ResponseHeadersVariable $ResponseHeaders
+    Write-Verbose ($Body | ConvertTo-JSON)
+    $Output = Invoke-RestMethod -Method PATCH -Uri "$FinalURL" -Headers $Headers -Body ($Body | ConvertTo-JSON) -ResponseHeadersVariable ResponseHeaders
+    
 
     $Output | Write-Output
 }
-

@@ -1,4 +1,3 @@
-
 <#
 .SYNOPSIS
 Issue owners and users with push access can edit an issue.
@@ -48,16 +47,32 @@ Function Update-AnIssue
 		[Parameter(Mandatory=$FALSE)][string]$accept,
 		[Parameter(Mandatory=$FALSE)][string]$owner,
 		[Parameter(Mandatory=$FALSE)][string]$repo,
-		[Parameter(Mandatory=$FALSE)][string]$issue_number,
+		[Parameter(Mandatory=$FALSE)][int]$issue_number,
 		[Parameter(Mandatory=$FALSE)][string]$title,
 		[Parameter(Mandatory=$FALSE)][string]$body,
 		[Parameter(Mandatory=$FALSE)][string]$assignee,
 		[Parameter(Mandatory=$FALSE)][string]$state,
 		[Parameter(Mandatory=$FALSE)][string]$milestone,
 		[Parameter(Mandatory=$FALSE)][string]$labels,
-		[Parameter(Mandatory=$FALSE)][string]$assignees
+		[Parameter(Mandatory=$FALSE)][string[]]$assignees
     )
-    $QueryStrings = @() | ? { $PSBoundParameters.ContainsKey($_) }
+    $QueryStrings = @(
+        
+    ) | ? { $PSBoundParameters.ContainsKey($_) }
+
+
+    $Body = @{}
+    @( 
+        "title",
+		"body",
+		"assignee",
+		"state",
+		"milestone",
+		"labels",
+		"assignees" 
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Body[$_] = $PSBoundParameters[$_] }
+
+
 
     
     if (![String]::IsNullOrEmpty($QueryStrings))
@@ -71,22 +86,13 @@ Function Update-AnIssue
 
 
     $Headers = @{
-        "Authorization" = "token $Script:GithubToken"
+        "Authorization" = "token $Global:GithubToken"
 		"accept" = "$accept"
     }
 
-    $Body = @{
-        	"title" = "$title"
-	"body" = "$body"
-	"assignee" = "$assignee"
-	"state" = "$state"
-	"milestone" = "$milestone"
-	"labels" = "$labels"
-	"assignees" = "$assignees"
-    }
-
-    $Output = Invoke-RestMethod -Method PATCH -Uri "$FinalURL" -Headers $Headers -Body $Body -ResponseHeadersVariable $ResponseHeaders
+    Write-Verbose ($Body | ConvertTo-JSON)
+    $Output = Invoke-RestMethod -Method PATCH -Uri "$FinalURL" -Headers $Headers -Body ($Body | ConvertTo-JSON) -ResponseHeadersVariable ResponseHeaders
+    
 
     $Output | Write-Output
 }
-

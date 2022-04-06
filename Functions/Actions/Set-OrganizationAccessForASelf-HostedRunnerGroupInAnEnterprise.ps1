@@ -1,4 +1,3 @@
-
 <#
 .SYNOPSIS
 Replaces the list of organizations that have access to a self-hosted runner configured in an enterprise.
@@ -27,10 +26,20 @@ Function Set-OrganizationAccessForASelf-HostedRunnerGroupInAnEnterprise
     Param(
 		[Parameter(Mandatory=$FALSE)][string]$accept,
 		[Parameter(Mandatory=$FALSE)][string]$enterprise,
-		[Parameter(Mandatory=$FALSE)][string]$runner_group_id,
-		[Parameter(Mandatory=$FALSE)][string]$selected_organization_ids
+		[Parameter(Mandatory=$FALSE)][int]$runner_group_id,
+		[Parameter(Mandatory=$FALSE)][int[]]$selected_organization_ids
     )
-    $QueryStrings = @() | ? { $PSBoundParameters.ContainsKey($_) }
+    $QueryStrings = @(
+        
+    ) | ? { $PSBoundParameters.ContainsKey($_) }
+
+
+    $Body = @{}
+    @( 
+        "selected_organization_ids" 
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Body[$_] = $PSBoundParameters[$_] }
+
+
 
     
     if (![String]::IsNullOrEmpty($QueryStrings))
@@ -44,16 +53,13 @@ Function Set-OrganizationAccessForASelf-HostedRunnerGroupInAnEnterprise
 
 
     $Headers = @{
-        "Authorization" = "token $Script:GithubToken"
+        "Authorization" = "token $Global:GithubToken"
 		"accept" = "$accept"
     }
 
-    $Body = @{
-        	"selected_organization_ids" = "$selected_organization_ids"
-    }
-
-    $Output = Invoke-RestMethod -Method PUT -Uri "$FinalURL" -Headers $Headers -Body $Body -ResponseHeadersVariable $ResponseHeaders
+    Write-Verbose ($Body | ConvertTo-JSON)
+    $Output = Invoke-RestMethod -Method PUT -Uri "$FinalURL" -Headers $Headers -Body ($Body | ConvertTo-JSON) -ResponseHeadersVariable ResponseHeaders
+    
 
     $Output | Write-Output
 }
-

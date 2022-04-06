@@ -1,4 +1,3 @@
-
 <#
 .SYNOPSIS
 Draft pull requests are available in public repositories with GitHub Free and GitHub Free for organizations, GitHub Pro, and legacy per-repository billing plans, and in public and private repositories with GitHub Team and GitHub Enterprise Cloud. For more information, see GitHub's products in the GitHub Help documentation.
@@ -43,14 +42,28 @@ Function Update-APullRequest
 		[Parameter(Mandatory=$FALSE)][string]$accept,
 		[Parameter(Mandatory=$FALSE)][string]$owner,
 		[Parameter(Mandatory=$FALSE)][string]$repo,
-		[Parameter(Mandatory=$FALSE)][string]$pull_number,
+		[Parameter(Mandatory=$FALSE)][int]$pull_number,
 		[Parameter(Mandatory=$FALSE)][string]$title,
 		[Parameter(Mandatory=$FALSE)][string]$body,
 		[Parameter(Mandatory=$FALSE)][string]$state,
 		[Parameter(Mandatory=$FALSE)][string]$base,
-		[Parameter(Mandatory=$FALSE)][string]$maintainer_can_modify
+		[Parameter(Mandatory=$FALSE)][bool]$maintainer_can_modify
     )
-    $QueryStrings = @() | ? { $PSBoundParameters.ContainsKey($_) }
+    $QueryStrings = @(
+        
+    ) | ? { $PSBoundParameters.ContainsKey($_) }
+
+
+    $Body = @{}
+    @( 
+        "title",
+		"body",
+		"state",
+		"base",
+		"maintainer_can_modify" 
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Body[$_] = $PSBoundParameters[$_] }
+
+
 
     
     if (![String]::IsNullOrEmpty($QueryStrings))
@@ -64,20 +77,13 @@ Function Update-APullRequest
 
 
     $Headers = @{
-        "Authorization" = "token $Script:GithubToken"
+        "Authorization" = "token $Global:GithubToken"
 		"accept" = "$accept"
     }
 
-    $Body = @{
-        	"title" = "$title"
-	"body" = "$body"
-	"state" = "$state"
-	"base" = "$base"
-	"maintainer_can_modify" = "$maintainer_can_modify"
-    }
-
-    $Output = Invoke-RestMethod -Method PATCH -Uri "$FinalURL" -Headers $Headers -Body $Body -ResponseHeadersVariable $ResponseHeaders
+    Write-Verbose ($Body | ConvertTo-JSON)
+    $Output = Invoke-RestMethod -Method PATCH -Uri "$FinalURL" -Headers $Headers -Body ($Body | ConvertTo-JSON) -ResponseHeadersVariable ResponseHeaders
+    
 
     $Output | Write-Output
 }
-

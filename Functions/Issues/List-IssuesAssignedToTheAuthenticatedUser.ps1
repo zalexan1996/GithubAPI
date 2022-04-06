@@ -1,4 +1,3 @@
-
 <#
 .SYNOPSIS
 List issues assigned to the authenticated user across all visible repositories including owned repositories, member repositories, and organization repositories. You can use the filter query parameter to fetch issues that are not necessarily assigned to you.
@@ -70,14 +69,35 @@ Function List-IssuesAssignedToTheAuthenticatedUser
 		[Parameter(Mandatory=$FALSE)][string]$sort,
 		[Parameter(Mandatory=$FALSE)][string]$direction,
 		[Parameter(Mandatory=$FALSE)][string]$since,
-		[Parameter(Mandatory=$FALSE)][string]$collab,
-		[Parameter(Mandatory=$FALSE)][string]$orgs,
-		[Parameter(Mandatory=$FALSE)][string]$owned,
-		[Parameter(Mandatory=$FALSE)][string]$pulls,
-		[Parameter(Mandatory=$FALSE)][string]$per_page,
-		[Parameter(Mandatory=$FALSE)][string]$page
+		[Parameter(Mandatory=$FALSE)][bool]$collab,
+		[Parameter(Mandatory=$FALSE)][bool]$orgs,
+		[Parameter(Mandatory=$FALSE)][bool]$owned,
+		[Parameter(Mandatory=$FALSE)][bool]$pulls,
+		[Parameter(Mandatory=$FALSE)][int]$per_page,
+		[Parameter(Mandatory=$FALSE)][int]$page
     )
-    $QueryStrings = @("filter=$filter","state=$state","labels=$labels","sort=$sort","direction=$direction","since=$since","collab=$collab","orgs=$orgs","owned=$owned","pulls=$pulls","per_page=$per_page","page=$page") | ? { $PSBoundParameters.ContainsKey($_) }
+    $QueryStrings = @(
+        "filter=$filter",
+		"state=$state",
+		"labels=$labels",
+		"sort=$sort",
+		"direction=$direction",
+		"since=$since",
+		"collab=$collab",
+		"orgs=$orgs",
+		"owned=$owned",
+		"pulls=$pulls",
+		"per_page=$per_page",
+		"page=$page"
+    ) | ? { $PSBoundParameters.ContainsKey($_) }
+
+
+    $Body = @{}
+    @( 
+         
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Body[$_] = $PSBoundParameters[$_] }
+
+
 
     
     if (![String]::IsNullOrEmpty($QueryStrings))
@@ -91,16 +111,13 @@ Function List-IssuesAssignedToTheAuthenticatedUser
 
 
     $Headers = @{
-        "Authorization" = "token $Script:GithubToken"
+        "Authorization" = "token $Global:GithubToken"
 		"accept" = "$accept"
     }
 
-    $Body = @{
-        
-    }
-
-    $Output = Invoke-RestMethod -Method GET -Uri "$FinalURL" -Headers $Headers -Body $Body -ResponseHeadersVariable $ResponseHeaders
+    Write-Verbose ($Body | ConvertTo-JSON)
+    $Output = Invoke-RestMethod -Method GET -Uri "$FinalURL" -Headers $Headers -Body ($Body | ConvertTo-JSON) -ResponseHeadersVariable ResponseHeaders
+    
 
     $Output | Write-Output
 }
-

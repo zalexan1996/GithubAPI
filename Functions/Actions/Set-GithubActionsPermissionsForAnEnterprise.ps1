@@ -1,4 +1,3 @@
-
 <#
 .SYNOPSIS
 Sets the GitHub Actions permissions policy for organizations and allowed actions and reusable workflows in an enterprise.
@@ -30,7 +29,18 @@ Function Set-GithubActionsPermissionsForAnEnterprise
 		[Parameter(Mandatory=$FALSE)][string]$enabled_organizations,
 		[Parameter(Mandatory=$FALSE)][string]$allowed_actions
     )
-    $QueryStrings = @() | ? { $PSBoundParameters.ContainsKey($_) }
+    $QueryStrings = @(
+        
+    ) | ? { $PSBoundParameters.ContainsKey($_) }
+
+
+    $Body = @{}
+    @( 
+        "enabled_organizations",
+		"allowed_actions" 
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Body[$_] = $PSBoundParameters[$_] }
+
+
 
     
     if (![String]::IsNullOrEmpty($QueryStrings))
@@ -44,17 +54,13 @@ Function Set-GithubActionsPermissionsForAnEnterprise
 
 
     $Headers = @{
-        "Authorization" = "token $Script:GithubToken"
+        "Authorization" = "token $Global:GithubToken"
 		"accept" = "$accept"
     }
 
-    $Body = @{
-        	"enabled_organizations" = "$enabled_organizations"
-	"allowed_actions" = "$allowed_actions"
-    }
-
-    $Output = Invoke-RestMethod -Method PUT -Uri "$FinalURL" -Headers $Headers -Body $Body -ResponseHeadersVariable $ResponseHeaders
+    Write-Verbose ($Body | ConvertTo-JSON)
+    $Output = Invoke-RestMethod -Method PUT -Uri "$FinalURL" -Headers $Headers -Body ($Body | ConvertTo-JSON) -ResponseHeadersVariable ResponseHeaders
+    
 
     $Output | Write-Output
 }
-

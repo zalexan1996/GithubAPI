@@ -1,4 +1,3 @@
-
 <#
 .SYNOPSIS
 Deletes a file in a repository.
@@ -31,14 +30,8 @@ The branch name. Default: the repository’s default branch (usually master)
 .PARAMETER committer
 object containing information about the committer.
          
-.PARAMETER Properties of thecommitterobject
-
-         
 .PARAMETER author
 object containing information about the author.
-         
-.PARAMETER Properties of theauthorobject
-
 
 
 .LINK
@@ -55,12 +48,24 @@ Function Delete-AFile
 		[Parameter(Mandatory=$FALSE)][string]$message,
 		[Parameter(Mandatory=$FALSE)][string]$sha,
 		[Parameter(Mandatory=$FALSE)][string]$branch,
-		[Parameter(Mandatory=$FALSE)][string]$committer,
-		[Parameter(Mandatory=$FALSE)][string]$Properties of thecommitterobject,
-		[Parameter(Mandatory=$FALSE)][string]$author,
-		[Parameter(Mandatory=$FALSE)][string]$Properties of theauthorobject
+		[Parameter(Mandatory=$FALSE)][object]$committer,
+		[Parameter(Mandatory=$FALSE)][object]$author
     )
-    $QueryStrings = @() | ? { $PSBoundParameters.ContainsKey($_) }
+    $QueryStrings = @(
+        
+    ) | ? { $PSBoundParameters.ContainsKey($_) }
+
+
+    $Body = @{}
+    @( 
+        "message",
+		"sha",
+		"branch",
+		"committer",
+		"author" 
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Body[$_] = $PSBoundParameters[$_] }
+
+
 
     
     if (![String]::IsNullOrEmpty($QueryStrings))
@@ -74,20 +79,13 @@ Function Delete-AFile
 
 
     $Headers = @{
-        "Authorization" = "token $Script:GithubToken"
+        "Authorization" = "token $Global:GithubToken"
 		"accept" = "$accept"
     }
 
-    $Body = @{
-        	"message" = "$message"
-	"sha" = "$sha"
-	"branch" = "$branch"
-	"committer" = "$committer"
-	"author" = "$author"
-    }
-
-    $Output = Invoke-RestMethod -Method DELETE -Uri "$FinalURL" -Headers $Headers -Body $Body -ResponseHeadersVariable $ResponseHeaders
+    Write-Verbose ($Body | ConvertTo-JSON)
+    $Output = Invoke-RestMethod -Method DELETE -Uri "$FinalURL" -Headers $Headers -Body ($Body | ConvertTo-JSON) -ResponseHeadersVariable ResponseHeaders
+    
 
     $Output | Write-Output
 }
-

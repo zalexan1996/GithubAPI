@@ -1,4 +1,3 @@
-
 <#
 .SYNOPSIS
 Initiates the generation of a migration archive.
@@ -38,14 +37,29 @@ Function Start-AnOrganizationMigration
     Param(
 		[Parameter(Mandatory=$FALSE)][string]$accept,
 		[Parameter(Mandatory=$FALSE)][string]$org,
-		[Parameter(Mandatory=$FALSE)][string]$repositories,
-		[Parameter(Mandatory=$FALSE)][string]$lock_repositories,
-		[Parameter(Mandatory=$FALSE)][string]$exclude_attachments,
-		[Parameter(Mandatory=$FALSE)][string]$exclude_releases,
-		[Parameter(Mandatory=$FALSE)][string]$exclude_owner_projects,
-		[Parameter(Mandatory=$FALSE)][string]$exclude
+		[Parameter(Mandatory=$FALSE)][string[]]$repositories,
+		[Parameter(Mandatory=$FALSE)][bool]$lock_repositories,
+		[Parameter(Mandatory=$FALSE)][bool]$exclude_attachments,
+		[Parameter(Mandatory=$FALSE)][bool]$exclude_releases,
+		[Parameter(Mandatory=$FALSE)][bool]$exclude_owner_projects,
+		[Parameter(Mandatory=$FALSE)][string[]]$exclude
     )
-    $QueryStrings = @() | ? { $PSBoundParameters.ContainsKey($_) }
+    $QueryStrings = @(
+        
+    ) | ? { $PSBoundParameters.ContainsKey($_) }
+
+
+    $Body = @{}
+    @( 
+        "repositories",
+		"lock_repositories",
+		"exclude_attachments",
+		"exclude_releases",
+		"exclude_owner_projects",
+		"exclude" 
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Body[$_] = $PSBoundParameters[$_] }
+
+
 
     
     if (![String]::IsNullOrEmpty($QueryStrings))
@@ -59,21 +73,13 @@ Function Start-AnOrganizationMigration
 
 
     $Headers = @{
-        "Authorization" = "token $Script:GithubToken"
+        "Authorization" = "token $Global:GithubToken"
 		"accept" = "$accept"
     }
 
-    $Body = @{
-        	"repositories" = "$repositories"
-	"lock_repositories" = "$lock_repositories"
-	"exclude_attachments" = "$exclude_attachments"
-	"exclude_releases" = "$exclude_releases"
-	"exclude_owner_projects" = "$exclude_owner_projects"
-	"exclude" = "$exclude"
-    }
-
-    $Output = Invoke-RestMethod -Method POST -Uri "$FinalURL" -Headers $Headers -Body $Body -ResponseHeadersVariable $ResponseHeaders
+    Write-Verbose ($Body | ConvertTo-JSON)
+    $Output = Invoke-RestMethod -Method POST -Uri "$FinalURL" -Headers $Headers -Body ($Body | ConvertTo-JSON) -ResponseHeadersVariable ResponseHeaders
+    
 
     $Output | Write-Output
 }
-

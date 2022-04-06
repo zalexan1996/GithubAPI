@@ -1,4 +1,3 @@
-
 <#
 .SYNOPSIS
 Users with push access can create deployment statuses for a given deployment.
@@ -49,16 +48,32 @@ Function Create-ADeploymentStatus
 		[Parameter(Mandatory=$FALSE)][string]$accept,
 		[Parameter(Mandatory=$FALSE)][string]$owner,
 		[Parameter(Mandatory=$FALSE)][string]$repo,
-		[Parameter(Mandatory=$FALSE)][string]$deployment_id,
+		[Parameter(Mandatory=$FALSE)][int]$deployment_id,
 		[Parameter(Mandatory=$FALSE)][string]$state,
 		[Parameter(Mandatory=$FALSE)][string]$target_url,
 		[Parameter(Mandatory=$FALSE)][string]$log_url,
 		[Parameter(Mandatory=$FALSE)][string]$description,
 		[Parameter(Mandatory=$FALSE)][string]$environment,
 		[Parameter(Mandatory=$FALSE)][string]$environment_url,
-		[Parameter(Mandatory=$FALSE)][string]$auto_inactive
+		[Parameter(Mandatory=$FALSE)][bool]$auto_inactive
     )
-    $QueryStrings = @() | ? { $PSBoundParameters.ContainsKey($_) }
+    $QueryStrings = @(
+        
+    ) | ? { $PSBoundParameters.ContainsKey($_) }
+
+
+    $Body = @{}
+    @( 
+        "state",
+		"target_url",
+		"log_url",
+		"description",
+		"environment",
+		"environment_url",
+		"auto_inactive" 
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Body[$_] = $PSBoundParameters[$_] }
+
+
 
     
     if (![String]::IsNullOrEmpty($QueryStrings))
@@ -72,22 +87,13 @@ Function Create-ADeploymentStatus
 
 
     $Headers = @{
-        "Authorization" = "token $Script:GithubToken"
+        "Authorization" = "token $Global:GithubToken"
 		"accept" = "$accept"
     }
 
-    $Body = @{
-        	"state" = "$state"
-	"target_url" = "$target_url"
-	"log_url" = "$log_url"
-	"description" = "$description"
-	"environment" = "$environment"
-	"environment_url" = "$environment_url"
-	"auto_inactive" = "$auto_inactive"
-    }
-
-    $Output = Invoke-RestMethod -Method POST -Uri "$FinalURL" -Headers $Headers -Body $Body -ResponseHeadersVariable $ResponseHeaders
+    Write-Verbose ($Body | ConvertTo-JSON)
+    $Output = Invoke-RestMethod -Method POST -Uri "$FinalURL" -Headers $Headers -Body ($Body | ConvertTo-JSON) -ResponseHeadersVariable ResponseHeaders
+    
 
     $Output | Write-Output
 }
-

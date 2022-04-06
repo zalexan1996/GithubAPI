@@ -1,4 +1,3 @@
-
 <#
 .SYNOPSIS
 Lists the details of all code scanning analyses for a repository, starting with the most recent. The response is paginated and you can use the page and per_page parameters to list the analyses you're interested in. By default 30 analyses are listed per page.
@@ -48,13 +47,28 @@ Function List-CodeScanningAnalysesForARepository
 		[Parameter(Mandatory=$FALSE)][string]$owner,
 		[Parameter(Mandatory=$FALSE)][string]$repo,
 		[Parameter(Mandatory=$FALSE)][string]$tool_name,
-		[Parameter(Mandatory=$FALSE)][string]$tool_guid,
-		[Parameter(Mandatory=$FALSE)][string]$page,
-		[Parameter(Mandatory=$FALSE)][string]$per_page,
+		[Parameter(Mandatory=$FALSE)][stringnull]$tool_guid,
+		[Parameter(Mandatory=$FALSE)][int]$page,
+		[Parameter(Mandatory=$FALSE)][int]$per_page,
 		[Parameter(Mandatory=$FALSE)][string]$ref,
 		[Parameter(Mandatory=$FALSE)][string]$sarif_id
     )
-    $QueryStrings = @("tool_name=$tool_name","tool_guid=$tool_guid","page=$page","per_page=$per_page","ref=$ref","sarif_id=$sarif_id") | ? { $PSBoundParameters.ContainsKey($_) }
+    $QueryStrings = @(
+        "tool_name=$tool_name",
+		"tool_guid=$tool_guid",
+		"page=$page",
+		"per_page=$per_page",
+		"ref=$ref",
+		"sarif_id=$sarif_id"
+    ) | ? { $PSBoundParameters.ContainsKey($_) }
+
+
+    $Body = @{}
+    @( 
+         
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Body[$_] = $PSBoundParameters[$_] }
+
+
 
     
     if (![String]::IsNullOrEmpty($QueryStrings))
@@ -68,16 +82,13 @@ Function List-CodeScanningAnalysesForARepository
 
 
     $Headers = @{
-        "Authorization" = "token $Script:GithubToken"
+        "Authorization" = "token $Global:GithubToken"
 		"accept" = "$accept"
     }
 
-    $Body = @{
-        
-    }
-
-    $Output = Invoke-RestMethod -Method GET -Uri "$FinalURL" -Headers $Headers -Body $Body -ResponseHeadersVariable $ResponseHeaders
+    Write-Verbose ($Body | ConvertTo-JSON)
+    $Output = Invoke-RestMethod -Method GET -Uri "$FinalURL" -Headers $Headers -Body ($Body | ConvertTo-JSON) -ResponseHeadersVariable ResponseHeaders
+    
 
     $Output | Write-Output
 }
-

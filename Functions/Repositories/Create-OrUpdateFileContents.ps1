@@ -1,4 +1,3 @@
-
 <#
 .SYNOPSIS
 Creates a new file or replaces an existing file in a repository.
@@ -31,14 +30,8 @@ The branch name. Default: the repository’s default branch (usually master)
 .PARAMETER committer
 The person that committed the file. Default: the authenticated user.
          
-.PARAMETER Properties of thecommitterobject
-
-         
 .PARAMETER author
 The author of the file. Default: The committer or the authenticated user if you omit committer.
-         
-.PARAMETER Properties of theauthorobject
-
 
 
 .LINK
@@ -56,12 +49,25 @@ Function Create-OrUpdateFileContents
 		[Parameter(Mandatory=$FALSE)][string]$content,
 		[Parameter(Mandatory=$FALSE)][string]$sha,
 		[Parameter(Mandatory=$FALSE)][string]$branch,
-		[Parameter(Mandatory=$FALSE)][string]$committer,
-		[Parameter(Mandatory=$FALSE)][string]$Properties of thecommitterobject,
-		[Parameter(Mandatory=$FALSE)][string]$author,
-		[Parameter(Mandatory=$FALSE)][string]$Properties of theauthorobject
+		[Parameter(Mandatory=$FALSE)][object]$committer,
+		[Parameter(Mandatory=$FALSE)][object]$author
     )
-    $QueryStrings = @() | ? { $PSBoundParameters.ContainsKey($_) }
+    $QueryStrings = @(
+        
+    ) | ? { $PSBoundParameters.ContainsKey($_) }
+
+
+    $Body = @{}
+    @( 
+        "message",
+		"content",
+		"sha",
+		"branch",
+		"committer",
+		"author" 
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Body[$_] = $PSBoundParameters[$_] }
+
+
 
     
     if (![String]::IsNullOrEmpty($QueryStrings))
@@ -75,21 +81,13 @@ Function Create-OrUpdateFileContents
 
 
     $Headers = @{
-        "Authorization" = "token $Script:GithubToken"
+        "Authorization" = "token $Global:GithubToken"
 		"accept" = "$accept"
     }
 
-    $Body = @{
-        	"message" = "$message"
-	"content" = "$content"
-	"sha" = "$sha"
-	"branch" = "$branch"
-	"committer" = "$committer"
-	"author" = "$author"
-    }
-
-    $Output = Invoke-RestMethod -Method PUT -Uri "$FinalURL" -Headers $Headers -Body $Body -ResponseHeadersVariable $ResponseHeaders
+    Write-Verbose ($Body | ConvertTo-JSON)
+    $Output = Invoke-RestMethod -Method PUT -Uri "$FinalURL" -Headers $Headers -Body ($Body | ConvertTo-JSON) -ResponseHeadersVariable ResponseHeaders
+    
 
     $Output | Write-Output
 }
-

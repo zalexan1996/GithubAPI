@@ -1,4 +1,3 @@
-
 <#
 .SYNOPSIS
 Note: The Checks API only looks for pushes in the repository where the check suite or check run were created. Pushes to a branch in a forked repository are not detected and return an empty pull_requests array.
@@ -44,16 +43,8 @@ The time the check completed. This is a timestamp in ISO 8601 format: YYYY-MM-DD
 .PARAMETER output
 Check runs can accept a variety of data in the output object, including a title and summary and can optionally provide descriptive details about the run. See the output object description.
          
-.PARAMETER Properties of theoutputobject
-Properties of theannotationsitems
-Properties of theimagesitems
-
-         
 .PARAMETER actions
 Displays a button on GitHub that can be clicked to alert your app to do additional tasks. For example, a code linting app can display a button that automatically fixes detected errors. The button created in this object is displayed after the check run completes. When a user clicks the button, GitHub sends the check_run.requested_action webhook to your app. Each action includes a label, identifier and description. A maximum of three actions are accepted. See the actions object description. To learn more about check runs and requested actions, see "Check runs and requested actions."
-         
-.PARAMETER Properties of theactionsitems
-
 
 
 .LINK
@@ -74,14 +65,29 @@ Function Create-ACheckRun
 		[Parameter(Mandatory=$FALSE)][string]$started_at,
 		[Parameter(Mandatory=$FALSE)][string]$conclusion,
 		[Parameter(Mandatory=$FALSE)][string]$completed_at,
-		[Parameter(Mandatory=$FALSE)][string]$output,
-		[Parameter(Mandatory=$FALSE)][string]$Properties of theoutputobject
-Properties of theannotationsitems
-Properties of theimagesitems,
-		[Parameter(Mandatory=$FALSE)][string]$actions,
-		[Parameter(Mandatory=$FALSE)][string]$Properties of theactionsitems
+		[Parameter(Mandatory=$FALSE)][object]$output,
+		[Parameter(Mandatory=$FALSE)][object[]]$actions
     )
-    $QueryStrings = @() | ? { $PSBoundParameters.ContainsKey($_) }
+    $QueryStrings = @(
+        
+    ) | ? { $PSBoundParameters.ContainsKey($_) }
+
+
+    $Body = @{}
+    @( 
+        "name",
+		"head_sha",
+		"details_url",
+		"external_id",
+		"status",
+		"started_at",
+		"conclusion",
+		"completed_at",
+		"output",
+		"actions" 
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Body[$_] = $PSBoundParameters[$_] }
+
+
 
     
     if (![String]::IsNullOrEmpty($QueryStrings))
@@ -95,25 +101,13 @@ Properties of theimagesitems,
 
 
     $Headers = @{
-        "Authorization" = "token $Script:GithubToken"
+        "Authorization" = "token $Global:GithubToken"
 		"accept" = "$accept"
     }
 
-    $Body = @{
-        	"name" = "$name"
-	"head_sha" = "$head_sha"
-	"details_url" = "$details_url"
-	"external_id" = "$external_id"
-	"status" = "$status"
-	"started_at" = "$started_at"
-	"conclusion" = "$conclusion"
-	"completed_at" = "$completed_at"
-	"output" = "$output"
-	"actions" = "$actions"
-    }
-
-    $Output = Invoke-RestMethod -Method POST -Uri "$FinalURL" -Headers $Headers -Body $Body -ResponseHeadersVariable $ResponseHeaders
+    Write-Verbose ($Body | ConvertTo-JSON)
+    $Output = Invoke-RestMethod -Method POST -Uri "$FinalURL" -Headers $Headers -Body ($Body | ConvertTo-JSON) -ResponseHeadersVariable ResponseHeaders
+    
 
     $Output | Write-Output
 }
-

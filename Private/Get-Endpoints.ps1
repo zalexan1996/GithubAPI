@@ -8,6 +8,7 @@ Function Get-Endpoints
         [Parameter(Mandatory=$TRUE)][string]$SectionUrl
     )
     
+
     # Navigate to the section URL
     Enter-SeUrl -Driver $Driver -Url $SectionUrl
 
@@ -27,6 +28,7 @@ Function Get-Endpoints
             $funcObj = Get-FunctionFromDiv -FunctionDiv $functionDivs[$i]
             if ($funcObj.FunctionName -notlike "*_Legacy_*")
             {
+                Write-Verbose "`t$($funcObj.FunctionName)"
                 # Generate a PowerShell function from our function object and add it to our output
                 $funcObj | Select-Object *, @{
                     Name="Code"

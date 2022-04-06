@@ -1,4 +1,3 @@
-
 <#
 .SYNOPSIS
 Deletes a specified code scanning analysis from a repository. For private repositories, you must use an access token with the repo scope. For public repositories, you must use an access token with public_repo scope. GitHub Apps must have the security_events write permission to use this endpoint.
@@ -49,10 +48,20 @@ Function Delete-ACodeScanningAnalysisFromARepository
 		[Parameter(Mandatory=$FALSE)][string]$accept,
 		[Parameter(Mandatory=$FALSE)][string]$owner,
 		[Parameter(Mandatory=$FALSE)][string]$repo,
-		[Parameter(Mandatory=$FALSE)][string]$analysis_id,
-		[Parameter(Mandatory=$FALSE)][string]$confirm_delete
+		[Parameter(Mandatory=$FALSE)][int]$analysis_id,
+		[Parameter(Mandatory=$FALSE)][stringnull]$confirm_delete
     )
-    $QueryStrings = @("confirm_delete=$confirm_delete") | ? { $PSBoundParameters.ContainsKey($_) }
+    $QueryStrings = @(
+        "confirm_delete=$confirm_delete"
+    ) | ? { $PSBoundParameters.ContainsKey($_) }
+
+
+    $Body = @{}
+    @( 
+         
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Body[$_] = $PSBoundParameters[$_] }
+
+
 
     
     if (![String]::IsNullOrEmpty($QueryStrings))
@@ -66,16 +75,13 @@ Function Delete-ACodeScanningAnalysisFromARepository
 
 
     $Headers = @{
-        "Authorization" = "token $Script:GithubToken"
+        "Authorization" = "token $Global:GithubToken"
 		"accept" = "$accept"
     }
 
-    $Body = @{
-        
-    }
-
-    $Output = Invoke-RestMethod -Method DELETE -Uri "$FinalURL" -Headers $Headers -Body $Body -ResponseHeadersVariable $ResponseHeaders
+    Write-Verbose ($Body | ConvertTo-JSON)
+    $Output = Invoke-RestMethod -Method DELETE -Uri "$FinalURL" -Headers $Headers -Body ($Body | ConvertTo-JSON) -ResponseHeadersVariable ResponseHeaders
+    
 
     $Output | Write-Output
 }
-

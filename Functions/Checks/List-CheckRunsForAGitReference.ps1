@@ -1,4 +1,3 @@
-
 <#
 .SYNOPSIS
 Note: The Checks API only looks for pushes in the repository where the check suite or check run were created. Pushes to a branch in a forked repository are not detected and return an empty pull_requests array.
@@ -53,11 +52,26 @@ Function List-CheckRunsForAGitReference
 		[Parameter(Mandatory=$FALSE)][string]$check_name,
 		[Parameter(Mandatory=$FALSE)][string]$status,
 		[Parameter(Mandatory=$FALSE)][string]$filter,
-		[Parameter(Mandatory=$FALSE)][string]$per_page,
-		[Parameter(Mandatory=$FALSE)][string]$page,
-		[Parameter(Mandatory=$FALSE)][string]$app_id
+		[Parameter(Mandatory=$FALSE)][int]$per_page,
+		[Parameter(Mandatory=$FALSE)][int]$page,
+		[Parameter(Mandatory=$FALSE)][int]$app_id
     )
-    $QueryStrings = @("check_name=$check_name","status=$status","filter=$filter","per_page=$per_page","page=$page","app_id=$app_id") | ? { $PSBoundParameters.ContainsKey($_) }
+    $QueryStrings = @(
+        "check_name=$check_name",
+		"status=$status",
+		"filter=$filter",
+		"per_page=$per_page",
+		"page=$page",
+		"app_id=$app_id"
+    ) | ? { $PSBoundParameters.ContainsKey($_) }
+
+
+    $Body = @{}
+    @( 
+         
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Body[$_] = $PSBoundParameters[$_] }
+
+
 
     
     if (![String]::IsNullOrEmpty($QueryStrings))
@@ -71,16 +85,13 @@ Function List-CheckRunsForAGitReference
 
 
     $Headers = @{
-        "Authorization" = "token $Script:GithubToken"
+        "Authorization" = "token $Global:GithubToken"
 		"accept" = "$accept"
     }
 
-    $Body = @{
-        
-    }
-
-    $Output = Invoke-RestMethod -Method GET -Uri "$FinalURL" -Headers $Headers -Body $Body -ResponseHeadersVariable $ResponseHeaders
+    Write-Verbose ($Body | ConvertTo-JSON)
+    $Output = Invoke-RestMethod -Method GET -Uri "$FinalURL" -Headers $Headers -Body ($Body | ConvertTo-JSON) -ResponseHeadersVariable ResponseHeaders
+    
 
     $Output | Write-Output
 }
-

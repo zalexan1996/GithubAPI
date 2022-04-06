@@ -1,4 +1,3 @@
-
 <#
 .SYNOPSIS
 Gets a Git commit object.
@@ -6,7 +5,7 @@ Signature verification object
 The response will include a verification object that describes the result of verifying the commit's signature. The following fields are included in the verification object:
 Name Type Description
 verified boolean Indicates whether GitHub considers the signature in this commit to be verified.
-reason string The reason for verified value. Possible values and their meanings are enumerated in table below.
+reason string The reason for verified value. Possible values and their meanings are enumerated in the table below.
 signature string The signature that was extracted from the commit.
 payload string The value that was signed.
 These are the possible values for reason in the verification object:
@@ -51,7 +50,17 @@ Function Get-ACommit
 		[Parameter(Mandatory=$FALSE)][string]$repo,
 		[Parameter(Mandatory=$FALSE)][string]$commit_sha
     )
-    $QueryStrings = @() | ? { $PSBoundParameters.ContainsKey($_) }
+    $QueryStrings = @(
+        
+    ) | ? { $PSBoundParameters.ContainsKey($_) }
+
+
+    $Body = @{}
+    @( 
+         
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Body[$_] = $PSBoundParameters[$_] }
+
+
 
     
     if (![String]::IsNullOrEmpty($QueryStrings))
@@ -65,16 +74,13 @@ Function Get-ACommit
 
 
     $Headers = @{
-        "Authorization" = "token $Script:GithubToken"
+        "Authorization" = "token $Global:GithubToken"
 		"accept" = "$accept"
     }
 
-    $Body = @{
-        
-    }
-
-    $Output = Invoke-RestMethod -Method GET -Uri "$FinalURL" -Headers $Headers -Body $Body -ResponseHeadersVariable $ResponseHeaders
+    Write-Verbose ($Body | ConvertTo-JSON)
+    $Output = Invoke-RestMethod -Method GET -Uri "$FinalURL" -Headers $Headers -Body ($Body | ConvertTo-JSON) -ResponseHeadersVariable ResponseHeaders
+    
 
     $Output | Write-Output
 }
-

@@ -1,4 +1,3 @@
-
 <#
 .SYNOPSIS
 Users with push access to the repository can create a release.
@@ -53,12 +52,29 @@ Function Create-ARelease
 		[Parameter(Mandatory=$FALSE)][string]$target_commitish,
 		[Parameter(Mandatory=$FALSE)][string]$name,
 		[Parameter(Mandatory=$FALSE)][string]$body,
-		[Parameter(Mandatory=$FALSE)][string]$draft,
-		[Parameter(Mandatory=$FALSE)][string]$prerelease,
+		[Parameter(Mandatory=$FALSE)][bool]$draft,
+		[Parameter(Mandatory=$FALSE)][bool]$prerelease,
 		[Parameter(Mandatory=$FALSE)][string]$discussion_category_name,
-		[Parameter(Mandatory=$FALSE)][string]$generate_release_notes
+		[Parameter(Mandatory=$FALSE)][bool]$generate_release_notes
     )
-    $QueryStrings = @() | ? { $PSBoundParameters.ContainsKey($_) }
+    $QueryStrings = @(
+        
+    ) | ? { $PSBoundParameters.ContainsKey($_) }
+
+
+    $Body = @{}
+    @( 
+        "tag_name",
+		"target_commitish",
+		"name",
+		"body",
+		"draft",
+		"prerelease",
+		"discussion_category_name",
+		"generate_release_notes" 
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Body[$_] = $PSBoundParameters[$_] }
+
+
 
     
     if (![String]::IsNullOrEmpty($QueryStrings))
@@ -72,23 +88,13 @@ Function Create-ARelease
 
 
     $Headers = @{
-        "Authorization" = "token $Script:GithubToken"
+        "Authorization" = "token $Global:GithubToken"
 		"accept" = "$accept"
     }
 
-    $Body = @{
-        	"tag_name" = "$tag_name"
-	"target_commitish" = "$target_commitish"
-	"name" = "$name"
-	"body" = "$body"
-	"draft" = "$draft"
-	"prerelease" = "$prerelease"
-	"discussion_category_name" = "$discussion_category_name"
-	"generate_release_notes" = "$generate_release_notes"
-    }
-
-    $Output = Invoke-RestMethod -Method POST -Uri "$FinalURL" -Headers $Headers -Body $Body -ResponseHeadersVariable $ResponseHeaders
+    Write-Verbose ($Body | ConvertTo-JSON)
+    $Output = Invoke-RestMethod -Method POST -Uri "$FinalURL" -Headers $Headers -Body ($Body | ConvertTo-JSON) -ResponseHeadersVariable ResponseHeaders
+    
 
     $Output | Write-Output
 }
-

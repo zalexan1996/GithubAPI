@@ -1,4 +1,3 @@
-
 <#
 .SYNOPSIS
 Updates a codespace owned by the authenticated user. Currently only the codespace's machine type and recent folders can be modified using this endpoint.
@@ -33,9 +32,21 @@ Function Update-ACodespaceForTheAuthenticatedUser
 		[Parameter(Mandatory=$FALSE)][string]$codespace_name,
 		[Parameter(Mandatory=$FALSE)][string]$machine,
 		[Parameter(Mandatory=$FALSE)][string]$display_name,
-		[Parameter(Mandatory=$FALSE)][string]$recent_folders
+		[Parameter(Mandatory=$FALSE)][string[]]$recent_folders
     )
-    $QueryStrings = @() | ? { $PSBoundParameters.ContainsKey($_) }
+    $QueryStrings = @(
+        
+    ) | ? { $PSBoundParameters.ContainsKey($_) }
+
+
+    $Body = @{}
+    @( 
+        "machine",
+		"display_name",
+		"recent_folders" 
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Body[$_] = $PSBoundParameters[$_] }
+
+
 
     
     if (![String]::IsNullOrEmpty($QueryStrings))
@@ -49,18 +60,13 @@ Function Update-ACodespaceForTheAuthenticatedUser
 
 
     $Headers = @{
-        "Authorization" = "token $Script:GithubToken"
+        "Authorization" = "token $Global:GithubToken"
 		"accept" = "$accept"
     }
 
-    $Body = @{
-        	"machine" = "$machine"
-	"display_name" = "$display_name"
-	"recent_folders" = "$recent_folders"
-    }
-
-    $Output = Invoke-RestMethod -Method PATCH -Uri "$FinalURL" -Headers $Headers -Body $Body -ResponseHeadersVariable $ResponseHeaders
+    Write-Verbose ($Body | ConvertTo-JSON)
+    $Output = Invoke-RestMethod -Method PATCH -Uri "$FinalURL" -Headers $Headers -Body ($Body | ConvertTo-JSON) -ResponseHeadersVariable ResponseHeaders
+    
 
     $Output | Write-Output
 }
-

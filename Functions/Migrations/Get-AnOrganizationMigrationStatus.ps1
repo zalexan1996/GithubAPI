@@ -1,4 +1,3 @@
-
 <#
 .SYNOPSIS
 Fetches the status of a migration.
@@ -31,10 +30,20 @@ Function Get-AnOrganizationMigrationStatus
     Param(
 		[Parameter(Mandatory=$FALSE)][string]$accept,
 		[Parameter(Mandatory=$FALSE)][string]$org,
-		[Parameter(Mandatory=$FALSE)][string]$migration_id,
-		[Parameter(Mandatory=$FALSE)][string]$exclude
+		[Parameter(Mandatory=$FALSE)][int]$migration_id,
+		[Parameter(Mandatory=$FALSE)][array]$exclude
     )
-    $QueryStrings = @("exclude=$exclude") | ? { $PSBoundParameters.ContainsKey($_) }
+    $QueryStrings = @(
+        "exclude=$exclude"
+    ) | ? { $PSBoundParameters.ContainsKey($_) }
+
+
+    $Body = @{}
+    @( 
+         
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Body[$_] = $PSBoundParameters[$_] }
+
+
 
     
     if (![String]::IsNullOrEmpty($QueryStrings))
@@ -48,16 +57,13 @@ Function Get-AnOrganizationMigrationStatus
 
 
     $Headers = @{
-        "Authorization" = "token $Script:GithubToken"
+        "Authorization" = "token $Global:GithubToken"
 		"accept" = "$accept"
     }
 
-    $Body = @{
-        
-    }
-
-    $Output = Invoke-RestMethod -Method GET -Uri "$FinalURL" -Headers $Headers -Body $Body -ResponseHeadersVariable $ResponseHeaders
+    Write-Verbose ($Body | ConvertTo-JSON)
+    $Output = Invoke-RestMethod -Method GET -Uri "$FinalURL" -Headers $Headers -Body ($Body | ConvertTo-JSON) -ResponseHeadersVariable ResponseHeaders
+    
 
     $Output | Write-Output
 }
-

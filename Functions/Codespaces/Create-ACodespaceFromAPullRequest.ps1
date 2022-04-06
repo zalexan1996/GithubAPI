@@ -1,4 +1,3 @@
-
 <#
 .SYNOPSIS
 Creates a codespace owned by the authenticated user for the specified pull request.
@@ -43,14 +42,28 @@ Function Create-ACodespaceFromAPullRequest
 		[Parameter(Mandatory=$FALSE)][string]$accept,
 		[Parameter(Mandatory=$FALSE)][string]$owner,
 		[Parameter(Mandatory=$FALSE)][string]$repo,
-		[Parameter(Mandatory=$FALSE)][string]$pull_number,
+		[Parameter(Mandatory=$FALSE)][int]$pull_number,
 		[Parameter(Mandatory=$FALSE)][string]$location,
 		[Parameter(Mandatory=$FALSE)][string]$machine,
 		[Parameter(Mandatory=$FALSE)][string]$working_directory,
-		[Parameter(Mandatory=$FALSE)][string]$idle_timeout_minutes,
+		[Parameter(Mandatory=$FALSE)][int]$idle_timeout_minutes,
 		[Parameter(Mandatory=$FALSE)][string]$display_name
     )
-    $QueryStrings = @() | ? { $PSBoundParameters.ContainsKey($_) }
+    $QueryStrings = @(
+        
+    ) | ? { $PSBoundParameters.ContainsKey($_) }
+
+
+    $Body = @{}
+    @( 
+        "location",
+		"machine",
+		"working_directory",
+		"idle_timeout_minutes",
+		"display_name" 
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Body[$_] = $PSBoundParameters[$_] }
+
+
 
     
     if (![String]::IsNullOrEmpty($QueryStrings))
@@ -64,20 +77,13 @@ Function Create-ACodespaceFromAPullRequest
 
 
     $Headers = @{
-        "Authorization" = "token $Script:GithubToken"
+        "Authorization" = "token $Global:GithubToken"
 		"accept" = "$accept"
     }
 
-    $Body = @{
-        	"location" = "$location"
-	"machine" = "$machine"
-	"working_directory" = "$working_directory"
-	"idle_timeout_minutes" = "$idle_timeout_minutes"
-	"display_name" = "$display_name"
-    }
-
-    $Output = Invoke-RestMethod -Method POST -Uri "$FinalURL" -Headers $Headers -Body $Body -ResponseHeadersVariable $ResponseHeaders
+    Write-Verbose ($Body | ConvertTo-JSON)
+    $Output = Invoke-RestMethod -Method POST -Uri "$FinalURL" -Headers $Headers -Body ($Body | ConvertTo-JSON) -ResponseHeadersVariable ResponseHeaders
+    
 
     $Output | Write-Output
 }
-

@@ -1,4 +1,3 @@
-
 <#
 .SYNOPSIS
 Creates a new self-hosted runner group for an enterprise.
@@ -25,6 +24,12 @@ List of runner IDs to add to the runner group.
          
 .PARAMETER allows_public_repositories
 Whether the runner group can be used by public repositories.
+         
+.PARAMETER restricted_to_workflows
+If true, the runner group will be restricted to running only the workflows specified in the selected_workflows array.
+         
+.PARAMETER selected_workflows
+List of workflows the runner group should be allowed to run. This setting will be ignored unless restricted_to_workflows is set to true.
 
 
 .LINK
@@ -38,11 +43,29 @@ Function Create-ASelf-HostedRunnerGroupForAnEnterprise
 		[Parameter(Mandatory=$FALSE)][string]$enterprise,
 		[Parameter(Mandatory=$FALSE)][string]$name,
 		[Parameter(Mandatory=$FALSE)][string]$visibility,
-		[Parameter(Mandatory=$FALSE)][string]$selected_organization_ids,
-		[Parameter(Mandatory=$FALSE)][string]$runners,
-		[Parameter(Mandatory=$FALSE)][string]$allows_public_repositories
+		[Parameter(Mandatory=$FALSE)][int[]]$selected_organization_ids,
+		[Parameter(Mandatory=$FALSE)][int[]]$runners,
+		[Parameter(Mandatory=$FALSE)][bool]$allows_public_repositories,
+		[Parameter(Mandatory=$FALSE)][bool]$restricted_to_workflows,
+		[Parameter(Mandatory=$FALSE)][string[]]$selected_workflows
     )
-    $QueryStrings = @() | ? { $PSBoundParameters.ContainsKey($_) }
+    $QueryStrings = @(
+        
+    ) | ? { $PSBoundParameters.ContainsKey($_) }
+
+
+    $Body = @{}
+    @( 
+        "name",
+		"visibility",
+		"selected_organization_ids",
+		"runners",
+		"allows_public_repositories",
+		"restricted_to_workflows",
+		"selected_workflows" 
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Body[$_] = $PSBoundParameters[$_] }
+
+
 
     
     if (![String]::IsNullOrEmpty($QueryStrings))
@@ -56,20 +79,13 @@ Function Create-ASelf-HostedRunnerGroupForAnEnterprise
 
 
     $Headers = @{
-        "Authorization" = "token $Script:GithubToken"
+        "Authorization" = "token $Global:GithubToken"
 		"accept" = "$accept"
     }
 
-    $Body = @{
-        	"name" = "$name"
-	"visibility" = "$visibility"
-	"selected_organization_ids" = "$selected_organization_ids"
-	"runners" = "$runners"
-	"allows_public_repositories" = "$allows_public_repositories"
-    }
-
-    $Output = Invoke-RestMethod -Method POST -Uri "$FinalURL" -Headers $Headers -Body $Body -ResponseHeadersVariable $ResponseHeaders
+    Write-Verbose ($Body | ConvertTo-JSON)
+    $Output = Invoke-RestMethod -Method POST -Uri "$FinalURL" -Headers $Headers -Body ($Body | ConvertTo-JSON) -ResponseHeadersVariable ResponseHeaders
+    
 
     $Output | Write-Output
 }
-

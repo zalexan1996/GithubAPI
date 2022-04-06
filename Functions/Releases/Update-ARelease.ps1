@@ -1,4 +1,3 @@
-
 <#
 .SYNOPSIS
 Users with push access to the repository can edit a release.
@@ -48,16 +47,32 @@ Function Update-ARelease
 		[Parameter(Mandatory=$FALSE)][string]$accept,
 		[Parameter(Mandatory=$FALSE)][string]$owner,
 		[Parameter(Mandatory=$FALSE)][string]$repo,
-		[Parameter(Mandatory=$FALSE)][string]$release_id,
+		[Parameter(Mandatory=$FALSE)][int]$release_id,
 		[Parameter(Mandatory=$FALSE)][string]$tag_name,
 		[Parameter(Mandatory=$FALSE)][string]$target_commitish,
 		[Parameter(Mandatory=$FALSE)][string]$name,
 		[Parameter(Mandatory=$FALSE)][string]$body,
-		[Parameter(Mandatory=$FALSE)][string]$draft,
-		[Parameter(Mandatory=$FALSE)][string]$prerelease,
+		[Parameter(Mandatory=$FALSE)][bool]$draft,
+		[Parameter(Mandatory=$FALSE)][bool]$prerelease,
 		[Parameter(Mandatory=$FALSE)][string]$discussion_category_name
     )
-    $QueryStrings = @() | ? { $PSBoundParameters.ContainsKey($_) }
+    $QueryStrings = @(
+        
+    ) | ? { $PSBoundParameters.ContainsKey($_) }
+
+
+    $Body = @{}
+    @( 
+        "tag_name",
+		"target_commitish",
+		"name",
+		"body",
+		"draft",
+		"prerelease",
+		"discussion_category_name" 
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Body[$_] = $PSBoundParameters[$_] }
+
+
 
     
     if (![String]::IsNullOrEmpty($QueryStrings))
@@ -71,22 +86,13 @@ Function Update-ARelease
 
 
     $Headers = @{
-        "Authorization" = "token $Script:GithubToken"
+        "Authorization" = "token $Global:GithubToken"
 		"accept" = "$accept"
     }
 
-    $Body = @{
-        	"tag_name" = "$tag_name"
-	"target_commitish" = "$target_commitish"
-	"name" = "$name"
-	"body" = "$body"
-	"draft" = "$draft"
-	"prerelease" = "$prerelease"
-	"discussion_category_name" = "$discussion_category_name"
-    }
-
-    $Output = Invoke-RestMethod -Method PATCH -Uri "$FinalURL" -Headers $Headers -Body $Body -ResponseHeadersVariable $ResponseHeaders
+    Write-Verbose ($Body | ConvertTo-JSON)
+    $Output = Invoke-RestMethod -Method PATCH -Uri "$FinalURL" -Headers $Headers -Body ($Body | ConvertTo-JSON) -ResponseHeadersVariable ResponseHeaders
+    
 
     $Output | Write-Output
 }
-

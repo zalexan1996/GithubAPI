@@ -1,4 +1,3 @@
-
 <#
 .SYNOPSIS
 Protected branches are available in public repositories with GitHub Free and GitHub Free for organizations, and in public and private repositories with GitHub Pro, GitHub Team, GitHub Enterprise Cloud, and GitHub Enterprise Server. For more information, see GitHub's products in the GitHub Help documentation.
@@ -25,9 +24,6 @@ Deprecated: The list of status checks to require in order to merge into this bra
          
 .PARAMETER checks
 The list of status checks to require in order to merge into this branch.
-         
-.PARAMETER Properties of thechecksitems
-
 
 
 .LINK
@@ -41,12 +37,23 @@ Function Update-StatusCheckProtection
 		[Parameter(Mandatory=$FALSE)][string]$owner,
 		[Parameter(Mandatory=$FALSE)][string]$repo,
 		[Parameter(Mandatory=$FALSE)][string]$branch,
-		[Parameter(Mandatory=$FALSE)][string]$strict,
-		[Parameter(Mandatory=$FALSE)][string]$contexts,
-		[Parameter(Mandatory=$FALSE)][string]$checks,
-		[Parameter(Mandatory=$FALSE)][string]$Properties of thechecksitems
+		[Parameter(Mandatory=$FALSE)][bool]$strict,
+		[Parameter(Mandatory=$FALSE)][string[]]$contexts,
+		[Parameter(Mandatory=$FALSE)][object[]]$checks
     )
-    $QueryStrings = @() | ? { $PSBoundParameters.ContainsKey($_) }
+    $QueryStrings = @(
+        
+    ) | ? { $PSBoundParameters.ContainsKey($_) }
+
+
+    $Body = @{}
+    @( 
+        "strict",
+		"contexts",
+		"checks" 
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Body[$_] = $PSBoundParameters[$_] }
+
+
 
     
     if (![String]::IsNullOrEmpty($QueryStrings))
@@ -60,18 +67,13 @@ Function Update-StatusCheckProtection
 
 
     $Headers = @{
-        "Authorization" = "token $Script:GithubToken"
+        "Authorization" = "token $Global:GithubToken"
 		"accept" = "$accept"
     }
 
-    $Body = @{
-        	"strict" = "$strict"
-	"contexts" = "$contexts"
-	"checks" = "$checks"
-    }
-
-    $Output = Invoke-RestMethod -Method PATCH -Uri "$FinalURL" -Headers $Headers -Body $Body -ResponseHeadersVariable $ResponseHeaders
+    Write-Verbose ($Body | ConvertTo-JSON)
+    $Output = Invoke-RestMethod -Method PATCH -Uri "$FinalURL" -Headers $Headers -Body ($Body | ConvertTo-JSON) -ResponseHeadersVariable ResponseHeaders
+    
 
     $Output | Write-Output
 }
-

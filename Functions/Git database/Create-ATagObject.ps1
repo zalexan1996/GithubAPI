@@ -1,4 +1,3 @@
-
 <#
 .SYNOPSIS
 Note that creating a tag object does not create the reference that makes a tag in Git. If you want to create an annotated tag in Git, you have to do this call to create the tag object, and then create the refs/tags/[tag] reference. If you want to create a lightweight tag, you only have to create the tag reference - this call would be unnecessary.
@@ -49,9 +48,6 @@ Required. The type of the object we're tagging. Normally this is a commit but it
          
 .PARAMETER tagger
 An object with information about the individual creating the tag.
-         
-.PARAMETER Properties of thetaggerobject
-
 
 
 .LINK
@@ -68,10 +64,23 @@ Function Create-ATagObject
 		[Parameter(Mandatory=$FALSE)][string]$message,
 		[Parameter(Mandatory=$FALSE)][string]$object,
 		[Parameter(Mandatory=$FALSE)][string]$type,
-		[Parameter(Mandatory=$FALSE)][string]$tagger,
-		[Parameter(Mandatory=$FALSE)][string]$Properties of thetaggerobject
+		[Parameter(Mandatory=$FALSE)][object]$tagger
     )
-    $QueryStrings = @() | ? { $PSBoundParameters.ContainsKey($_) }
+    $QueryStrings = @(
+        
+    ) | ? { $PSBoundParameters.ContainsKey($_) }
+
+
+    $Body = @{}
+    @( 
+        "tag",
+		"message",
+		"object",
+		"type",
+		"tagger" 
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Body[$_] = $PSBoundParameters[$_] }
+
+
 
     
     if (![String]::IsNullOrEmpty($QueryStrings))
@@ -85,20 +94,13 @@ Function Create-ATagObject
 
 
     $Headers = @{
-        "Authorization" = "token $Script:GithubToken"
+        "Authorization" = "token $Global:GithubToken"
 		"accept" = "$accept"
     }
 
-    $Body = @{
-        	"tag" = "$tag"
-	"message" = "$message"
-	"object" = "$object"
-	"type" = "$type"
-	"tagger" = "$tagger"
-    }
-
-    $Output = Invoke-RestMethod -Method POST -Uri "$FinalURL" -Headers $Headers -Body $Body -ResponseHeadersVariable $ResponseHeaders
+    Write-Verbose ($Body | ConvertTo-JSON)
+    $Output = Invoke-RestMethod -Method POST -Uri "$FinalURL" -Headers $Headers -Body ($Body | ConvertTo-JSON) -ResponseHeadersVariable ResponseHeaders
+    
 
     $Output | Write-Output
 }
-

@@ -1,4 +1,3 @@
-
 <#
 .SYNOPSIS
 Protected branches are available in public repositories with GitHub Free and GitHub Free for organizations, and in public and private repositories with GitHub Pro, GitHub Team, GitHub Enterprise Cloud, and GitHub Enterprise Server. For more information, see GitHub's products in the GitHub Help documentation.
@@ -40,6 +39,9 @@ Permits force pushes to the protected branch by anyone with write access to the 
 .PARAMETER allow_deletions
 Allows deletion of the protected branch by anyone with write access to the repository. Set to false to prevent deletion of the protected branch. Default: false. For more information, see "Enabling force pushes to a protected branch" in the GitHub Help documentation.
          
+.PARAMETER block_creations
+Blocks creation of new branches which match the branch protection pattern. Set to true to prohibit new branch creation. Default: false.
+         
 .PARAMETER required_conversation_resolution
 Requires all conversations on code to be resolved before a pull request can be merged into a branch that matches this rule. Set to false to disable. Default: false.
 
@@ -59,12 +61,31 @@ Function Update-BranchProtection
 		[Parameter(Mandatory=$FALSE)][string]$enforce_admins,
 		[Parameter(Mandatory=$FALSE)][string]$required_pull_request_reviews,
 		[Parameter(Mandatory=$FALSE)][string]$restrictions,
-		[Parameter(Mandatory=$FALSE)][string]$required_linear_history,
+		[Parameter(Mandatory=$FALSE)][bool]$required_linear_history,
 		[Parameter(Mandatory=$FALSE)][string]$allow_force_pushes,
-		[Parameter(Mandatory=$FALSE)][string]$allow_deletions,
-		[Parameter(Mandatory=$FALSE)][string]$required_conversation_resolution
+		[Parameter(Mandatory=$FALSE)][bool]$allow_deletions,
+		[Parameter(Mandatory=$FALSE)][bool]$block_creations,
+		[Parameter(Mandatory=$FALSE)][bool]$required_conversation_resolution
     )
-    $QueryStrings = @() | ? { $PSBoundParameters.ContainsKey($_) }
+    $QueryStrings = @(
+        
+    ) | ? { $PSBoundParameters.ContainsKey($_) }
+
+
+    $Body = @{}
+    @( 
+        "required_status_checks",
+		"enforce_admins",
+		"required_pull_request_reviews",
+		"restrictions",
+		"required_linear_history",
+		"allow_force_pushes",
+		"allow_deletions",
+		"block_creations",
+		"required_conversation_resolution" 
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Body[$_] = $PSBoundParameters[$_] }
+
+
 
     
     if (![String]::IsNullOrEmpty($QueryStrings))
@@ -78,23 +99,13 @@ Function Update-BranchProtection
 
 
     $Headers = @{
-        "Authorization" = "token $Script:GithubToken"
+        "Authorization" = "token $Global:GithubToken"
 		"accept" = "$accept"
     }
 
-    $Body = @{
-        	"required_status_checks" = "$required_status_checks"
-	"enforce_admins" = "$enforce_admins"
-	"required_pull_request_reviews" = "$required_pull_request_reviews"
-	"restrictions" = "$restrictions"
-	"required_linear_history" = "$required_linear_history"
-	"allow_force_pushes" = "$allow_force_pushes"
-	"allow_deletions" = "$allow_deletions"
-	"required_conversation_resolution" = "$required_conversation_resolution"
-    }
-
-    $Output = Invoke-RestMethod -Method PUT -Uri "$FinalURL" -Headers $Headers -Body $Body -ResponseHeadersVariable $ResponseHeaders
+    Write-Verbose ($Body | ConvertTo-JSON)
+    $Output = Invoke-RestMethod -Method PUT -Uri "$FinalURL" -Headers $Headers -Body ($Body | ConvertTo-JSON) -ResponseHeadersVariable ResponseHeaders
+    
 
     $Output | Write-Output
 }
-

@@ -1,4 +1,3 @@
-
 <#
 .SYNOPSIS
 Any user with pull access to a repository can create an issue. If issues are disabled in the repository, the API returns a 410 Gone status.
@@ -48,9 +47,24 @@ Function Create-AnIssue
 		[Parameter(Mandatory=$FALSE)][string]$assignee,
 		[Parameter(Mandatory=$FALSE)][string]$milestone,
 		[Parameter(Mandatory=$FALSE)][string]$labels,
-		[Parameter(Mandatory=$FALSE)][string]$assignees
+		[Parameter(Mandatory=$FALSE)][string[]]$assignees
     )
-    $QueryStrings = @() | ? { $PSBoundParameters.ContainsKey($_) }
+    $QueryStrings = @(
+        
+    ) | ? { $PSBoundParameters.ContainsKey($_) }
+
+
+    $Body = @{}
+    @( 
+        "title",
+		"body",
+		"assignee",
+		"milestone",
+		"labels",
+		"assignees" 
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Body[$_] = $PSBoundParameters[$_] }
+
+
 
     
     if (![String]::IsNullOrEmpty($QueryStrings))
@@ -64,21 +78,13 @@ Function Create-AnIssue
 
 
     $Headers = @{
-        "Authorization" = "token $Script:GithubToken"
+        "Authorization" = "token $Global:GithubToken"
 		"accept" = "$accept"
     }
 
-    $Body = @{
-        	"title" = "$title"
-	"body" = "$body"
-	"assignee" = "$assignee"
-	"milestone" = "$milestone"
-	"labels" = "$labels"
-	"assignees" = "$assignees"
-    }
-
-    $Output = Invoke-RestMethod -Method POST -Uri "$FinalURL" -Headers $Headers -Body $Body -ResponseHeadersVariable $ResponseHeaders
+    Write-Verbose ($Body | ConvertTo-JSON)
+    $Output = Invoke-RestMethod -Method POST -Uri "$FinalURL" -Headers $Headers -Body ($Body | ConvertTo-JSON) -ResponseHeadersVariable ResponseHeaders
+    
 
     $Output | Write-Output
 }
-

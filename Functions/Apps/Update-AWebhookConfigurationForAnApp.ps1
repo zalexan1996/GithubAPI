@@ -1,4 +1,3 @@
-
 <#
 .SYNOPSIS
 Updates the webhook configuration for a GitHub App. For more information about configuring a webhook for your app, see "Creating a GitHub App."
@@ -34,7 +33,20 @@ Function Update-AWebhookConfigurationForAnApp
 		[Parameter(Mandatory=$FALSE)][string]$secret,
 		[Parameter(Mandatory=$FALSE)][string]$insecure_ssl
     )
-    $QueryStrings = @() | ? { $PSBoundParameters.ContainsKey($_) }
+    $QueryStrings = @(
+        
+    ) | ? { $PSBoundParameters.ContainsKey($_) }
+
+
+    $Body = @{}
+    @( 
+        "url",
+		"content_type",
+		"secret",
+		"insecure_ssl" 
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Body[$_] = $PSBoundParameters[$_] }
+
+
 
     
     if (![String]::IsNullOrEmpty($QueryStrings))
@@ -48,19 +60,13 @@ Function Update-AWebhookConfigurationForAnApp
 
 
     $Headers = @{
-        "Authorization" = "token $Script:GithubToken"
+        "Authorization" = "token $Global:GithubToken"
 		"accept" = "$accept"
     }
 
-    $Body = @{
-        	"url" = "$url"
-	"content_type" = "$content_type"
-	"secret" = "$secret"
-	"insecure_ssl" = "$insecure_ssl"
-    }
-
-    $Output = Invoke-RestMethod -Method PATCH -Uri "$FinalURL" -Headers $Headers -Body $Body -ResponseHeadersVariable $ResponseHeaders
+    Write-Verbose ($Body | ConvertTo-JSON)
+    $Output = Invoke-RestMethod -Method PATCH -Uri "$FinalURL" -Headers $Headers -Body ($Body | ConvertTo-JSON) -ResponseHeadersVariable ResponseHeaders
+    
 
     $Output | Write-Output
 }
-

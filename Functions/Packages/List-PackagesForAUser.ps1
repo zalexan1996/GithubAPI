@@ -1,4 +1,3 @@
-
 <#
 .SYNOPSIS
 Lists all packages in a user's namespace for which the requesting user has access.
@@ -30,7 +29,18 @@ Function List-PackagesForAUser
 		[Parameter(Mandatory=$FALSE)][string]$visibility,
 		[Parameter(Mandatory=$FALSE)][string]$username
     )
-    $QueryStrings = @("package_type=$package_type","visibility=$visibility") | ? { $PSBoundParameters.ContainsKey($_) }
+    $QueryStrings = @(
+        "package_type=$package_type",
+		"visibility=$visibility"
+    ) | ? { $PSBoundParameters.ContainsKey($_) }
+
+
+    $Body = @{}
+    @( 
+         
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Body[$_] = $PSBoundParameters[$_] }
+
+
 
     
     if (![String]::IsNullOrEmpty($QueryStrings))
@@ -44,16 +54,13 @@ Function List-PackagesForAUser
 
 
     $Headers = @{
-        "Authorization" = "token $Script:GithubToken"
+        "Authorization" = "token $Global:GithubToken"
 		"accept" = "$accept"
     }
 
-    $Body = @{
-        
-    }
-
-    $Output = Invoke-RestMethod -Method GET -Uri "$FinalURL" -Headers $Headers -Body $Body -ResponseHeadersVariable $ResponseHeaders
+    Write-Verbose ($Body | ConvertTo-JSON)
+    $Output = Invoke-RestMethod -Method GET -Uri "$FinalURL" -Headers $Headers -Body ($Body | ConvertTo-JSON) -ResponseHeadersVariable ResponseHeaders
+    
 
     $Output | Write-Output
 }
-

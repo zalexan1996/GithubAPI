@@ -1,4 +1,3 @@
-
 <#
 .SYNOPSIS
 
@@ -33,11 +32,22 @@ Function Remove-RequestedReviewersFromAPullRequest
 		[Parameter(Mandatory=$FALSE)][string]$accept,
 		[Parameter(Mandatory=$FALSE)][string]$owner,
 		[Parameter(Mandatory=$FALSE)][string]$repo,
-		[Parameter(Mandatory=$FALSE)][string]$pull_number,
-		[Parameter(Mandatory=$FALSE)][string]$reviewers,
-		[Parameter(Mandatory=$FALSE)][string]$team_reviewers
+		[Parameter(Mandatory=$FALSE)][int]$pull_number,
+		[Parameter(Mandatory=$FALSE)][string[]]$reviewers,
+		[Parameter(Mandatory=$FALSE)][string[]]$team_reviewers
     )
-    $QueryStrings = @() | ? { $PSBoundParameters.ContainsKey($_) }
+    $QueryStrings = @(
+        
+    ) | ? { $PSBoundParameters.ContainsKey($_) }
+
+
+    $Body = @{}
+    @( 
+        "reviewers",
+		"team_reviewers" 
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Body[$_] = $PSBoundParameters[$_] }
+
+
 
     
     if (![String]::IsNullOrEmpty($QueryStrings))
@@ -51,17 +61,13 @@ Function Remove-RequestedReviewersFromAPullRequest
 
 
     $Headers = @{
-        "Authorization" = "token $Script:GithubToken"
+        "Authorization" = "token $Global:GithubToken"
 		"accept" = "$accept"
     }
 
-    $Body = @{
-        	"reviewers" = "$reviewers"
-	"team_reviewers" = "$team_reviewers"
-    }
-
-    $Output = Invoke-RestMethod -Method DELETE -Uri "$FinalURL" -Headers $Headers -Body $Body -ResponseHeadersVariable $ResponseHeaders
+    Write-Verbose ($Body | ConvertTo-JSON)
+    $Output = Invoke-RestMethod -Method DELETE -Uri "$FinalURL" -Headers $Headers -Body ($Body | ConvertTo-JSON) -ResponseHeadersVariable ResponseHeaders
+    
 
     $Output | Write-Output
 }
-

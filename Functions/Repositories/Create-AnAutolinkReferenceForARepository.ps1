@@ -1,4 +1,3 @@
-
 <#
 .SYNOPSIS
 Users with admin access to the repository can create an autolink.
@@ -33,7 +32,18 @@ Function Create-AnAutolinkReferenceForARepository
 		[Parameter(Mandatory=$FALSE)][string]$key_prefix,
 		[Parameter(Mandatory=$FALSE)][string]$url_template
     )
-    $QueryStrings = @() | ? { $PSBoundParameters.ContainsKey($_) }
+    $QueryStrings = @(
+        
+    ) | ? { $PSBoundParameters.ContainsKey($_) }
+
+
+    $Body = @{}
+    @( 
+        "key_prefix",
+		"url_template" 
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Body[$_] = $PSBoundParameters[$_] }
+
+
 
     
     if (![String]::IsNullOrEmpty($QueryStrings))
@@ -47,17 +57,13 @@ Function Create-AnAutolinkReferenceForARepository
 
 
     $Headers = @{
-        "Authorization" = "token $Script:GithubToken"
+        "Authorization" = "token $Global:GithubToken"
 		"accept" = "$accept"
     }
 
-    $Body = @{
-        	"key_prefix" = "$key_prefix"
-	"url_template" = "$url_template"
-    }
-
-    $Output = Invoke-RestMethod -Method POST -Uri "$FinalURL" -Headers $Headers -Body $Body -ResponseHeadersVariable $ResponseHeaders
+    Write-Verbose ($Body | ConvertTo-JSON)
+    $Output = Invoke-RestMethod -Method POST -Uri "$FinalURL" -Headers $Headers -Body ($Body | ConvertTo-JSON) -ResponseHeadersVariable ResponseHeaders
+    
 
     $Output | Write-Output
 }
-

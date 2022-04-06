@@ -1,4 +1,3 @@
-
 <#
 .SYNOPSIS
 Creates or updates a secret for a user's codespace with an encrypted value. Encrypt your secret using LibSodium. You must authenticate using an access token with the user scope to use this endpoint. User must also have Codespaces access to use this endpoint.
@@ -81,9 +80,21 @@ Function Create-OrUpdateASecretForTheAuthenticatedUser
 		[Parameter(Mandatory=$FALSE)][string]$secret_name,
 		[Parameter(Mandatory=$FALSE)][string]$encrypted_value,
 		[Parameter(Mandatory=$FALSE)][string]$key_id,
-		[Parameter(Mandatory=$FALSE)][string]$selected_repository_ids
+		[Parameter(Mandatory=$FALSE)][string[]]$selected_repository_ids
     )
-    $QueryStrings = @() | ? { $PSBoundParameters.ContainsKey($_) }
+    $QueryStrings = @(
+        
+    ) | ? { $PSBoundParameters.ContainsKey($_) }
+
+
+    $Body = @{}
+    @( 
+        "encrypted_value",
+		"key_id",
+		"selected_repository_ids" 
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Body[$_] = $PSBoundParameters[$_] }
+
+
 
     
     if (![String]::IsNullOrEmpty($QueryStrings))
@@ -97,18 +108,13 @@ Function Create-OrUpdateASecretForTheAuthenticatedUser
 
 
     $Headers = @{
-        "Authorization" = "token $Script:GithubToken"
+        "Authorization" = "token $Global:GithubToken"
 		"accept" = "$accept"
     }
 
-    $Body = @{
-        	"encrypted_value" = "$encrypted_value"
-	"key_id" = "$key_id"
-	"selected_repository_ids" = "$selected_repository_ids"
-    }
-
-    $Output = Invoke-RestMethod -Method PUT -Uri "$FinalURL" -Headers $Headers -Body $Body -ResponseHeadersVariable $ResponseHeaders
+    Write-Verbose ($Body | ConvertTo-JSON)
+    $Output = Invoke-RestMethod -Method PUT -Uri "$FinalURL" -Headers $Headers -Body ($Body | ConvertTo-JSON) -ResponseHeadersVariable ResponseHeaders
+    
 
     $Output | Write-Output
 }
-

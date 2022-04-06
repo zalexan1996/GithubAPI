@@ -1,4 +1,3 @@
-
 <#
 .SYNOPSIS
 To edit a team, the authenticated user must either be an organization owner or a team maintainer.
@@ -55,7 +54,21 @@ Function Update-ATeam
 		[Parameter(Mandatory=$FALSE)][string]$permission,
 		[Parameter(Mandatory=$FALSE)][string]$parent_team_id
     )
-    $QueryStrings = @() | ? { $PSBoundParameters.ContainsKey($_) }
+    $QueryStrings = @(
+        
+    ) | ? { $PSBoundParameters.ContainsKey($_) }
+
+
+    $Body = @{}
+    @( 
+        "name",
+		"description",
+		"privacy",
+		"permission",
+		"parent_team_id" 
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Body[$_] = $PSBoundParameters[$_] }
+
+
 
     
     if (![String]::IsNullOrEmpty($QueryStrings))
@@ -69,20 +82,13 @@ Function Update-ATeam
 
 
     $Headers = @{
-        "Authorization" = "token $Script:GithubToken"
+        "Authorization" = "token $Global:GithubToken"
 		"accept" = "$accept"
     }
 
-    $Body = @{
-        	"name" = "$name"
-	"description" = "$description"
-	"privacy" = "$privacy"
-	"permission" = "$permission"
-	"parent_team_id" = "$parent_team_id"
-    }
-
-    $Output = Invoke-RestMethod -Method PATCH -Uri "$FinalURL" -Headers $Headers -Body $Body -ResponseHeadersVariable $ResponseHeaders
+    Write-Verbose ($Body | ConvertTo-JSON)
+    $Output = Invoke-RestMethod -Method PATCH -Uri "$FinalURL" -Headers $Headers -Body ($Body | ConvertTo-JSON) -ResponseHeadersVariable ResponseHeaders
+    
 
     $Output | Write-Output
 }
-

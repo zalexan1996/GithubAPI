@@ -1,4 +1,3 @@
-
 <#
 .SYNOPSIS
 Note: You can also specify a team or organization with team_id and org_id using the route DELETE /organizations/:org_id/team/:team_id/discussions/:discussion_number/comments/:comment_number/reactions/:reaction_id.
@@ -34,11 +33,21 @@ Function Delete-TeamDiscussionCommentReaction
 		[Parameter(Mandatory=$FALSE)][string]$accept,
 		[Parameter(Mandatory=$FALSE)][string]$org,
 		[Parameter(Mandatory=$FALSE)][string]$team_slug,
-		[Parameter(Mandatory=$FALSE)][string]$discussion_number,
-		[Parameter(Mandatory=$FALSE)][string]$comment_number,
-		[Parameter(Mandatory=$FALSE)][string]$reaction_id
+		[Parameter(Mandatory=$FALSE)][int]$discussion_number,
+		[Parameter(Mandatory=$FALSE)][int]$comment_number,
+		[Parameter(Mandatory=$FALSE)][int]$reaction_id
     )
-    $QueryStrings = @() | ? { $PSBoundParameters.ContainsKey($_) }
+    $QueryStrings = @(
+        
+    ) | ? { $PSBoundParameters.ContainsKey($_) }
+
+
+    $Body = @{}
+    @( 
+         
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Body[$_] = $PSBoundParameters[$_] }
+
+
 
     
     if (![String]::IsNullOrEmpty($QueryStrings))
@@ -52,16 +61,13 @@ Function Delete-TeamDiscussionCommentReaction
 
 
     $Headers = @{
-        "Authorization" = "token $Script:GithubToken"
+        "Authorization" = "token $Global:GithubToken"
 		"accept" = "$accept"
     }
 
-    $Body = @{
-        
-    }
-
-    $Output = Invoke-RestMethod -Method DELETE -Uri "$FinalURL" -Headers $Headers -Body $Body -ResponseHeadersVariable $ResponseHeaders
+    Write-Verbose ($Body | ConvertTo-JSON)
+    $Output = Invoke-RestMethod -Method DELETE -Uri "$FinalURL" -Headers $Headers -Body ($Body | ConvertTo-JSON) -ResponseHeadersVariable ResponseHeaders
+    
 
     $Output | Write-Output
 }
-

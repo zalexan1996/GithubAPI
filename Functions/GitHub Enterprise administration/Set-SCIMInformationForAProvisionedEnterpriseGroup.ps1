@@ -1,4 +1,3 @@
-
 <#
 .SYNOPSIS
 Note: The SCIM API endpoints for enterprise accounts are currently in beta and are subject to change.
@@ -34,11 +33,23 @@ Function Set-SCIMInformationForAProvisionedEnterpriseGroup
 		[Parameter(Mandatory=$FALSE)][string]$accept,
 		[Parameter(Mandatory=$FALSE)][string]$enterprise,
 		[Parameter(Mandatory=$FALSE)][string]$scim_group_id,
-		[Parameter(Mandatory=$FALSE)][string]$schemas,
+		[Parameter(Mandatory=$FALSE)][string[]]$schemas,
 		[Parameter(Mandatory=$FALSE)][string]$displayName,
-		[Parameter(Mandatory=$FALSE)][string]$members
+		[Parameter(Mandatory=$FALSE)][object[]]$members
     )
-    $QueryStrings = @() | ? { $PSBoundParameters.ContainsKey($_) }
+    $QueryStrings = @(
+        
+    ) | ? { $PSBoundParameters.ContainsKey($_) }
+
+
+    $Body = @{}
+    @( 
+        "schemas",
+		"displayName",
+		"members" 
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Body[$_] = $PSBoundParameters[$_] }
+
+
 
     
     if (![String]::IsNullOrEmpty($QueryStrings))
@@ -52,18 +63,13 @@ Function Set-SCIMInformationForAProvisionedEnterpriseGroup
 
 
     $Headers = @{
-        "Authorization" = "token $Script:GithubToken"
+        "Authorization" = "token $Global:GithubToken"
 		"accept" = "$accept"
     }
 
-    $Body = @{
-        	"schemas" = "$schemas"
-	"displayName" = "$displayName"
-	"members" = "$members"
-    }
-
-    $Output = Invoke-RestMethod -Method PUT -Uri "$FinalURL" -Headers $Headers -Body $Body -ResponseHeadersVariable $ResponseHeaders
+    Write-Verbose ($Body | ConvertTo-JSON)
+    $Output = Invoke-RestMethod -Method PUT -Uri "$FinalURL" -Headers $Headers -Body ($Body | ConvertTo-JSON) -ResponseHeadersVariable ResponseHeaders
+    
 
     $Output | Write-Output
 }
-

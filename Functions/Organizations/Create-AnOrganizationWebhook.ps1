@@ -1,4 +1,3 @@
-
 <#
 .SYNOPSIS
 Here's how you can create a hook that posts payloads in JSON format:
@@ -15,9 +14,6 @@ Required. Must be passed as "web".
          
 .PARAMETER config
 Required. Key/value pairs to provide settings for this webhook. These are defined below.
-         
-.PARAMETER Properties of theconfigobject
-
          
 .PARAMETER events
 Determines what events the hook is triggered for.
@@ -38,12 +34,24 @@ Function Create-AnOrganizationWebhook
 		[Parameter(Mandatory=$FALSE)][string]$accept,
 		[Parameter(Mandatory=$FALSE)][string]$org,
 		[Parameter(Mandatory=$FALSE)][string]$name,
-		[Parameter(Mandatory=$FALSE)][string]$config,
-		[Parameter(Mandatory=$FALSE)][string]$Properties of theconfigobject,
-		[Parameter(Mandatory=$FALSE)][string]$events,
-		[Parameter(Mandatory=$FALSE)][string]$active
+		[Parameter(Mandatory=$FALSE)][object]$config,
+		[Parameter(Mandatory=$FALSE)][string[]]$events,
+		[Parameter(Mandatory=$FALSE)][bool]$active
     )
-    $QueryStrings = @() | ? { $PSBoundParameters.ContainsKey($_) }
+    $QueryStrings = @(
+        
+    ) | ? { $PSBoundParameters.ContainsKey($_) }
+
+
+    $Body = @{}
+    @( 
+        "name",
+		"config",
+		"events",
+		"active" 
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Body[$_] = $PSBoundParameters[$_] }
+
+
 
     
     if (![String]::IsNullOrEmpty($QueryStrings))
@@ -57,19 +65,13 @@ Function Create-AnOrganizationWebhook
 
 
     $Headers = @{
-        "Authorization" = "token $Script:GithubToken"
+        "Authorization" = "token $Global:GithubToken"
 		"accept" = "$accept"
     }
 
-    $Body = @{
-        	"name" = "$name"
-	"config" = "$config"
-	"events" = "$events"
-	"active" = "$active"
-    }
-
-    $Output = Invoke-RestMethod -Method POST -Uri "$FinalURL" -Headers $Headers -Body $Body -ResponseHeadersVariable $ResponseHeaders
+    Write-Verbose ($Body | ConvertTo-JSON)
+    $Output = Invoke-RestMethod -Method POST -Uri "$FinalURL" -Headers $Headers -Body ($Body | ConvertTo-JSON) -ResponseHeadersVariable ResponseHeaders
+    
 
     $Output | Write-Output
 }
-

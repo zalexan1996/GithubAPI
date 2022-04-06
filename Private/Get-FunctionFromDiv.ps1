@@ -8,7 +8,7 @@ Function Get-FunctionFromDiv
     # Get the function name
     $Text = (Get-Culture).TextInfo.ToTitleCase($functionDiv.FindElementsByXPath("h3").Text)
     $hyphenIndex = $text.IndexOf(" ")
-    $__Title = $Text.Replace(" ", "").Insert($hyphenIndex, '-').Replace("(","_").Replace(")","_")
+    $__Title = $Text.Replace(" ", "").Insert($hyphenIndex, '-').Replace("'", "").Replace("(", "_").Replace(")", "_")
 
     # Skip this one if it is a legacy function
     # if ($__Title -like "*(Legacy)*") { return; }
@@ -25,7 +25,7 @@ Function Get-FunctionFromDiv
 
 
     # Get the parameters
-    $parameterRows = $functionDiv.FindElementsByXPath("table[contains(@class, 'ParameterTable')]/tbody/tr")
+    $parameterRows = $functionDiv.FindElementsByXPath("table[contains(@class, 'ParameterTable')]/tbody/tr[not(@class='border-none')]")
 
     # Temporarily set the timeout to a small value. We'll be looking for <code> tags that may or may not be there.
     # We also aren't navigating so there SHOULDN'T be a problem with this.
@@ -36,15 +36,12 @@ Function Get-FunctionFromDiv
     Foreach ($parameterRow in $ParameterRows)
     {
         $tds = $ParameterRow.findElementsByTagName("td")
-        if ($tds.Count -gt 2)
-        {
-            $__Parameters = $__Parameters + [PSCustomObject]@{
-                Name = $tds[0].Text
-                Type = [String]::IsNullOrEmpty($Param.Type) ? ("string") : ($tds[1].Text) # If a type isn't specified, we can most likely get away with using string.
-                In = $tds[2].Text
-                Description = $tds[3].Text
-                Default = $tds[3].FindElementsByTagName("code") | Select-Object -Expand Text
-            }
+        $__Parameters = $__Parameters + [PSCustomObject]@{
+            Name = $tds[0].Text
+            Type = [String]::IsNullOrEmpty($tds[1].Text) ? ("string") : ($tds[1].Text) # If a type isn't specified, we can most likely get away with using string.
+            In = $tds[2].Text
+            Description = $tds[3].Text
+            Default = "N/A"
         }
     }
     $Driver.Manage().Timeouts().ImplicitWait = $oldTimeout

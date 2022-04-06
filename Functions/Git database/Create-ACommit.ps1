@@ -1,4 +1,3 @@
-
 <#
 .SYNOPSIS
 Creates a new Git commit object.
@@ -6,7 +5,7 @@ Signature verification object
 The response will include a verification object that describes the result of verifying the commit's signature. The following fields are included in the verification object:
 Name Type Description
 verified boolean Indicates whether GitHub considers the signature in this commit to be verified.
-reason string The reason for verified value. Possible values and their meanings are enumerated in table below.
+reason string The reason for verified value. Possible values and their meanings are enumerated in the table below.
 signature string The signature that was extracted from the commit.
 payload string The value that was signed.
 These are the possible values for reason in the verification object:
@@ -47,14 +46,8 @@ The SHAs of the commits that were the parents of this commit. If omitted or empt
 .PARAMETER author
 Information about the author of the commit. By default, the author will be the authenticated user and the current date. See the author and committer object below for details.
          
-.PARAMETER Properties of theauthorobject
-
-         
 .PARAMETER committer
 Information about the person who is making the commit. By default, committer will use the information set in author. See the author and committer object below for details.
-         
-.PARAMETER Properties of thecommitterobject
-
          
 .PARAMETER signature
 The PGP signature of the commit. GitHub adds the signature to the gpgsig header of the created commit. For a commit signature to be verifiable by Git or GitHub, it must be an ASCII-armored detached PGP signature over the string commit as it would be written to the object database. To pass a signature parameter, you need to first manually create a valid PGP signature, which can be complicated. You may find it easier to use the command line to create signed commits.
@@ -72,14 +65,27 @@ Function Create-ACommit
 		[Parameter(Mandatory=$FALSE)][string]$repo,
 		[Parameter(Mandatory=$FALSE)][string]$message,
 		[Parameter(Mandatory=$FALSE)][string]$tree,
-		[Parameter(Mandatory=$FALSE)][string]$parents,
-		[Parameter(Mandatory=$FALSE)][string]$author,
-		[Parameter(Mandatory=$FALSE)][string]$Properties of theauthorobject,
-		[Parameter(Mandatory=$FALSE)][string]$committer,
-		[Parameter(Mandatory=$FALSE)][string]$Properties of thecommitterobject,
+		[Parameter(Mandatory=$FALSE)][string[]]$parents,
+		[Parameter(Mandatory=$FALSE)][object]$author,
+		[Parameter(Mandatory=$FALSE)][object]$committer,
 		[Parameter(Mandatory=$FALSE)][string]$signature
     )
-    $QueryStrings = @() | ? { $PSBoundParameters.ContainsKey($_) }
+    $QueryStrings = @(
+        
+    ) | ? { $PSBoundParameters.ContainsKey($_) }
+
+
+    $Body = @{}
+    @( 
+        "message",
+		"tree",
+		"parents",
+		"author",
+		"committer",
+		"signature" 
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Body[$_] = $PSBoundParameters[$_] }
+
+
 
     
     if (![String]::IsNullOrEmpty($QueryStrings))
@@ -93,21 +99,13 @@ Function Create-ACommit
 
 
     $Headers = @{
-        "Authorization" = "token $Script:GithubToken"
+        "Authorization" = "token $Global:GithubToken"
 		"accept" = "$accept"
     }
 
-    $Body = @{
-        	"message" = "$message"
-	"tree" = "$tree"
-	"parents" = "$parents"
-	"author" = "$author"
-	"committer" = "$committer"
-	"signature" = "$signature"
-    }
-
-    $Output = Invoke-RestMethod -Method POST -Uri "$FinalURL" -Headers $Headers -Body $Body -ResponseHeadersVariable $ResponseHeaders
+    Write-Verbose ($Body | ConvertTo-JSON)
+    $Output = Invoke-RestMethod -Method POST -Uri "$FinalURL" -Headers $Headers -Body ($Body | ConvertTo-JSON) -ResponseHeadersVariable ResponseHeaders
+    
 
     $Output | Write-Output
 }
-

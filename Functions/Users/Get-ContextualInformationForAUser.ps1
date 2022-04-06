@@ -1,4 +1,3 @@
-
 <#
 .SYNOPSIS
 Provides hovercard information when authenticated through basic auth or OAuth with the repo scope. You can find out more about someone in relation to their pull requests, issues, repositories, and organizations.
@@ -32,7 +31,18 @@ Function Get-ContextualInformationForAUser
 		[Parameter(Mandatory=$FALSE)][string]$subject_type,
 		[Parameter(Mandatory=$FALSE)][string]$subject_id
     )
-    $QueryStrings = @("subject_type=$subject_type","subject_id=$subject_id") | ? { $PSBoundParameters.ContainsKey($_) }
+    $QueryStrings = @(
+        "subject_type=$subject_type",
+		"subject_id=$subject_id"
+    ) | ? { $PSBoundParameters.ContainsKey($_) }
+
+
+    $Body = @{}
+    @( 
+         
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Body[$_] = $PSBoundParameters[$_] }
+
+
 
     
     if (![String]::IsNullOrEmpty($QueryStrings))
@@ -46,16 +56,13 @@ Function Get-ContextualInformationForAUser
 
 
     $Headers = @{
-        "Authorization" = "token $Script:GithubToken"
+        "Authorization" = "token $Global:GithubToken"
 		"accept" = "$accept"
     }
 
-    $Body = @{
-        
-    }
-
-    $Output = Invoke-RestMethod -Method GET -Uri "$FinalURL" -Headers $Headers -Body $Body -ResponseHeadersVariable $ResponseHeaders
+    Write-Verbose ($Body | ConvertTo-JSON)
+    $Output = Invoke-RestMethod -Method GET -Uri "$FinalURL" -Headers $Headers -Body ($Body | ConvertTo-JSON) -ResponseHeadersVariable ResponseHeaders
+    
 
     $Output | Write-Output
 }
-

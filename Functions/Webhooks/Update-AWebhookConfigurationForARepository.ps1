@@ -1,4 +1,3 @@
-
 <#
 .SYNOPSIS
 Updates the webhook configuration for a repository. To update more information about the webhook, including the active state and events, use "Update a repository webhook."
@@ -40,13 +39,26 @@ Function Update-AWebhookConfigurationForARepository
 		[Parameter(Mandatory=$FALSE)][string]$accept,
 		[Parameter(Mandatory=$FALSE)][string]$owner,
 		[Parameter(Mandatory=$FALSE)][string]$repo,
-		[Parameter(Mandatory=$FALSE)][string]$hook_id,
+		[Parameter(Mandatory=$FALSE)][int]$hook_id,
 		[Parameter(Mandatory=$FALSE)][string]$url,
 		[Parameter(Mandatory=$FALSE)][string]$content_type,
 		[Parameter(Mandatory=$FALSE)][string]$secret,
 		[Parameter(Mandatory=$FALSE)][string]$insecure_ssl
     )
-    $QueryStrings = @() | ? { $PSBoundParameters.ContainsKey($_) }
+    $QueryStrings = @(
+        
+    ) | ? { $PSBoundParameters.ContainsKey($_) }
+
+
+    $Body = @{}
+    @( 
+        "url",
+		"content_type",
+		"secret",
+		"insecure_ssl" 
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Body[$_] = $PSBoundParameters[$_] }
+
+
 
     
     if (![String]::IsNullOrEmpty($QueryStrings))
@@ -60,19 +72,13 @@ Function Update-AWebhookConfigurationForARepository
 
 
     $Headers = @{
-        "Authorization" = "token $Script:GithubToken"
+        "Authorization" = "token $Global:GithubToken"
 		"accept" = "$accept"
     }
 
-    $Body = @{
-        	"url" = "$url"
-	"content_type" = "$content_type"
-	"secret" = "$secret"
-	"insecure_ssl" = "$insecure_ssl"
-    }
-
-    $Output = Invoke-RestMethod -Method PATCH -Uri "$FinalURL" -Headers $Headers -Body $Body -ResponseHeadersVariable $ResponseHeaders
+    Write-Verbose ($Body | ConvertTo-JSON)
+    $Output = Invoke-RestMethod -Method PATCH -Uri "$FinalURL" -Headers $Headers -Body ($Body | ConvertTo-JSON) -ResponseHeadersVariable ResponseHeaders
+    
 
     $Output | Write-Output
 }
-

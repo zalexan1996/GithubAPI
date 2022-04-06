@@ -1,4 +1,3 @@
-
 <#
 .SYNOPSIS
 Returns all package versions for a package owned by an organization.
@@ -41,11 +40,23 @@ Function Get-AllPackageVersionsForAPackageOwnedByAnOrganization
 		[Parameter(Mandatory=$FALSE)][string]$package_type,
 		[Parameter(Mandatory=$FALSE)][string]$package_name,
 		[Parameter(Mandatory=$FALSE)][string]$org,
-		[Parameter(Mandatory=$FALSE)][string]$page,
-		[Parameter(Mandatory=$FALSE)][string]$per_page,
+		[Parameter(Mandatory=$FALSE)][int]$page,
+		[Parameter(Mandatory=$FALSE)][int]$per_page,
 		[Parameter(Mandatory=$FALSE)][string]$state
     )
-    $QueryStrings = @("page=$page","per_page=$per_page","state=$state") | ? { $PSBoundParameters.ContainsKey($_) }
+    $QueryStrings = @(
+        "page=$page",
+		"per_page=$per_page",
+		"state=$state"
+    ) | ? { $PSBoundParameters.ContainsKey($_) }
+
+
+    $Body = @{}
+    @( 
+         
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Body[$_] = $PSBoundParameters[$_] }
+
+
 
     
     if (![String]::IsNullOrEmpty($QueryStrings))
@@ -59,16 +70,13 @@ Function Get-AllPackageVersionsForAPackageOwnedByAnOrganization
 
 
     $Headers = @{
-        "Authorization" = "token $Script:GithubToken"
+        "Authorization" = "token $Global:GithubToken"
 		"accept" = "$accept"
     }
 
-    $Body = @{
-        
-    }
-
-    $Output = Invoke-RestMethod -Method GET -Uri "$FinalURL" -Headers $Headers -Body $Body -ResponseHeadersVariable $ResponseHeaders
+    Write-Verbose ($Body | ConvertTo-JSON)
+    $Output = Invoke-RestMethod -Method GET -Uri "$FinalURL" -Headers $Headers -Body ($Body | ConvertTo-JSON) -ResponseHeadersVariable ResponseHeaders
+    
 
     $Output | Write-Output
 }
-

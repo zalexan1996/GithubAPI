@@ -1,4 +1,3 @@
-
 <#
 .SYNOPSIS
 Lists packages owned by the authenticated user within the user's namespace.
@@ -18,7 +17,7 @@ The selected visibility of the packages. Can be one of public, private, or inter
 .LINK
 https://docs.github.com/en/rest/reference/packages
 #>
-Function List-PackagesForTheAuthenticatedUser'sNamespace
+Function List-PackagesForTheAuthenticatedUsersNamespace
 {
     [CmdletBinding()]
     Param(
@@ -26,7 +25,18 @@ Function List-PackagesForTheAuthenticatedUser'sNamespace
 		[Parameter(Mandatory=$FALSE)][string]$package_type,
 		[Parameter(Mandatory=$FALSE)][string]$visibility
     )
-    $QueryStrings = @("package_type=$package_type","visibility=$visibility") | ? { $PSBoundParameters.ContainsKey($_) }
+    $QueryStrings = @(
+        "package_type=$package_type",
+		"visibility=$visibility"
+    ) | ? { $PSBoundParameters.ContainsKey($_) }
+
+
+    $Body = @{}
+    @( 
+         
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Body[$_] = $PSBoundParameters[$_] }
+
+
 
     
     if (![String]::IsNullOrEmpty($QueryStrings))
@@ -40,16 +50,13 @@ Function List-PackagesForTheAuthenticatedUser'sNamespace
 
 
     $Headers = @{
-        "Authorization" = "token $Script:GithubToken"
+        "Authorization" = "token $Global:GithubToken"
 		"accept" = "$accept"
     }
 
-    $Body = @{
-        
-    }
-
-    $Output = Invoke-RestMethod -Method GET -Uri "$FinalURL" -Headers $Headers -Body $Body -ResponseHeadersVariable $ResponseHeaders
+    Write-Verbose ($Body | ConvertTo-JSON)
+    $Output = Invoke-RestMethod -Method GET -Uri "$FinalURL" -Headers $Headers -Body ($Body | ConvertTo-JSON) -ResponseHeadersVariable ResponseHeaders
+    
 
     $Output | Write-Output
 }
-

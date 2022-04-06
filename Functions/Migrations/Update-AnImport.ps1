@@ -1,4 +1,3 @@
-
 <#
 .SYNOPSIS
 An import can be updated with credentials or a project choice by passing in the appropriate parameters in this API request. If no parameters are provided, the import will be restarted.
@@ -42,7 +41,20 @@ Function Update-AnImport
 		[Parameter(Mandatory=$FALSE)][string]$vcs,
 		[Parameter(Mandatory=$FALSE)][string]$tfvc_project
     )
-    $QueryStrings = @() | ? { $PSBoundParameters.ContainsKey($_) }
+    $QueryStrings = @(
+        
+    ) | ? { $PSBoundParameters.ContainsKey($_) }
+
+
+    $Body = @{}
+    @( 
+        "vcs_username",
+		"vcs_password",
+		"vcs",
+		"tfvc_project" 
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Body[$_] = $PSBoundParameters[$_] }
+
+
 
     
     if (![String]::IsNullOrEmpty($QueryStrings))
@@ -56,19 +68,13 @@ Function Update-AnImport
 
 
     $Headers = @{
-        "Authorization" = "token $Script:GithubToken"
+        "Authorization" = "token $Global:GithubToken"
 		"accept" = "$accept"
     }
 
-    $Body = @{
-        	"vcs_username" = "$vcs_username"
-	"vcs_password" = "$vcs_password"
-	"vcs" = "$vcs"
-	"tfvc_project" = "$tfvc_project"
-    }
-
-    $Output = Invoke-RestMethod -Method PATCH -Uri "$FinalURL" -Headers $Headers -Body $Body -ResponseHeadersVariable $ResponseHeaders
+    Write-Verbose ($Body | ConvertTo-JSON)
+    $Output = Invoke-RestMethod -Method PATCH -Uri "$FinalURL" -Headers $Headers -Body ($Body | ConvertTo-JSON) -ResponseHeadersVariable ResponseHeaders
+    
 
     $Output | Write-Output
 }
-

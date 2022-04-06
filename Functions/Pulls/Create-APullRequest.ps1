@@ -1,4 +1,3 @@
-
 <#
 .SYNOPSIS
 Draft pull requests are available in public repositories with GitHub Free and GitHub Free for organizations, GitHub Pro, and legacy per-repository billing plans, and in public and private repositories with GitHub Team and GitHub Enterprise Cloud. For more information, see GitHub's products in the GitHub Help documentation.
@@ -52,11 +51,27 @@ Function Create-APullRequest
 		[Parameter(Mandatory=$FALSE)][string]$head,
 		[Parameter(Mandatory=$FALSE)][string]$base,
 		[Parameter(Mandatory=$FALSE)][string]$body,
-		[Parameter(Mandatory=$FALSE)][string]$maintainer_can_modify,
-		[Parameter(Mandatory=$FALSE)][string]$draft,
-		[Parameter(Mandatory=$FALSE)][string]$issue
+		[Parameter(Mandatory=$FALSE)][bool]$maintainer_can_modify,
+		[Parameter(Mandatory=$FALSE)][bool]$draft,
+		[Parameter(Mandatory=$FALSE)][int]$issue
     )
-    $QueryStrings = @() | ? { $PSBoundParameters.ContainsKey($_) }
+    $QueryStrings = @(
+        
+    ) | ? { $PSBoundParameters.ContainsKey($_) }
+
+
+    $Body = @{}
+    @( 
+        "title",
+		"head",
+		"base",
+		"body",
+		"maintainer_can_modify",
+		"draft",
+		"issue" 
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Body[$_] = $PSBoundParameters[$_] }
+
+
 
     
     if (![String]::IsNullOrEmpty($QueryStrings))
@@ -70,22 +85,13 @@ Function Create-APullRequest
 
 
     $Headers = @{
-        "Authorization" = "token $Script:GithubToken"
+        "Authorization" = "token $Global:GithubToken"
 		"accept" = "$accept"
     }
 
-    $Body = @{
-        	"title" = "$title"
-	"head" = "$head"
-	"base" = "$base"
-	"body" = "$body"
-	"maintainer_can_modify" = "$maintainer_can_modify"
-	"draft" = "$draft"
-	"issue" = "$issue"
-    }
-
-    $Output = Invoke-RestMethod -Method POST -Uri "$FinalURL" -Headers $Headers -Body $Body -ResponseHeadersVariable $ResponseHeaders
+    Write-Verbose ($Body | ConvertTo-JSON)
+    $Output = Invoke-RestMethod -Method POST -Uri "$FinalURL" -Headers $Headers -Body ($Body | ConvertTo-JSON) -ResponseHeadersVariable ResponseHeaders
+    
 
     $Output | Write-Output
 }
-

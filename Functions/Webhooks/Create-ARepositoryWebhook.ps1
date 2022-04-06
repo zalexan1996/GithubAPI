@@ -1,4 +1,3 @@
-
 <#
 .SYNOPSIS
 Repositories can have multiple webhooks installed. Each webhook should have a unique config. Multiple webhooks can share the same config as long as those webhooks do not have any events that overlap.
@@ -18,9 +17,6 @@ Use web to create a webhook. Default: web. This parameter only accepts the value
          
 .PARAMETER config
 Key/value pairs to provide settings for this webhook. These are defined below.
-         
-.PARAMETER Properties of theconfigobject
-
          
 .PARAMETER events
 Determines what events the hook is triggered for.
@@ -42,12 +38,24 @@ Function Create-ARepositoryWebhook
 		[Parameter(Mandatory=$FALSE)][string]$owner,
 		[Parameter(Mandatory=$FALSE)][string]$repo,
 		[Parameter(Mandatory=$FALSE)][string]$name,
-		[Parameter(Mandatory=$FALSE)][string]$config,
-		[Parameter(Mandatory=$FALSE)][string]$Properties of theconfigobject,
-		[Parameter(Mandatory=$FALSE)][string]$events,
-		[Parameter(Mandatory=$FALSE)][string]$active
+		[Parameter(Mandatory=$FALSE)][object]$config,
+		[Parameter(Mandatory=$FALSE)][string[]]$events,
+		[Parameter(Mandatory=$FALSE)][bool]$active
     )
-    $QueryStrings = @() | ? { $PSBoundParameters.ContainsKey($_) }
+    $QueryStrings = @(
+        
+    ) | ? { $PSBoundParameters.ContainsKey($_) }
+
+
+    $Body = @{}
+    @( 
+        "name",
+		"config",
+		"events",
+		"active" 
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Body[$_] = $PSBoundParameters[$_] }
+
+
 
     
     if (![String]::IsNullOrEmpty($QueryStrings))
@@ -61,19 +69,13 @@ Function Create-ARepositoryWebhook
 
 
     $Headers = @{
-        "Authorization" = "token $Script:GithubToken"
+        "Authorization" = "token $Global:GithubToken"
 		"accept" = "$accept"
     }
 
-    $Body = @{
-        	"name" = "$name"
-	"config" = "$config"
-	"events" = "$events"
-	"active" = "$active"
-    }
-
-    $Output = Invoke-RestMethod -Method POST -Uri "$FinalURL" -Headers $Headers -Body $Body -ResponseHeadersVariable $ResponseHeaders
+    Write-Verbose ($Body | ConvertTo-JSON)
+    $Output = Invoke-RestMethod -Method POST -Uri "$FinalURL" -Headers $Headers -Body ($Body | ConvertTo-JSON) -ResponseHeadersVariable ResponseHeaders
+    
 
     $Output | Write-Output
 }
-

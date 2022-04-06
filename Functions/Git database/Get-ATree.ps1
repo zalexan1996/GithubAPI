@@ -1,4 +1,3 @@
-
 <#
 .SYNOPSIS
 Returns a single tree using the SHA1 value for that tree.
@@ -34,7 +33,17 @@ Function Get-ATree
 		[Parameter(Mandatory=$FALSE)][string]$tree_sha,
 		[Parameter(Mandatory=$FALSE)][string]$recursive
     )
-    $QueryStrings = @("recursive=$recursive") | ? { $PSBoundParameters.ContainsKey($_) }
+    $QueryStrings = @(
+        "recursive=$recursive"
+    ) | ? { $PSBoundParameters.ContainsKey($_) }
+
+
+    $Body = @{}
+    @( 
+         
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Body[$_] = $PSBoundParameters[$_] }
+
+
 
     
     if (![String]::IsNullOrEmpty($QueryStrings))
@@ -48,16 +57,13 @@ Function Get-ATree
 
 
     $Headers = @{
-        "Authorization" = "token $Script:GithubToken"
+        "Authorization" = "token $Global:GithubToken"
 		"accept" = "$accept"
     }
 
-    $Body = @{
-        
-    }
-
-    $Output = Invoke-RestMethod -Method GET -Uri "$FinalURL" -Headers $Headers -Body $Body -ResponseHeadersVariable $ResponseHeaders
+    Write-Verbose ($Body | ConvertTo-JSON)
+    $Output = Invoke-RestMethod -Method GET -Uri "$FinalURL" -Headers $Headers -Body ($Body | ConvertTo-JSON) -ResponseHeadersVariable ResponseHeaders
+    
 
     $Output | Write-Output
 }
-
