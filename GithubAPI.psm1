@@ -1,7 +1,7 @@
 # Make sure your github token (and only your github token) is in C:\Users\Username\Appdata\Roaming\github.token
 Param(
-    [Parameter(Mandatory=$FALSE)][Bool]$Regenerate,
     [Parameter(Mandatory=$FALSE)][String[]]$UseSections = @("ALL"),
+    [Parameter(Mandatory=$FALSE)][Bool]$Regenerate = $FALSE,
     [Parameter(Mandatory=$FALSE)][String]$Token = (Get-Content $env:APPDATA\github.token)
 )
 

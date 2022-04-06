@@ -1,21 +1,26 @@
 # GithubAPI
-A self-generating PowerShell module for the GitHub API.
+A dynamically generated PowerShell module for the GitHub RestAPI. Passing `$TRUE` into the module scrapes https://docs.github.com/en/rest/reference and converts each endpoint into PowerShell functions. Regenerating the function definitions is not necessary in order to use this module because I've done the generating for you!
 
 # Requirements
-- Generate GitHub token and put it in `C:/Users/Username/AppData/Roaming/github.token`
-- Google Chrome
+- Generate a GitHub OAuth token and put it in `C:/Users/Username/AppData/Roaming/github.token`
 - PowerShell 7.2+ recommended. I did not test this on Windows PowerShell.
+- Selenium module (if you want to regenerate the function definitions)
+- Google Chrome (if you want to regenerate the function definitions)
 
 
-# How it works
-Running the following will scrape the GitHub API's [documentation page](https://docs.github.com/en/rest/reference) and convert each endpoint to a PowerShell function.
+# How to
+**Make sure your GitHub OAuth token is in `$ENV:AppData/github.token` before using this module** 
 
-`Import-Module ./Github.psm1 -ArgumentList $TRUE`
+## Import all modules WITHOUT regenerating the function definitions
+`Import-Module ./GithubAPI`
 
-Why do it this way? Because ain't nobody got time for doing that manually. This script creates ~800 functions.
+## Import [Specific Sections](https://docs.github.com/en/rest/reference) WITHOUT regenerating the function definitions
+`Import-Module ./GithubAPI -ArgumentList @("Branches", "Commits", "Releases", "Repositories"), $FALSE`
 
-Passing in `$TRUE` will regenerate the cached functions (this takes my computer about 20-30 minutes), while passing in `$FALSE` just loads whatever .ps1 files happen to be in the *functions* subfolder. The web driver only navigates once for every section of the specification so we're not constantly spamming their servers.
+## Import all sections and regenerate the function definitions
+`Import-Module ./GithubAPI -ArgumentList @("ALL"), $TRUE`
+
 
 # TODO
-- Module argument to only include certain sections
+- ~~Module argument to only include certain sections~~
 - Default Parameters
