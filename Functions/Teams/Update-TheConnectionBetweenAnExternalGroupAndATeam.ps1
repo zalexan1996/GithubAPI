@@ -19,6 +19,37 @@ Required. External Group Id
 
 .LINK
 https://docs.github.com/en/rest/reference/teams
+
+.OUTPUTS
+ {
+  "group_id": "123",
+  "group_name": "Octocat admins",
+  "updated_at": "2021-01-24T11:31:04-06:00",
+  "teams": [
+    {
+      "team_id": 1,
+      "team_name": "team-test"
+    },
+    {
+      "team_id": 2,
+      "team_name": "team-test2"
+    }
+  ],
+  "members": [
+    {
+      "member_id": 1,
+      "member_login": "mona-lisa_eocsaxrs",
+      "member_name": "Mona Lisa",
+      "member_email": "mona_lisa@github.com"
+    },
+    {
+      "member_id": 2,
+      "member_login": "octo-lisa_eocsaxrs",
+      "member_name": "Octo Lisa",
+      "member_email": "octo_lisa@github.com"
+    }
+  ]
+}
 #>
 Function Update-TheConnectionBetweenAnExternalGroupAndATeam
 {
@@ -29,9 +60,10 @@ Function Update-TheConnectionBetweenAnExternalGroupAndATeam
 		[Parameter(Mandatory=$FALSE)][string]$team_slug,
 		[Parameter(Mandatory=$FALSE)][int]$group_id
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -42,9 +74,9 @@ Function Update-TheConnectionBetweenAnExternalGroupAndATeam
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/orgs/$org/teams/$team_slug/external-groups?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/orgs/$org/teams/$team_slug/external-groups?$($Querys -join '&')"
     }
     else
     {

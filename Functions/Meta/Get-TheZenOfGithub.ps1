@@ -9,6 +9,9 @@ Setting toapplication/vnd.github.v3+json is recommended.
 
 .LINK
 https://docs.github.com/en/rest/reference/meta
+
+.OUTPUTS
+
 #>
 Function Get-TheZenOfGithub
 {
@@ -16,9 +19,10 @@ Function Get-TheZenOfGithub
     Param(
 		[Parameter(Mandatory=$FALSE)][string]$accept
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -29,9 +33,9 @@ Function Get-TheZenOfGithub
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/zen?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/zen?$($Querys -join '&')"
     }
     else
     {

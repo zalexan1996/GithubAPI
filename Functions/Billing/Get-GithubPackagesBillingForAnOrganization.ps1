@@ -14,6 +14,13 @@ Setting toapplication/vnd.github.v3+json is recommended.
 
 .LINK
 https://docs.github.com/en/rest/reference/billing
+
+.OUTPUTS
+ {
+  "total_gigabytes_bandwidth_used": 50,
+  "total_paid_gigabytes_bandwidth_used": 40,
+  "included_gigabytes_bandwidth": 10
+}
 #>
 Function Get-GithubPackagesBillingForAnOrganization
 {
@@ -22,9 +29,10 @@ Function Get-GithubPackagesBillingForAnOrganization
 		[Parameter(Mandatory=$FALSE)][string]$accept,
 		[Parameter(Mandatory=$FALSE)][string]$org
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -35,9 +43,9 @@ Function Get-GithubPackagesBillingForAnOrganization
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/orgs/$org/settings/billing/packages?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/orgs/$org/settings/billing/packages?$($Querys -join '&')"
     }
     else
     {

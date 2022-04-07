@@ -13,6 +13,9 @@ installation_id parameter
 
 .LINK
 https://docs.github.com/en/rest/reference/apps
+
+.OUTPUTS
+
 #>
 Function Unsuspend-AnAppInstallation
 {
@@ -21,9 +24,10 @@ Function Unsuspend-AnAppInstallation
 		[Parameter(Mandatory=$FALSE)][string]$accept,
 		[Parameter(Mandatory=$FALSE)][int]$installation_id
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -34,9 +38,9 @@ Function Unsuspend-AnAppInstallation
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/app/installations/$installation_id/suspended?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/app/installations/$installation_id/suspended?$($Querys -join '&')"
     }
     else
     {

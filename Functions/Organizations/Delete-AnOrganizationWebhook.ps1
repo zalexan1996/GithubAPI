@@ -15,6 +15,9 @@ Setting toapplication/vnd.github.v3+json is recommended.
 
 .LINK
 https://docs.github.com/en/rest/reference/orgs
+
+.OUTPUTS
+
 #>
 Function Delete-AnOrganizationWebhook
 {
@@ -24,9 +27,10 @@ Function Delete-AnOrganizationWebhook
 		[Parameter(Mandatory=$FALSE)][string]$org,
 		[Parameter(Mandatory=$FALSE)][int]$hook_id
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -37,9 +41,9 @@ Function Delete-AnOrganizationWebhook
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/orgs/$org/hooks/$hook_id?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/orgs/$org/hooks/$hook_id?$($Querys -join '&')"
     }
     else
     {

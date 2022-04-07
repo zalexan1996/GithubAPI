@@ -18,6 +18,9 @@ milestone_number parameter
 
 .LINK
 https://docs.github.com/en/rest/reference/issues
+
+.OUTPUTS
+
 #>
 Function Delete-AMilestone
 {
@@ -28,9 +31,10 @@ Function Delete-AMilestone
 		[Parameter(Mandatory=$FALSE)][string]$repo,
 		[Parameter(Mandatory=$FALSE)][int]$milestone_number
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -41,9 +45,9 @@ Function Delete-AMilestone
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/repos/$owner/$repo/milestones/$milestone_number?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/repos/$owner/$repo/milestones/$milestone_number?$($Querys -join '&')"
     }
     else
     {

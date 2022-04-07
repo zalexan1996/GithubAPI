@@ -80,6 +80,9 @@ An array of repository ids that can access the organization secret. You can only
 
 .LINK
 https://docs.github.com/en/rest/reference/dependabot
+
+.OUTPUTS
+
 #>
 Function Create-OrUpdateAnOrganizationSecret
 {
@@ -93,9 +96,10 @@ Function Create-OrUpdateAnOrganizationSecret
 		[Parameter(Mandatory=$FALSE)][string]$visibility,
 		[Parameter(Mandatory=$FALSE)][string[]]$selected_repository_ids
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -109,9 +113,9 @@ Function Create-OrUpdateAnOrganizationSecret
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/orgs/$org/dependabot/secrets/$secret_name?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/orgs/$org/dependabot/secrets/$secret_name?$($Querys -join '&')"
     }
     else
     {

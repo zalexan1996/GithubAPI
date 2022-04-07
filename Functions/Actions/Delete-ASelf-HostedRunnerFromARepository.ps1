@@ -19,6 +19,9 @@ Unique identifier of the self-hosted runner.
 
 .LINK
 https://docs.github.com/en/rest/reference/actions
+
+.OUTPUTS
+
 #>
 Function Delete-ASelf-HostedRunnerFromARepository
 {
@@ -29,9 +32,10 @@ Function Delete-ASelf-HostedRunnerFromARepository
 		[Parameter(Mandatory=$FALSE)][string]$repo,
 		[Parameter(Mandatory=$FALSE)][int]$runner_id
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -42,9 +46,9 @@ Function Delete-ASelf-HostedRunnerFromARepository
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/repos/$owner/$repo/actions/runners/$runner_id?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/repos/$owner/$repo/actions/runners/$runner_id?$($Querys -join '&')"
     }
     else
     {

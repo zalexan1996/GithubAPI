@@ -21,6 +21,29 @@ The ID of the analysis, as returned from the GET /repos/{owner}/{repo}/code-scan
 
 .LINK
 https://docs.github.com/en/rest/reference/code-scanning
+
+.OUTPUTS
+ {
+  "ref": "refs/heads/main",
+  "commit_sha": "c18c69115654ff0166991962832dc2bd7756e655",
+  "analysis_key": ".github/workflows/codeql-analysis.yml:analyze",
+  "environment": "{\"language\":\"javascript\"}",
+  "error": "",
+  "category": ".github/workflows/codeql-analysis.yml:analyze/language:javascript",
+  "created_at": "2021-01-13T11:55:49Z",
+  "results_count": 3,
+  "rules_count": 67,
+  "id": 3602840,
+  "url": "https://api.github.com/repos/octocat/hello-world/code-scanning/analyses/201",
+  "sarif_id": "47177e22-5596-11eb-80a1-c1e54ef945c6",
+  "tool": {
+    "name": "CodeQL",
+    "guid": null,
+    "version": "2.4.0"
+  },
+  "deletable": true,
+  "warning": ""
+}
 #>
 Function Get-ACodeScanningAnalysisForARepository
 {
@@ -31,9 +54,10 @@ Function Get-ACodeScanningAnalysisForARepository
 		[Parameter(Mandatory=$FALSE)][string]$repo,
 		[Parameter(Mandatory=$FALSE)][int]$analysis_id
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -44,9 +68,9 @@ Function Get-ACodeScanningAnalysisForARepository
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/repos/$owner/$repo/code-scanning/analyses/$analysis_id?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/repos/$owner/$repo/code-scanning/analyses/$analysis_id?$($Querys -join '&')"
     }
     else
     {

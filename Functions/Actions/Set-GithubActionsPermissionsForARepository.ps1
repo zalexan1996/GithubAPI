@@ -23,6 +23,9 @@ The permissions policy that controls the actions and reusable workflows that are
 
 .LINK
 https://docs.github.com/en/rest/reference/actions
+
+.OUTPUTS
+
 #>
 Function Set-GithubActionsPermissionsForARepository
 {
@@ -34,9 +37,10 @@ Function Set-GithubActionsPermissionsForARepository
 		[Parameter(Mandatory=$FALSE)][bool]$enabled,
 		[Parameter(Mandatory=$FALSE)][string]$allowed_actions
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -48,9 +52,9 @@ Function Set-GithubActionsPermissionsForARepository
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/repos/$owner/$repo/actions/permissions?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/repos/$owner/$repo/actions/permissions?$($Querys -join '&')"
     }
     else
     {

@@ -19,6 +19,9 @@ Whether GitHub Actions can submit approving pull request reviews.
 
 .LINK
 https://docs.github.com/en/rest/reference/actions
+
+.OUTPUTS
+
 #>
 Function Set-DefaultWorkflowPermissions
 {
@@ -29,9 +32,10 @@ Function Set-DefaultWorkflowPermissions
 		[Parameter(Mandatory=$FALSE)][string]$default_workflow_permissions,
 		[Parameter(Mandatory=$FALSE)][bool]$can_approve_pull_request_reviews
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -43,9 +47,9 @@ Function Set-DefaultWorkflowPermissions
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/orgs/$org/actions/permissions/workflow?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/orgs/$org/actions/permissions/workflow?$($Querys -join '&')"
     }
     else
     {

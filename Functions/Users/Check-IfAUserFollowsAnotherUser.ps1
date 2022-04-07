@@ -15,6 +15,9 @@ Setting toapplication/vnd.github.v3+json is recommended.
 
 .LINK
 https://docs.github.com/en/rest/reference/users
+
+.OUTPUTS
+
 #>
 Function Check-IfAUserFollowsAnotherUser
 {
@@ -24,9 +27,10 @@ Function Check-IfAUserFollowsAnotherUser
 		[Parameter(Mandatory=$FALSE)][string]$username,
 		[Parameter(Mandatory=$FALSE)][string]$target_user
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -37,9 +41,9 @@ Function Check-IfAUserFollowsAnotherUser
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/users/$username/following/$target_user?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/users/$username/following/$target_user?$($Querys -join '&')"
     }
     else
     {

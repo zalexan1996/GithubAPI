@@ -19,6 +19,9 @@ team_slug parameter
 
 .LINK
 https://docs.github.com/en/rest/reference/teams
+
+.OUTPUTS
+
 #>
 Function Delete-ADiscussion
 {
@@ -29,9 +32,10 @@ Function Delete-ADiscussion
 		[Parameter(Mandatory=$FALSE)][string]$team_slug,
 		[Parameter(Mandatory=$FALSE)][int]$discussion_number
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -42,9 +46,9 @@ Function Delete-ADiscussion
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/orgs/$org/teams/$team_slug/discussions/$discussion_number?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/orgs/$org/teams/$team_slug/discussions/$discussion_number?$($Querys -join '&')"
     }
     else
     {

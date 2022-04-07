@@ -18,6 +18,9 @@ artifact_id parameter
 
 .LINK
 https://docs.github.com/en/rest/reference/actions
+
+.OUTPUTS
+
 #>
 Function Delete-AnArtifact
 {
@@ -28,9 +31,10 @@ Function Delete-AnArtifact
 		[Parameter(Mandatory=$FALSE)][string]$repo,
 		[Parameter(Mandatory=$FALSE)][int]$artifact_id
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -41,9 +45,9 @@ Function Delete-AnArtifact
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/repos/$owner/$repo/actions/artifacts/$artifact_id?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/repos/$owner/$repo/actions/artifacts/$artifact_id?$($Querys -join '&')"
     }
     else
     {

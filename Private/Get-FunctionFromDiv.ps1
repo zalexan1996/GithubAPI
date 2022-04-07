@@ -1,3 +1,26 @@
+<#
+.SYNOPSIS
+Parses a div and turns it into a PSCustomObject that represents all the important data of the current endpoint.
+
+.OUTPUT
+[PSCustomObject]@{
+    Synopsis = The Synopsis text of the endpoint
+    FunctionName = The name of the function. 
+    Method = The HTTP method of the function
+    Parameters = @(
+            @{
+                Name = The name of the parameter
+                Type = The datatype of the parameter
+                In = Where the parameter is supplied to (Header, Body, Query, Path)
+                Description = A short description of the paramater. Not all parameters have a scrapable Description field
+                Default = "N/A"
+            }
+        }
+    )
+    Uri = The URI of the endpoint
+    ExpectedOutput = The text from the Response box of the documentation page.
+}
+#>
 Function Get-FunctionFromDiv
 {
     [CmdletBinding()]
@@ -44,6 +67,9 @@ Function Get-FunctionFromDiv
             Default = "N/A"
         }
     }
+    
+    # Get the expected JSON output (if any)
+    $__ExpectedOutput = $functionDiv.FindElementsByXPath(".//pre[contains(@class, 'CodeBlock')]/code[contains(@class, 'json')]").Text
     $Driver.Manage().Timeouts().ImplicitWait = $oldTimeout
 
     [PSCustomObject]@{
@@ -52,5 +78,6 @@ Function Get-FunctionFromDiv
         Method = $__Method
         Parameters = $__Parameters
         Uri = $__formattedUri
+        ExpectedOutput = $__ExpectedOutput
     } | Write-Output
 }

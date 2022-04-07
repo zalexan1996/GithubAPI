@@ -2,6 +2,7 @@
 .SYNOPSIS
 Deletes a user's codespace.
 You must authenticate using an access token with the codespace scope to use this endpoint.
+GitHub Apps must have write access to the codespaces repository permission to use this endpoint.
 
         
 .PARAMETER accept
@@ -13,6 +14,9 @@ The name of the codespace.
 
 .LINK
 https://docs.github.com/en/rest/reference/codespaces
+
+.OUTPUTS
+
 #>
 Function Delete-ACodespaceForTheAuthenticatedUser
 {
@@ -21,9 +25,10 @@ Function Delete-ACodespaceForTheAuthenticatedUser
 		[Parameter(Mandatory=$FALSE)][string]$accept,
 		[Parameter(Mandatory=$FALSE)][string]$codespace_name
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -34,9 +39,9 @@ Function Delete-ACodespaceForTheAuthenticatedUser
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/user/codespaces/$codespace_name?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/user/codespaces/$codespace_name?$($Querys -join '&')"
     }
     else
     {

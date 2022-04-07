@@ -26,6 +26,22 @@ Default: 1
 
 .LINK
 https://docs.github.com/en/rest/reference/checks
+
+.OUTPUTS
+ [
+  {
+    "path": "README.md",
+    "start_line": 2,
+    "end_line": 2,
+    "start_column": 5,
+    "end_column": 10,
+    "annotation_level": "warning",
+    "title": "Spell Checker",
+    "message": "Check your spelling for 'banaas'.",
+    "raw_details": "Do you mean 'bananas' or 'banana'?",
+    "blob_href": "https://api.github.com/repos/github/rest-api-description/git/blobs/abc"
+  }
+]
 #>
 Function List-CheckRunAnnotations
 {
@@ -38,10 +54,11 @@ Function List-CheckRunAnnotations
 		[Parameter(Mandatory=$FALSE)][int]$per_page,
 		[Parameter(Mandatory=$FALSE)][int]$page
     )
+    $Querys = @()
     $QueryStrings = @(
-        "per_page=$per_page",
-		"page=$page"
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+        "per_page",
+		"page"
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -52,9 +69,9 @@ Function List-CheckRunAnnotations
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/repos/$owner/$repo/check-runs/$check_run_id/annotations?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/repos/$owner/$repo/check-runs/$check_run_id/annotations?$($Querys -join '&')"
     }
     else
     {

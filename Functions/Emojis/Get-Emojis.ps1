@@ -9,6 +9,9 @@ Setting toapplication/vnd.github.v3+json is recommended.
 
 .LINK
 https://docs.github.com/en/rest/reference/emojis
+
+.OUTPUTS
+
 #>
 Function Get-Emojis
 {
@@ -16,9 +19,10 @@ Function Get-Emojis
     Param(
 		[Parameter(Mandatory=$FALSE)][string]$accept
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -29,9 +33,9 @@ Function Get-Emojis
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/emojis?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/emojis?$($Querys -join '&')"
     }
     else
     {

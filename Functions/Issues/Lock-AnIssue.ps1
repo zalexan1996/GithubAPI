@@ -26,6 +26,9 @@ The reason for locking the issue or pull request conversation. Lock will fail if
 
 .LINK
 https://docs.github.com/en/rest/reference/issues
+
+.OUTPUTS
+
 #>
 Function Lock-AnIssue
 {
@@ -37,9 +40,10 @@ Function Lock-AnIssue
 		[Parameter(Mandatory=$FALSE)][int]$issue_number,
 		[Parameter(Mandatory=$FALSE)][string]$lock_reason
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -50,9 +54,9 @@ Function Lock-AnIssue
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/repos/$owner/$repo/issues/$issue_number/lock?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/repos/$owner/$repo/issues/$issue_number/lock?$($Querys -join '&')"
     }
     else
     {

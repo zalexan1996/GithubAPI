@@ -28,6 +28,66 @@ Default: 1
 
 .LINK
 https://docs.github.com/en/rest/reference/apps
+
+.OUTPUTS
+ [
+  {
+    "url": "https://api.github.com/orgs/github",
+    "type": "Organization",
+    "id": 4,
+    "login": "github",
+    "organization_billing_email": "billing@github.com",
+    "marketplace_pending_change": {
+      "effective_date": "2017-11-11T00:00:00Z",
+      "unit_count": null,
+      "id": 77,
+      "plan": {
+        "url": "https://api.github.com/marketplace_listing/plans/1111",
+        "accounts_url": "https://api.github.com/marketplace_listing/plans/1111/accounts",
+        "id": 1111,
+        "number": 2,
+        "name": "Startup",
+        "description": "A professional-grade CI solution",
+        "monthly_price_in_cents": 699,
+        "yearly_price_in_cents": 7870,
+        "price_model": "flat-rate",
+        "has_free_trial": true,
+        "state": "published",
+        "unit_name": null,
+        "bullets": [
+          "Up to 10 private repositories",
+          "3 concurrent builds"
+        ]
+      }
+    },
+    "marketplace_purchase": {
+      "billing_cycle": "monthly",
+      "next_billing_date": "2017-11-11T00:00:00Z",
+      "unit_count": null,
+      "on_free_trial": true,
+      "free_trial_ends_on": "2017-11-11T00:00:00Z",
+      "updated_at": "2017-11-02T01:12:12Z",
+      "plan": {
+        "url": "https://api.github.com/marketplace_listing/plans/1313",
+        "accounts_url": "https://api.github.com/marketplace_listing/plans/1313/accounts",
+        "id": 1313,
+        "number": 3,
+        "name": "Pro",
+        "description": "A professional-grade CI solution",
+        "monthly_price_in_cents": 1099,
+        "yearly_price_in_cents": 11870,
+        "price_model": "flat-rate",
+        "has_free_trial": true,
+        "unit_name": null,
+        "state": "published",
+        "bullets": [
+          "Up to 25 private repositories",
+          "11 concurrent builds"
+        ]
+      }
+    }
+  }
+]
 #>
 Function List-AccountsForAPlan_Stubbed_
 {
@@ -40,12 +100,13 @@ Function List-AccountsForAPlan_Stubbed_
 		[Parameter(Mandatory=$FALSE)][int]$per_page,
 		[Parameter(Mandatory=$FALSE)][int]$page
     )
+    $Querys = @()
     $QueryStrings = @(
-        "sort=$sort",
-		"direction=$direction",
-		"per_page=$per_page",
-		"page=$page"
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+        "sort",
+		"direction",
+		"per_page",
+		"page"
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -56,9 +117,9 @@ Function List-AccountsForAPlan_Stubbed_
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/marketplace_listing/stubbed/plans/$plan_id/accounts?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/marketplace_listing/stubbed/plans/$plan_id/accounts?$($Querys -join '&')"
     }
     else
     {

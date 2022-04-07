@@ -15,6 +15,27 @@ Setting toapplication/vnd.github.v3+json is recommended.
 
 .LINK
 https://docs.github.com/en/rest/reference/orgs
+
+.OUTPUTS
+ {
+  "id": 1,
+  "url": "https://api.github.com/orgs/octocat/hooks/1",
+  "ping_url": "https://api.github.com/orgs/octocat/hooks/1/pings",
+  "deliveries_url": "https://api.github.com/orgs/octocat/hooks/1/deliveries",
+  "name": "web",
+  "events": [
+    "push",
+    "pull_request"
+  ],
+  "active": true,
+  "config": {
+    "url": "http://example.com",
+    "content_type": "json"
+  },
+  "updated_at": "2011-09-06T20:39:23Z",
+  "created_at": "2011-09-06T17:26:27Z",
+  "type": "Organization"
+}
 #>
 Function Get-AnOrganizationWebhook
 {
@@ -24,9 +45,10 @@ Function Get-AnOrganizationWebhook
 		[Parameter(Mandatory=$FALSE)][string]$org,
 		[Parameter(Mandatory=$FALSE)][int]$hook_id
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -37,9 +59,9 @@ Function Get-AnOrganizationWebhook
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/orgs/$org/hooks/$hook_id?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/orgs/$org/hooks/$hook_id?$($Querys -join '&')"
     }
     else
     {

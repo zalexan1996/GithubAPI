@@ -22,6 +22,36 @@ Used for pagination: the starting delivery from which the page of deliveries is 
 
 .LINK
 https://docs.github.com/en/rest/reference/orgs
+
+.OUTPUTS
+ [
+  {
+    "id": 12345678,
+    "guid": "0b989ba4-242f-11e5-81e1-c7b6966d2516",
+    "delivered_at": "2019-06-03T00:57:16Z",
+    "redelivery": false,
+    "duration": 0.27,
+    "status": "OK",
+    "status_code": 200,
+    "event": "issues",
+    "action": "opened",
+    "installation_id": 123,
+    "repository_id": 456
+  },
+  {
+    "id": 123456789,
+    "guid": "0b989ba4-242f-11e5-81e1-c7b6966d2516",
+    "delivered_at": "2019-06-04T00:57:16Z",
+    "redelivery": true,
+    "duration": 0.28,
+    "status": "OK",
+    "status_code": 200,
+    "event": "issues",
+    "action": "opened",
+    "installation_id": 123,
+    "repository_id": 456
+  }
+]
 #>
 Function List-DeliveriesForAnOrganizationWebhook
 {
@@ -33,10 +63,11 @@ Function List-DeliveriesForAnOrganizationWebhook
 		[Parameter(Mandatory=$FALSE)][int]$per_page,
 		[Parameter(Mandatory=$FALSE)][string]$cursor
     )
+    $Querys = @()
     $QueryStrings = @(
-        "per_page=$per_page",
-		"cursor=$cursor"
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+        "per_page",
+		"cursor"
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -47,9 +78,9 @@ Function List-DeliveriesForAnOrganizationWebhook
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/orgs/$org/hooks/$hook_id/deliveries?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/orgs/$org/hooks/$hook_id/deliveries?$($Querys -join '&')"
     }
     else
     {

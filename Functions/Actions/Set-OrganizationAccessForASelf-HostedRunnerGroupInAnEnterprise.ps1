@@ -19,6 +19,9 @@ Required. List of organization IDs that can access the runner group.
 
 .LINK
 https://docs.github.com/en/rest/reference/actions
+
+.OUTPUTS
+
 #>
 Function Set-OrganizationAccessForASelf-HostedRunnerGroupInAnEnterprise
 {
@@ -29,9 +32,10 @@ Function Set-OrganizationAccessForASelf-HostedRunnerGroupInAnEnterprise
 		[Parameter(Mandatory=$FALSE)][int]$runner_group_id,
 		[Parameter(Mandatory=$FALSE)][int[]]$selected_organization_ids
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -42,9 +46,9 @@ Function Set-OrganizationAccessForASelf-HostedRunnerGroupInAnEnterprise
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/enterprises/$enterprise/actions/runner-groups/$runner_group_id/organizations?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/enterprises/$enterprise/actions/runner-groups/$runner_group_id/organizations?$($Querys -join '&')"
     }
     else
     {

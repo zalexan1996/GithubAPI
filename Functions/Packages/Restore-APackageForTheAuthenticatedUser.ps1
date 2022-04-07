@@ -22,6 +22,9 @@ package token
 
 .LINK
 https://docs.github.com/en/rest/reference/packages
+
+.OUTPUTS
+
 #>
 Function Restore-APackageForTheAuthenticatedUser
 {
@@ -32,9 +35,10 @@ Function Restore-APackageForTheAuthenticatedUser
 		[Parameter(Mandatory=$FALSE)][string]$package_name,
 		[Parameter(Mandatory=$FALSE)][string]$token
     )
+    $Querys = @()
     $QueryStrings = @(
-        "token=$token"
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+        "token"
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -45,9 +49,9 @@ Function Restore-APackageForTheAuthenticatedUser
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/user/packages/$package_type/$package_name/restore?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/user/packages/$package_type/$package_name/restore?$($Querys -join '&')"
     }
     else
     {

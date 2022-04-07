@@ -19,6 +19,9 @@ Required. Defines the level of access that workflows outside of the repository h
 
 .LINK
 https://docs.github.com/en/rest/reference/actions
+
+.OUTPUTS
+
 #>
 Function Set-TheLevelOfAccessForWorkflowsOutsideOfTheRepository
 {
@@ -29,9 +32,10 @@ Function Set-TheLevelOfAccessForWorkflowsOutsideOfTheRepository
 		[Parameter(Mandatory=$FALSE)][string]$repo,
 		[Parameter(Mandatory=$FALSE)][string]$access_level
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -42,9 +46,9 @@ Function Set-TheLevelOfAccessForWorkflowsOutsideOfTheRepository
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/repos/$owner/$repo/actions/permissions/access?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/repos/$owner/$repo/actions/permissions/access?$($Querys -join '&')"
     }
     else
     {

@@ -18,6 +18,13 @@ Required. The name of the branch which should be updated to match upstream.
 
 .LINK
 https://docs.github.com/en/rest/reference/branches
+
+.OUTPUTS
+ {
+  "message": "Successfully fetched and fast-forwarded from upstream defunkt:main",
+  "merge_type": "fast-forward",
+  "base_branch": "defunkt:main"
+}
 #>
 Function Sync-AForkBranchWithTheUpstreamRepository
 {
@@ -28,9 +35,10 @@ Function Sync-AForkBranchWithTheUpstreamRepository
 		[Parameter(Mandatory=$FALSE)][string]$repo,
 		[Parameter(Mandatory=$FALSE)][string]$branch
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -41,9 +49,9 @@ Function Sync-AForkBranchWithTheUpstreamRepository
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/repos/$owner/$repo/merge-upstream?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/repos/$owner/$repo/merge-upstream?$($Querys -join '&')"
     }
     else
     {

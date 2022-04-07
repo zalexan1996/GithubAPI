@@ -19,6 +19,37 @@ A user ID. Only return users with an ID greater than this ID.
 
 .LINK
 https://docs.github.com/en/rest/reference/migrations
+
+.OUTPUTS
+ [
+  {
+    "id": 2268557,
+    "remote_id": "nobody@fc7da526-431c-80fe-3c8c-c148ff18d7ef",
+    "remote_name": "nobody",
+    "email": "hubot@github.com",
+    "name": "Hubot",
+    "url": "https://api.github.com/repos/octocat/socm/import/authors/2268557",
+    "import_url": "https://api.github.com/repos/octocat/socm/import"
+  },
+  {
+    "id": 2268558,
+    "remote_id": "svner@fc7da526-431c-80fe-3c8c-c148ff18d7ef",
+    "remote_name": "svner",
+    "email": "svner@fc7da526-431c-80fe-3c8c-c148ff18d7ef",
+    "name": "svner",
+    "url": "https://api.github.com/repos/octocat/socm/import/authors/2268558",
+    "import_url": "https://api.github.com/repos/octocat/socm/import"
+  },
+  {
+    "id": 2268559,
+    "remote_id": "svner@example.com@fc7da526-431c-80fe-3c8c-c148ff18d7ef",
+    "remote_name": "svner@example.com",
+    "email": "svner@example.com@fc7da526-431c-80fe-3c8c-c148ff18d7ef",
+    "name": "svner@example.com",
+    "url": "https://api.github.com/repos/octocat/socm/import/authors/2268559",
+    "import_url": "https://api.github.com/repos/octocat/socm/import"
+  }
+]
 #>
 Function Get-CommitAuthors
 {
@@ -29,9 +60,10 @@ Function Get-CommitAuthors
 		[Parameter(Mandatory=$FALSE)][string]$repo,
 		[Parameter(Mandatory=$FALSE)][int]$since
     )
+    $Querys = @()
     $QueryStrings = @(
-        "since=$since"
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+        "since"
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -42,9 +74,9 @@ Function Get-CommitAuthors
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/repos/$owner/$repo/import/authors?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/repos/$owner/$repo/import/authors?$($Querys -join '&')"
     }
     else
     {

@@ -21,6 +21,27 @@ Default: 1
 
 .LINK
 https://docs.github.com/en/rest/reference/actions
+
+.OUTPUTS
+ {
+  "total_count": 1,
+  "organizations": [
+    {
+      "login": "octocat",
+      "id": 161335,
+      "node_id": "MDEwOlJlcG9zaXRvcnkxMjk2MjY5",
+      "url": "https://api.github.com/orgs/octo-org",
+      "repos_url": "https://api.github.com/orgs/octo-org/repos",
+      "events_url": "https://api.github.com/orgs/octo-org/events",
+      "hooks_url": "https://api.github.com/orgs/octo-org/hooks",
+      "issues_url": "https://api.github.com/orgs/octo-org/issues",
+      "members_url": "https://api.github.com/orgs/octo-org/members{/member}",
+      "public_members_url": "https://api.github.com/orgs/octo-org/public_members{/member}",
+      "avatar_url": "https://github.com/images/error/octocat_happy.gif",
+      "description": "A great organization"
+    }
+  ]
+}
 #>
 Function List-SelectedOrganizationsEnabledForGithubActionsInAnEnterprise
 {
@@ -31,10 +52,11 @@ Function List-SelectedOrganizationsEnabledForGithubActionsInAnEnterprise
 		[Parameter(Mandatory=$FALSE)][int]$per_page,
 		[Parameter(Mandatory=$FALSE)][int]$page
     )
+    $Querys = @()
     $QueryStrings = @(
-        "per_page=$per_page",
-		"page=$page"
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+        "per_page",
+		"page"
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -45,9 +67,9 @@ Function List-SelectedOrganizationsEnabledForGithubActionsInAnEnterprise
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/enterprises/$enterprise/actions/permissions/organizations?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/enterprises/$enterprise/actions/permissions/organizations?$($Querys -join '&')"
     }
     else
     {

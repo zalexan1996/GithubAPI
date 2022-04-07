@@ -12,6 +12,12 @@ Setting toapplication/vnd.github.v3+json is recommended.
 
 .LINK
 https://docs.github.com/en/rest/reference/dependabot
+
+.OUTPUTS
+ {
+  "key_id": "012345678912345678",
+  "key": "2Sg8iYjAxxmI2LvUXpJjkYrMxURPc8r+dB7TJyvv1234"
+}
 #>
 Function Get-AnOrganizationPublicKey
 {
@@ -20,9 +26,10 @@ Function Get-AnOrganizationPublicKey
 		[Parameter(Mandatory=$FALSE)][string]$accept,
 		[Parameter(Mandatory=$FALSE)][string]$org
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -33,9 +40,9 @@ Function Get-AnOrganizationPublicKey
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/orgs/$org/dependabot/secrets/public-key?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/orgs/$org/dependabot/secrets/public-key?$($Querys -join '&')"
     }
     else
     {

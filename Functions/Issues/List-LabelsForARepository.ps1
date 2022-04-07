@@ -23,6 +23,28 @@ Default: 1
 
 .LINK
 https://docs.github.com/en/rest/reference/issues
+
+.OUTPUTS
+ [
+  {
+    "id": 208045946,
+    "node_id": "MDU6TGFiZWwyMDgwNDU5NDY=",
+    "url": "https://api.github.com/repos/octocat/Hello-World/labels/bug",
+    "name": "bug",
+    "description": "Something isn't working",
+    "color": "f29513",
+    "default": true
+  },
+  {
+    "id": 208045947,
+    "node_id": "MDU6TGFiZWwyMDgwNDU5NDc=",
+    "url": "https://api.github.com/repos/octocat/Hello-World/labels/enhancement",
+    "name": "enhancement",
+    "description": "New feature or request",
+    "color": "a2eeef",
+    "default": false
+  }
+]
 #>
 Function List-LabelsForARepository
 {
@@ -34,10 +56,11 @@ Function List-LabelsForARepository
 		[Parameter(Mandatory=$FALSE)][int]$per_page,
 		[Parameter(Mandatory=$FALSE)][int]$page
     )
+    $Querys = @()
     $QueryStrings = @(
-        "per_page=$per_page",
-		"page=$page"
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+        "per_page",
+		"page"
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -48,9 +71,9 @@ Function List-LabelsForARepository
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/repos/$owner/$repo/labels?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/repos/$owner/$repo/labels?$($Querys -join '&')"
     }
     else
     {

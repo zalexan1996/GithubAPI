@@ -21,6 +21,11 @@ Required. contexts parameter
 
 .LINK
 https://docs.github.com/en/rest/reference/branches
+
+.OUTPUTS
+ [
+  "continuous-integration/travis-ci"
+]
 #>
 Function Remove-StatusCheckContexts
 {
@@ -32,9 +37,10 @@ Function Remove-StatusCheckContexts
 		[Parameter(Mandatory=$FALSE)][string]$branch,
 		[Parameter(Mandatory=$FALSE)][string[]]$contexts
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -45,9 +51,9 @@ Function Remove-StatusCheckContexts
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/repos/$owner/$repo/branches/$branch/protection/required_status_checks/contexts?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/repos/$owner/$repo/branches/$branch/protection/required_status_checks/contexts?$($Querys -join '&')"
     }
     else
     {

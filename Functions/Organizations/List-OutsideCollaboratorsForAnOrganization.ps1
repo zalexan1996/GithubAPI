@@ -26,6 +26,30 @@ Default: 1
 
 .LINK
 https://docs.github.com/en/rest/reference/orgs
+
+.OUTPUTS
+ [
+  {
+    "login": "octocat",
+    "id": 1,
+    "node_id": "MDQ6VXNlcjE=",
+    "avatar_url": "https://github.com/images/error/octocat_happy.gif",
+    "gravatar_id": "",
+    "url": "https://api.github.com/users/octocat",
+    "html_url": "https://github.com/octocat",
+    "followers_url": "https://api.github.com/users/octocat/followers",
+    "following_url": "https://api.github.com/users/octocat/following{/other_user}",
+    "gists_url": "https://api.github.com/users/octocat/gists{/gist_id}",
+    "starred_url": "https://api.github.com/users/octocat/starred{/owner}{/repo}",
+    "subscriptions_url": "https://api.github.com/users/octocat/subscriptions",
+    "organizations_url": "https://api.github.com/users/octocat/orgs",
+    "repos_url": "https://api.github.com/users/octocat/repos",
+    "events_url": "https://api.github.com/users/octocat/events{/privacy}",
+    "received_events_url": "https://api.github.com/users/octocat/received_events",
+    "type": "User",
+    "site_admin": false
+  }
+]
 #>
 Function List-OutsideCollaboratorsForAnOrganization
 {
@@ -37,11 +61,12 @@ Function List-OutsideCollaboratorsForAnOrganization
 		[Parameter(Mandatory=$FALSE)][int]$per_page,
 		[Parameter(Mandatory=$FALSE)][int]$page
     )
+    $Querys = @()
     $QueryStrings = @(
-        "filter=$filter",
-		"per_page=$per_page",
-		"page=$page"
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+        "filter",
+		"per_page",
+		"page"
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -52,9 +77,9 @@ Function List-OutsideCollaboratorsForAnOrganization
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/orgs/$org/outside_collaborators?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/orgs/$org/outside_collaborators?$($Querys -join '&')"
     }
     else
     {

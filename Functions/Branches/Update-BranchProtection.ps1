@@ -48,6 +48,9 @@ Requires all conversations on code to be resolved before a pull request can be m
 
 .LINK
 https://docs.github.com/en/rest/reference/branches
+
+.OUTPUTS
+
 #>
 Function Update-BranchProtection
 {
@@ -67,9 +70,10 @@ Function Update-BranchProtection
 		[Parameter(Mandatory=$FALSE)][bool]$block_creations,
 		[Parameter(Mandatory=$FALSE)][bool]$required_conversation_resolution
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -88,9 +92,9 @@ Function Update-BranchProtection
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/repos/$owner/$repo/branches/$branch/protection?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/repos/$owner/$repo/branches/$branch/protection?$($Querys -join '&')"
     }
     else
     {

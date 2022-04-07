@@ -16,6 +16,12 @@ The slug version of the enterprise name. You can also substitute this value with
 
 .LINK
 https://docs.github.com/en/rest/reference/actions
+
+.OUTPUTS
+ {
+  "token": "AABF3JGZDX3P5PMEXLND6TS6FCWO6",
+  "expires_at": "2020-01-29T12:13:35.123-08:00"
+}
 #>
 Function Create-ARemoveTokenForAnEnterprise
 {
@@ -24,9 +30,10 @@ Function Create-ARemoveTokenForAnEnterprise
 		[Parameter(Mandatory=$FALSE)][string]$accept,
 		[Parameter(Mandatory=$FALSE)][string]$enterprise
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -37,9 +44,9 @@ Function Create-ARemoveTokenForAnEnterprise
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/enterprises/$enterprise/actions/runners/remove-token?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/enterprises/$enterprise/actions/runners/remove-token?$($Querys -join '&')"
     }
     else
     {

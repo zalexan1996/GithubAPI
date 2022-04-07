@@ -16,6 +16,9 @@ Unique identifier of an organization.
 
 .LINK
 https://docs.github.com/en/rest/reference/actions
+
+.OUTPUTS
+
 #>
 Function Enable-ASelectedOrganizationForGithubActionsInAnEnterprise
 {
@@ -25,9 +28,10 @@ Function Enable-ASelectedOrganizationForGithubActionsInAnEnterprise
 		[Parameter(Mandatory=$FALSE)][string]$enterprise,
 		[Parameter(Mandatory=$FALSE)][int]$org_id
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -38,9 +42,9 @@ Function Enable-ASelectedOrganizationForGithubActionsInAnEnterprise
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/enterprises/$enterprise/actions/permissions/organizations/$org_id?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/enterprises/$enterprise/actions/permissions/organizations/$org_id?$($Querys -join '&')"
     }
     else
     {

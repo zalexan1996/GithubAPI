@@ -40,6 +40,12 @@ Allow deletion if the specified analysis is the last in a set. If you attempt to
 
 .LINK
 https://docs.github.com/en/rest/reference/code-scanning
+
+.OUTPUTS
+ {
+  "next_analysis_url": "https://api.github.com/repos/octocat/hello-world/code-scanning/analyses/41",
+  "confirm_delete_url": "https://api.github.com/repos/octocat/hello-world/code-scanning/analyses/41?confirm_delete"
+}
 #>
 Function Delete-ACodeScanningAnalysisFromARepository
 {
@@ -51,9 +57,10 @@ Function Delete-ACodeScanningAnalysisFromARepository
 		[Parameter(Mandatory=$FALSE)][int]$analysis_id,
 		[Parameter(Mandatory=$FALSE)][stringnull]$confirm_delete
     )
+    $Querys = @()
     $QueryStrings = @(
-        "confirm_delete=$confirm_delete"
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+        "confirm_delete"
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -64,9 +71,9 @@ Function Delete-ACodeScanningAnalysisFromARepository
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/repos/$owner/$repo/code-scanning/analyses/$analysis_id?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/repos/$owner/$repo/code-scanning/analyses/$analysis_id?$($Querys -join '&')"
     }
     else
     {

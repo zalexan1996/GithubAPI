@@ -21,6 +21,13 @@ The duration of the interaction restriction. Can be one of: one_day, three_days,
 
 .LINK
 https://docs.github.com/en/rest/reference/interactions
+
+.OUTPUTS
+ {
+  "limit": "collaborators_only",
+  "origin": "repository",
+  "expires_at": "2018-08-17T04:18:39Z"
+}
 #>
 Function Set-InteractionRestrictionsForARepository
 {
@@ -32,9 +39,10 @@ Function Set-InteractionRestrictionsForARepository
 		[Parameter(Mandatory=$FALSE)][string]$limit,
 		[Parameter(Mandatory=$FALSE)][string]$expiry
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -46,9 +54,9 @@ Function Set-InteractionRestrictionsForARepository
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/repos/$owner/$repo/interaction-limits?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/repos/$owner/$repo/interaction-limits?$($Querys -join '&')"
     }
     else
     {

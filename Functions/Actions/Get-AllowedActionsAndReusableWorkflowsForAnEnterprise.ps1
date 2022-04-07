@@ -13,6 +13,16 @@ The slug version of the enterprise name. You can also substitute this value with
 
 .LINK
 https://docs.github.com/en/rest/reference/actions
+
+.OUTPUTS
+ {
+  "github_owned_allowed": true,
+  "verified_allowed": false,
+  "patterns_allowed": [
+    "monalisa/octocat@*",
+    "docker/*"
+  ]
+}
 #>
 Function Get-AllowedActionsAndReusableWorkflowsForAnEnterprise
 {
@@ -21,9 +31,10 @@ Function Get-AllowedActionsAndReusableWorkflowsForAnEnterprise
 		[Parameter(Mandatory=$FALSE)][string]$accept,
 		[Parameter(Mandatory=$FALSE)][string]$enterprise
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -34,9 +45,9 @@ Function Get-AllowedActionsAndReusableWorkflowsForAnEnterprise
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/enterprises/$enterprise/actions/permissions/selected-actions?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/enterprises/$enterprise/actions/permissions/selected-actions?$($Querys -join '&')"
     }
     else
     {

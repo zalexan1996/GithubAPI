@@ -18,6 +18,9 @@ comment_id parameter
 
 .LINK
 https://docs.github.com/en/rest/reference/pulls
+
+.OUTPUTS
+
 #>
 Function Delete-AReviewCommentForAPullRequest
 {
@@ -28,9 +31,10 @@ Function Delete-AReviewCommentForAPullRequest
 		[Parameter(Mandatory=$FALSE)][string]$repo,
 		[Parameter(Mandatory=$FALSE)][int]$comment_id
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -41,9 +45,9 @@ Function Delete-AReviewCommentForAPullRequest
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/repos/$owner/$repo/pulls/comments/$comment_id?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/repos/$owner/$repo/pulls/comments/$comment_id?$($Querys -join '&')"
     }
     else
     {

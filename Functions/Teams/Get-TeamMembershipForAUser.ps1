@@ -22,6 +22,13 @@ team_slug parameter
 
 .LINK
 https://docs.github.com/en/rest/reference/teams
+
+.OUTPUTS
+ {
+  "url": "https://api.github.com/teams/1/memberships/octocat",
+  "role": "maintainer",
+  "state": "active"
+}
 #>
 Function Get-TeamMembershipForAUser
 {
@@ -32,9 +39,10 @@ Function Get-TeamMembershipForAUser
 		[Parameter(Mandatory=$FALSE)][string]$team_slug,
 		[Parameter(Mandatory=$FALSE)][string]$username
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -45,9 +53,9 @@ Function Get-TeamMembershipForAUser
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/orgs/$org/teams/$team_slug/memberships/$username?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/orgs/$org/teams/$team_slug/memberships/$username?$($Querys -join '&')"
     }
     else
     {

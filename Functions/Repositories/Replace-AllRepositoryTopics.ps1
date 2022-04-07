@@ -18,6 +18,16 @@ Required. An array of topics to add to the repository. Pass one or more topics t
 
 .LINK
 https://docs.github.com/en/rest/reference/repos
+
+.OUTPUTS
+ {
+  "names": [
+    "octocat",
+    "atom",
+    "electron",
+    "api"
+  ]
+}
 #>
 Function Replace-AllRepositoryTopics
 {
@@ -28,9 +38,10 @@ Function Replace-AllRepositoryTopics
 		[Parameter(Mandatory=$FALSE)][string]$repo,
 		[Parameter(Mandatory=$FALSE)][string[]]$names
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -41,9 +52,9 @@ Function Replace-AllRepositoryTopics
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/repos/$owner/$repo/topics?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/repos/$owner/$repo/topics?$($Querys -join '&')"
     }
     else
     {

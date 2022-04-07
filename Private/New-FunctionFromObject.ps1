@@ -1,3 +1,36 @@
+<#
+.SYNOPSIS
+Generates a PowerShell function from a PSCustomObject (the output from Get-FunctionFromDiv).
+
+
+
+.PARAMETER FunctionObject
+The output from Get-FunctionfromDiv:
+[PSCustomObject]@{
+    Synopsis = The Synopsis text of the endpoint
+    FunctionName = The name of the function. 
+    Method = The HTTP method of the function
+    Parameters = @(
+            @{
+                Name = The name of the parameter
+                Type = The datatype of the parameter
+                In = Where the parameter is supplied to (Header, Body, Query, Path)
+                Description = A short description of the paramater. Not all parameters have a scrapable Description field
+                Default = "N/A"
+            }
+        }
+    )
+    Uri = The URI of the endpoint
+    ExpectedOutput = The text from the Response box of the documentation page.
+}
+
+.PARAMETER DocumentationURL
+The url of where we've scraped this info from. Will be used in the helpdocs of our generated function.
+
+.OUTPUTS
+Returns a powershell function as a [string]
+
+#>
 Function New-FunctionFromObject {
     [CmdletBinding()]
     Param(
@@ -49,8 +82,8 @@ $($Param.Description)
     }
     
     
-    $Queries = $FunctionObject.Parameters | Where-Object In -like Query | Foreach-Object {
-        "`"$($_.Name)=`$$($_.Name)`""
+    $Queries = $FunctionObject.Parameters | Where-Object In -like Query | Select-Object -Expand Name | Foreach-Object {
+        "`"$_`""
     }
 
     $Bodies = $FunctionObject.Parameters | Where-Object In -like body | Select-Object -Expand Name | Foreach-Object { "`"$_`"" }
@@ -64,6 +97,9 @@ $ParameterDocumentations
 
 .LINK
 $DocumentationURL
+
+.OUTPUTS
+$($FunctionObject.ExpectedOutput)
 #>
 Function $($FunctionObject.FunctionName)
 {
@@ -71,9 +107,10 @@ Function $($FunctionObject.FunctionName)
     Param(
 $($ParameterDefinitions -join ",`n")
     )
+    `$Querys = @()
     `$QueryStrings = @(
         $($Queries -join ",`n`t`t")
-    ) | ? { `$PSBoundParameters.ContainsKey(`$_) }
+    ) | ? { `$PSBoundParameters.ContainsKey(`$_) } | % { `$Querys = `$Querys + "`$(`$_)=`$(`$PSBoundParameters[`$_])" }
 
 
     `$Body = @{}
@@ -84,9 +121,9 @@ $($ParameterDefinitions -join ",`n")
 
 
     
-    if (![String]::IsNullOrEmpty(`$QueryStrings))
+    if (![String]::IsNullOrEmpty(`$Querys))
     {
-        `$FinalURL = "$($FunctionObject.Uri)?`$(`$QueryStrings -join '&')"
+        `$FinalURL = "$($FunctionObject.Uri)?`$(`$Querys -join '&')"
     }
     else
     {

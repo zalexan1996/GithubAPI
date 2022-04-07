@@ -15,6 +15,9 @@ migration_id parameter
 
 .LINK
 https://docs.github.com/en/rest/reference/migrations
+
+.OUTPUTS
+
 #>
 Function Delete-AnOrganizationMigrationArchive
 {
@@ -24,9 +27,10 @@ Function Delete-AnOrganizationMigrationArchive
 		[Parameter(Mandatory=$FALSE)][string]$org,
 		[Parameter(Mandatory=$FALSE)][int]$migration_id
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -37,9 +41,9 @@ Function Delete-AnOrganizationMigrationArchive
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/orgs/$org/migrations/$migration_id/archive?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/orgs/$org/migrations/$migration_id/archive?$($Querys -join '&')"
     }
     else
     {

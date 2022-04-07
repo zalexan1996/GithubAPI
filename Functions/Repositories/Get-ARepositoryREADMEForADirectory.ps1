@@ -22,6 +22,26 @@ The name of the commit/branch/tag. Default: the repository’s default branch (u
 
 .LINK
 https://docs.github.com/en/rest/reference/repos
+
+.OUTPUTS
+ {
+  "type": "file",
+  "encoding": "base64",
+  "size": 5362,
+  "name": "README.md",
+  "path": "README.md",
+  "content": "encoded content ...",
+  "sha": "3d21ec53a331a6f037a91c368710b99387d012c1",
+  "url": "https://api.github.com/repos/octokit/octokit.rb/contents/README.md",
+  "git_url": "https://api.github.com/repos/octokit/octokit.rb/git/blobs/3d21ec53a331a6f037a91c368710b99387d012c1",
+  "html_url": "https://github.com/octokit/octokit.rb/blob/master/README.md",
+  "download_url": "https://raw.githubusercontent.com/octokit/octokit.rb/master/README.md",
+  "_links": {
+    "git": "https://api.github.com/repos/octokit/octokit.rb/git/blobs/3d21ec53a331a6f037a91c368710b99387d012c1",
+    "self": "https://api.github.com/repos/octokit/octokit.rb/contents/README.md",
+    "html": "https://github.com/octokit/octokit.rb/blob/master/README.md"
+  }
+}
 #>
 Function Get-ARepositoryREADMEForADirectory
 {
@@ -33,9 +53,10 @@ Function Get-ARepositoryREADMEForADirectory
 		[Parameter(Mandatory=$FALSE)][string]$dir,
 		[Parameter(Mandatory=$FALSE)][string]$ref
     )
+    $Querys = @()
     $QueryStrings = @(
-        "ref=$ref"
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+        "ref"
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -46,9 +67,9 @@ Function Get-ARepositoryREADMEForADirectory
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/repos/$owner/$repo/readme/$dir?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/repos/$owner/$repo/readme/$dir?$($Querys -join '&')"
     }
     else
     {

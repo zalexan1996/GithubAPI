@@ -15,6 +15,9 @@ Setting toapplication/vnd.github.v3+json is recommended.
 
 .LINK
 https://docs.github.com/en/rest/reference/orgs
+
+.OUTPUTS
+
 #>
 Function Remove-AnOrganizationMember
 {
@@ -24,9 +27,10 @@ Function Remove-AnOrganizationMember
 		[Parameter(Mandatory=$FALSE)][string]$org,
 		[Parameter(Mandatory=$FALSE)][string]$username
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -37,9 +41,9 @@ Function Remove-AnOrganizationMember
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/orgs/$org/members/$username?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/orgs/$org/members/$username?$($Querys -join '&')"
     }
     else
     {

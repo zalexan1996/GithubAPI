@@ -34,6 +34,34 @@ Default: 1
 
 .LINK
 https://docs.github.com/en/rest/reference/search
+
+.OUTPUTS
+ {
+  "total_count": 2,
+  "incomplete_results": false,
+  "items": [
+    {
+      "id": 418327088,
+      "node_id": "MDU6TGFiZWw0MTgzMjcwODg=",
+      "url": "https://api.github.com/repos/octocat/linguist/labels/enhancement",
+      "name": "enhancement",
+      "color": "84b6eb",
+      "default": true,
+      "description": "New feature or request.",
+      "score": 1
+    },
+    {
+      "id": 418327086,
+      "node_id": "MDU6TGFiZWw0MTgzMjcwODY=",
+      "url": "https://api.github.com/repos/octocat/linguist/labels/bug",
+      "name": "bug",
+      "color": "ee0701",
+      "default": true,
+      "description": "Something isn't working.",
+      "score": 1
+    }
+  ]
+}
 #>
 Function Search-Labels
 {
@@ -47,14 +75,15 @@ Function Search-Labels
 		[Parameter(Mandatory=$FALSE)][int]$per_page,
 		[Parameter(Mandatory=$FALSE)][int]$page
     )
+    $Querys = @()
     $QueryStrings = @(
-        "repository_id=$repository_id",
-		"q=$q",
-		"sort=$sort",
-		"order=$order",
-		"per_page=$per_page",
-		"page=$page"
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+        "repository_id",
+		"q",
+		"sort",
+		"order",
+		"per_page",
+		"page"
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -65,9 +94,9 @@ Function Search-Labels
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/search/labels?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/search/labels?$($Querys -join '&')"
     }
     else
     {

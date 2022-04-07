@@ -16,6 +16,11 @@ Setting toapplication/vnd.github.v3+json is recommended.
 
 .LINK
 https://docs.github.com/en/rest/reference/actions
+
+.OUTPUTS
+ {
+  "access_level": "organization"
+}
 #>
 Function Get-TheLevelOfAccessForWorkflowsOutsideOfTheRepository
 {
@@ -25,9 +30,10 @@ Function Get-TheLevelOfAccessForWorkflowsOutsideOfTheRepository
 		[Parameter(Mandatory=$FALSE)][string]$owner,
 		[Parameter(Mandatory=$FALSE)][string]$repo
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -38,9 +44,9 @@ Function Get-TheLevelOfAccessForWorkflowsOutsideOfTheRepository
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/repos/$owner/$repo/actions/permissions/access?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/repos/$owner/$repo/actions/permissions/access?$($Querys -join '&')"
     }
     else
     {

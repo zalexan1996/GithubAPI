@@ -19,6 +19,59 @@ The id of the workflow run.
 
 .LINK
 https://docs.github.com/en/rest/reference/actions
+
+.OUTPUTS
+ {
+  "billable": {
+    "UBUNTU": {
+      "total_ms": 180000,
+      "jobs": 1,
+      "job_runs": [
+        {
+          "job_id": 1,
+          "duration_ms": 180000
+        }
+      ]
+    },
+    "MACOS": {
+      "total_ms": 240000,
+      "jobs": 4,
+      "job_runs": [
+        {
+          "job_id": 2,
+          "duration_ms": 60000
+        },
+        {
+          "job_id": 3,
+          "duration_ms": 60000
+        },
+        {
+          "job_id": 4,
+          "duration_ms": 60000
+        },
+        {
+          "job_id": 5,
+          "duration_ms": 60000
+        }
+      ]
+    },
+    "WINDOWS": {
+      "total_ms": 300000,
+      "jobs": 2,
+      "job_runs": [
+        {
+          "job_id": 6,
+          "duration_ms": 150000
+        },
+        {
+          "job_id": 7,
+          "duration_ms": 150000
+        }
+      ]
+    }
+  },
+  "run_duration_ms": 500000
+}
 #>
 Function Get-WorkflowRunUsage
 {
@@ -29,9 +82,10 @@ Function Get-WorkflowRunUsage
 		[Parameter(Mandatory=$FALSE)][string]$repo,
 		[Parameter(Mandatory=$FALSE)][int]$run_id
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -42,9 +96,9 @@ Function Get-WorkflowRunUsage
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/repos/$owner/$repo/actions/runs/$run_id/timing?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/repos/$owner/$repo/actions/runs/$run_id/timing?$($Querys -join '&')"
     }
     else
     {

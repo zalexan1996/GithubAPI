@@ -19,6 +19,9 @@ team_slug parameter
 
 .LINK
 https://docs.github.com/en/rest/reference/teams
+
+.OUTPUTS
+
 #>
 Function Remove-AProjectFromATeam
 {
@@ -29,9 +32,10 @@ Function Remove-AProjectFromATeam
 		[Parameter(Mandatory=$FALSE)][string]$team_slug,
 		[Parameter(Mandatory=$FALSE)][int]$project_id
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -42,9 +46,9 @@ Function Remove-AProjectFromATeam
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/orgs/$org/teams/$team_slug/projects/$project_id?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/orgs/$org/teams/$team_slug/projects/$project_id?$($Querys -join '&')"
     }
     else
     {

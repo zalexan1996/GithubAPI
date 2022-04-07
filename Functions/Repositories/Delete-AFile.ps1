@@ -36,6 +36,45 @@ object containing information about the author.
 
 .LINK
 https://docs.github.com/en/rest/reference/repos
+
+.OUTPUTS
+ {
+  "content": null,
+  "commit": {
+    "sha": "7638417db6d59f3c431d3e1f261cc637155684cd",
+    "node_id": "MDY6Q29tbWl0NzYzODQxN2RiNmQ1OWYzYzQzMWQzZTFmMjYxY2M2MzcxNTU2ODRjZA==",
+    "url": "https://api.github.com/repos/octocat/Hello-World/git/commits/7638417db6d59f3c431d3e1f261cc637155684cd",
+    "html_url": "https://github.com/octocat/Hello-World/git/commit/7638417db6d59f3c431d3e1f261cc637155684cd",
+    "author": {
+      "date": "2014-11-07T22:01:45Z",
+      "name": "Monalisa Octocat",
+      "email": "octocat@github.com"
+    },
+    "committer": {
+      "date": "2014-11-07T22:01:45Z",
+      "name": "Monalisa Octocat",
+      "email": "octocat@github.com"
+    },
+    "message": "my commit message",
+    "tree": {
+      "url": "https://api.github.com/repos/octocat/Hello-World/git/trees/691272480426f78a0138979dd3ce63b77f706feb",
+      "sha": "691272480426f78a0138979dd3ce63b77f706feb"
+    },
+    "parents": [
+      {
+        "url": "https://api.github.com/repos/octocat/Hello-World/git/commits/1acc419d4d6a9ce985db7be48c6349a0475975b5",
+        "html_url": "https://github.com/octocat/Hello-World/git/commit/1acc419d4d6a9ce985db7be48c6349a0475975b5",
+        "sha": "1acc419d4d6a9ce985db7be48c6349a0475975b5"
+      }
+    ],
+    "verification": {
+      "verified": false,
+      "reason": "unsigned",
+      "signature": null,
+      "payload": null
+    }
+  }
+}
 #>
 Function Delete-AFile
 {
@@ -51,9 +90,10 @@ Function Delete-AFile
 		[Parameter(Mandatory=$FALSE)][object]$committer,
 		[Parameter(Mandatory=$FALSE)][object]$author
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -68,9 +108,9 @@ Function Delete-AFile
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/repos/$owner/$repo/contents/$path?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/repos/$owner/$repo/contents/$path?$($Querys -join '&')"
     }
     else
     {

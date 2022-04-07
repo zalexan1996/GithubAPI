@@ -15,6 +15,9 @@ secret_name parameter
 
 .LINK
 https://docs.github.com/en/rest/reference/actions
+
+.OUTPUTS
+
 #>
 Function Delete-AnOrganizationSecret
 {
@@ -24,9 +27,10 @@ Function Delete-AnOrganizationSecret
 		[Parameter(Mandatory=$FALSE)][string]$org,
 		[Parameter(Mandatory=$FALSE)][string]$secret_name
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -37,9 +41,9 @@ Function Delete-AnOrganizationSecret
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/orgs/$org/actions/secrets/$secret_name?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/orgs/$org/actions/secrets/$secret_name?$($Querys -join '&')"
     }
     else
     {

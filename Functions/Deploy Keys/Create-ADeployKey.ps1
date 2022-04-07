@@ -25,6 +25,17 @@ Deploy keys with write access can perform the same actions as an organization me
 
 .LINK
 https://docs.github.com/en/rest/reference/deploy_keys
+
+.OUTPUTS
+ {
+  "id": 1,
+  "key": "ssh-rsa AAA...",
+  "url": "https://api.github.com/repos/octocat/Hello-World/keys/1",
+  "title": "octocat@octomac",
+  "verified": true,
+  "created_at": "2014-12-10T15:53:42Z",
+  "read_only": true
+}
 #>
 Function Create-ADeployKey
 {
@@ -37,9 +48,10 @@ Function Create-ADeployKey
 		[Parameter(Mandatory=$FALSE)][string]$key,
 		[Parameter(Mandatory=$FALSE)][bool]$read_only
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -52,9 +64,9 @@ Function Create-ADeployKey
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/repos/$owner/$repo/keys?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/repos/$owner/$repo/keys?$($Querys -join '&')"
     }
     else
     {

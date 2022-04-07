@@ -1,3 +1,18 @@
+<#
+.SYNOPSIS
+Downloads the chromium web driver that matches your installed Chrome version.
+It throws an exception if it can't find your Chrome installation.
+It can also throw an exception if there isn't a web driver available for your chrome version yet.
+
+.PARAMETER StartUrl
+The URL to open the driver to
+
+.PARAMETER Visible
+Whether to display the web driver or not.
+
+.OUTPUTS
+Assuming everything succeeded, it should return a Chrome webdriver opened to your specified StartUrl.
+#>
 Function Start-Chrome {
     [CmdletBinding()]
     Param(
@@ -5,8 +20,21 @@ Function Start-Chrome {
         [Parameter(Mandatory=$False)][Bool]$Visible
     )
 
+    if (Test-Path "${ENV:ProgramFiles(x86)}\Google\Chrome\Application\chrome.exe")
+    { 
+        $ChromePath = "${ENV:ProgramFiles(x86)}\Google\Chrome\Application" 
+    }
+    elseif (Test-Path "${ENV:ProgramFiles}\Google\Chrome\Application\chrome.exe")
+    {
+        $ChromePath = "${ENV:ProgramFiles}\Google\Chrome\Application"
+    }
+    else
+    {
+        throw "Failed to find Chrome. Make sure it's installed to one of your Program Files directories (X86 or x64)."
+    }
+
     # Get the current chrome version
-    $ChromeVersion = Get-ChildItem "${ENV:ProgramFiles(x86)}\Google\Chrome\Application" | Where-Object { 
+    $ChromeVersion = Get-ChildItem "$ChromePath" | Where-Object { 
         $_.Attributes -like "Directory" -and $_.Name -match "^\d+" 
     } | Select-Object -First 1 -ExpandProperty Name
 

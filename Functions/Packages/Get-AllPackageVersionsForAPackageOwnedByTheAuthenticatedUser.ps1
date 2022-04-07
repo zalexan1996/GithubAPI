@@ -28,6 +28,42 @@ Default: active
 
 .LINK
 https://docs.github.com/en/rest/reference/packages
+
+.OUTPUTS
+ [
+  {
+    "id": 45763,
+    "name": "sha256:08a44bab0bddaddd8837a8b381aebc2e4b933768b981685a9e088360af0d3dd9",
+    "url": "https://api.github.com/users/octocat/packages/container/hello_docker/versions/45763",
+    "package_html_url": "https://github.com/users/octocat/packages/container/package/hello_docker",
+    "created_at": "2020-09-11T21:56:40Z",
+    "updated_at": "2021-02-05T21:32:32Z",
+    "html_url": "https://github.com/users/octocat/packages/container/hello_docker/45763",
+    "metadata": {
+      "package_type": "container",
+      "container": {
+        "tags": [
+          "latest"
+        ]
+      }
+    }
+  },
+  {
+    "id": 881,
+    "name": "sha256:b3d3e366b55f9a54599220198b3db5da8f53592acbbb7dc7e4e9878762fc5344",
+    "url": "https://api.github.com/users/octocat/packages/container/hello_docker/versions/881",
+    "package_html_url": "https://github.com/users/octocat/packages/container/package/hello_docker",
+    "created_at": "2020-05-21T22:22:20Z",
+    "updated_at": "2021-02-05T21:32:32Z",
+    "html_url": "https://github.com/users/octocat/packages/container/hello_docker/881",
+    "metadata": {
+      "package_type": "container",
+      "container": {
+        "tags": []
+      }
+    }
+  }
+]
 #>
 Function Get-AllPackageVersionsForAPackageOwnedByTheAuthenticatedUser
 {
@@ -40,11 +76,12 @@ Function Get-AllPackageVersionsForAPackageOwnedByTheAuthenticatedUser
 		[Parameter(Mandatory=$FALSE)][int]$per_page,
 		[Parameter(Mandatory=$FALSE)][string]$state
     )
+    $Querys = @()
     $QueryStrings = @(
-        "page=$page",
-		"per_page=$per_page",
-		"state=$state"
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+        "page",
+		"per_page",
+		"state"
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -55,9 +92,9 @@ Function Get-AllPackageVersionsForAPackageOwnedByTheAuthenticatedUser
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/user/packages/$package_type/$package_name/versions?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/user/packages/$package_type/$package_name/versions?$($Querys -join '&')"
     }
     else
     {

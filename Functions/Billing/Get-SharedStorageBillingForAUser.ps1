@@ -14,6 +14,13 @@ Setting toapplication/vnd.github.v3+json is recommended.
 
 .LINK
 https://docs.github.com/en/rest/reference/billing
+
+.OUTPUTS
+ {
+  "days_left_in_billing_cycle": 20,
+  "estimated_paid_storage_for_month": 15,
+  "estimated_storage_for_month": 40
+}
 #>
 Function Get-SharedStorageBillingForAUser
 {
@@ -22,9 +29,10 @@ Function Get-SharedStorageBillingForAUser
 		[Parameter(Mandatory=$FALSE)][string]$accept,
 		[Parameter(Mandatory=$FALSE)][string]$username
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -35,9 +43,9 @@ Function Get-SharedStorageBillingForAUser
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/users/$username/settings/billing/shared-storage?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/users/$username/settings/billing/shared-storage?$($Querys -join '&')"
     }
     else
     {

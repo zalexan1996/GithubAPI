@@ -20,6 +20,37 @@ Default: 1
 
 .LINK
 https://docs.github.com/en/rest/reference/billing
+
+.OUTPUTS
+ {
+  "total_advanced_security_committers": 2,
+  "repositories": [
+    {
+      "name": "octocat-org/Hello-World",
+      "advanced_security_committers": 2,
+      "advanced_security_committers_breakdown": [
+        {
+          "user_login": "octocat",
+          "last_pushed_date": "2021-11-03"
+        },
+        {
+          "user_login": "octokitten",
+          "last_pushed_date": "2021-10-25"
+        }
+      ]
+    },
+    {
+      "name": "octocat-org/server",
+      "advanced_security_committers": 1,
+      "advanced_security_committers_breakdown": [
+        {
+          "user_login": "octokitten",
+          "last_pushed_date": "2021-10-26"
+        }
+      ]
+    }
+  ]
+}
 #>
 Function Get-GithubAdvancedSecurityActiveCommittersForAnOrganization
 {
@@ -30,10 +61,11 @@ Function Get-GithubAdvancedSecurityActiveCommittersForAnOrganization
 		[Parameter(Mandatory=$FALSE)][int]$per_page,
 		[Parameter(Mandatory=$FALSE)][int]$page
     )
+    $Querys = @()
     $QueryStrings = @(
-        "per_page=$per_page",
-		"page=$page"
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+        "per_page",
+		"page"
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -44,9 +76,9 @@ Function Get-GithubAdvancedSecurityActiveCommittersForAnOrganization
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/orgs/$org/settings/billing/advanced-security?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/orgs/$org/settings/billing/advanced-security?$($Querys -join '&')"
     }
     else
     {

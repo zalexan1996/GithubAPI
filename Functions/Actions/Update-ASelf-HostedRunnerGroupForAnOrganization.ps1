@@ -32,6 +32,23 @@ List of workflows the runner group should be allowed to run. This setting will b
 
 .LINK
 https://docs.github.com/en/rest/reference/actions
+
+.OUTPUTS
+ {
+  "id": 2,
+  "name": "octo-runner-group",
+  "visibility": "selected",
+  "default": false,
+  "selected_repositories_url": "https://api.github.com/orgs/octo-org/actions/runner-groups/2/repositories",
+  "runners_url": "https://api.github.com/orgs/octo-org/actions/runner_groups/2/runners",
+  "inherited": false,
+  "allows_public_repositories": true,
+  "restricted_to_workflows": true,
+  "selected_workflows": [
+    "octo-org/octo-repo/.github/workflows/deploy.yaml@refs/heads/main"
+  ],
+  "workflow_restrictions_read_only": false
+}
 #>
 Function Update-ASelf-HostedRunnerGroupForAnOrganization
 {
@@ -46,9 +63,10 @@ Function Update-ASelf-HostedRunnerGroupForAnOrganization
 		[Parameter(Mandatory=$FALSE)][bool]$restricted_to_workflows,
 		[Parameter(Mandatory=$FALSE)][string[]]$selected_workflows
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -63,9 +81,9 @@ Function Update-ASelf-HostedRunnerGroupForAnOrganization
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/orgs/$org/actions/runner-groups/$runner_group_id?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/orgs/$org/actions/runner-groups/$runner_group_id?$($Querys -join '&')"
     }
     else
     {

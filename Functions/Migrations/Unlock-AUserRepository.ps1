@@ -15,6 +15,9 @@ repo_name parameter
 
 .LINK
 https://docs.github.com/en/rest/reference/migrations
+
+.OUTPUTS
+
 #>
 Function Unlock-AUserRepository
 {
@@ -24,9 +27,10 @@ Function Unlock-AUserRepository
 		[Parameter(Mandatory=$FALSE)][int]$migration_id,
 		[Parameter(Mandatory=$FALSE)][string]$repo_name
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -37,9 +41,9 @@ Function Unlock-AUserRepository
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/user/migrations/$migration_id/repos/$repo_name/lock?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/user/migrations/$migration_id/repos/$repo_name/lock?$($Querys -join '&')"
     }
     else
     {

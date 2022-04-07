@@ -23,6 +23,66 @@ Default: 1
 
 .LINK
 https://docs.github.com/en/rest/reference/actions
+
+.OUTPUTS
+ {
+  "total_count": 2,
+  "runners": [
+    {
+      "id": 23,
+      "name": "linux_runner",
+      "os": "linux",
+      "status": "online",
+      "busy": true,
+      "labels": [
+        {
+          "id": 5,
+          "name": "self-hosted",
+          "type": "read-only"
+        },
+        {
+          "id": 7,
+          "name": "X64",
+          "type": "read-only"
+        },
+        {
+          "id": 11,
+          "name": "Linux",
+          "type": "read-only"
+        }
+      ]
+    },
+    {
+      "id": 24,
+      "name": "mac_runner",
+      "os": "macos",
+      "status": "offline",
+      "busy": false,
+      "labels": [
+        {
+          "id": 5,
+          "name": "self-hosted",
+          "type": "read-only"
+        },
+        {
+          "id": 7,
+          "name": "X64",
+          "type": "read-only"
+        },
+        {
+          "id": 20,
+          "name": "macOS",
+          "type": "read-only"
+        },
+        {
+          "id": 21,
+          "name": "no-gpu",
+          "type": "custom"
+        }
+      ]
+    }
+  ]
+}
 #>
 Function List-Self-HostedRunnersForARepository
 {
@@ -34,10 +94,11 @@ Function List-Self-HostedRunnersForARepository
 		[Parameter(Mandatory=$FALSE)][int]$per_page,
 		[Parameter(Mandatory=$FALSE)][int]$page
     )
+    $Querys = @()
     $QueryStrings = @(
-        "per_page=$per_page",
-		"page=$page"
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+        "per_page",
+		"page"
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -48,9 +109,9 @@ Function List-Self-HostedRunnersForARepository
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/repos/$owner/$repo/actions/runners?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/repos/$owner/$repo/actions/runners?$($Querys -join '&')"
     }
     else
     {

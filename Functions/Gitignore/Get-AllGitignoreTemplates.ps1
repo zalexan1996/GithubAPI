@@ -9,6 +9,17 @@ Setting toapplication/vnd.github.v3+json is recommended.
 
 .LINK
 https://docs.github.com/en/rest/reference/gitignore
+
+.OUTPUTS
+ [
+  "Actionscript",
+  "Android",
+  "AppceleratorTitanium",
+  "Autotools",
+  "Bancha",
+  "C",
+  "C++"
+]
 #>
 Function Get-AllGitignoreTemplates
 {
@@ -16,9 +27,10 @@ Function Get-AllGitignoreTemplates
     Param(
 		[Parameter(Mandatory=$FALSE)][string]$accept
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -29,9 +41,9 @@ Function Get-AllGitignoreTemplates
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/gitignore/templates?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/gitignore/templates?$($Querys -join '&')"
     }
     else
     {

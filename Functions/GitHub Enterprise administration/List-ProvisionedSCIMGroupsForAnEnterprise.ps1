@@ -24,6 +24,65 @@ attributes to exclude
 
 .LINK
 https://docs.github.com/en/rest/reference/enterprise-admin
+
+.OUTPUTS
+ {
+  "schemas": [
+    "urn:ietf:params:scim:api:messages:2.0:ListResponse"
+  ],
+  "totalResults": 2,
+  "itemsPerPage": 2,
+  "startIndex": 1,
+  "Resources": [
+    {
+      "schemas": [
+        "urn:ietf:params:scim:schemas:core:2.0:Group"
+      ],
+      "id": "abcd27f8-a9aa-11ea-8221-f59b2be9cccc",
+      "externalId": null,
+      "displayName": "octo-org",
+      "members": [
+        {
+          "value": "92b58aaa-a1d6-11ea-8227-b9ce9e023ccc",
+          "$ref": "https://api.github.com/scim/v2/enterprises/octo-corp/Users/92b58aaa-a1d6-11ea-8227-b9ce9e023ccc",
+          "display": "octocat@github.com"
+        },
+        {
+          "value": "aaaa8c34-a6b2-11ea-9d70-bbbbbd1c8fd5",
+          "$ref": "https://api.github.com/scim/v2/enterprises/octo-corp/Users/aaaa8c34-a6b2-11ea-9d70-bbbbbd1c8fd5",
+          "display": "hubot@example.com"
+        }
+      ],
+      "meta": {
+        "resourceType": "Group",
+        "created": "2020-06-09T03:10:17.000+10:00",
+        "lastModified": "2020-06-09T03:10:17.000+10:00",
+        "location": "https://api.github.com/scim/v2/enterprises/octo-corp/Groups/abcd27f8-a9aa-11ea-8221-f59b2be9cccc"
+      }
+    },
+    {
+      "schemas": [
+        "urn:ietf:params:scim:schemas:core:2.0:Group"
+      ],
+      "id": "5e75bbbb-aa1a-11ea-8644-75ff655cdddd",
+      "externalId": null,
+      "displayName": "octo-docs-org",
+      "members": [
+        {
+          "value": "92b58aaa-a1d6-11ea-8227-b9ce9e023ccc",
+          "$ref": "https://api.github.com/scim/v2/enterprises/octo-corp/Users/92b58aaa-a1d6-11ea-8227-b9ce9e023ccc",
+          "display": "octocat@github.com"
+        }
+      ],
+      "meta": {
+        "resourceType": "Group",
+        "created": "2020-06-09T16:28:01.000+10:00",
+        "lastModified": "2020-06-09T16:28:01.000+10:00",
+        "location": "https://api.github.com/scim/v2/enterprises/octo-corp/Groups/5e75bbbb-aa1a-11ea-8644-75ff655cdddd"
+      }
+    }
+  ]
+}
 #>
 Function List-ProvisionedSCIMGroupsForAnEnterprise
 {
@@ -36,12 +95,13 @@ Function List-ProvisionedSCIMGroupsForAnEnterprise
 		[Parameter(Mandatory=$FALSE)][string]$filter,
 		[Parameter(Mandatory=$FALSE)][string]$excludedAttributes
     )
+    $Querys = @()
     $QueryStrings = @(
-        "startIndex=$startIndex",
-		"count=$count",
-		"filter=$filter",
-		"excludedAttributes=$excludedAttributes"
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+        "startIndex",
+		"count",
+		"filter",
+		"excludedAttributes"
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -52,9 +112,9 @@ Function List-ProvisionedSCIMGroupsForAnEnterprise
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/scim/v2/enterprises/$enterprise/Groups?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/scim/v2/enterprises/$enterprise/Groups?$($Querys -join '&')"
     }
     else
     {

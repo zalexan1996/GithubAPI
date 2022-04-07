@@ -19,6 +19,9 @@ The name of the branch.
 
 .LINK
 https://docs.github.com/en/rest/reference/branches
+
+.OUTPUTS
+
 #>
 Function Delete-AccessRestrictions
 {
@@ -29,9 +32,10 @@ Function Delete-AccessRestrictions
 		[Parameter(Mandatory=$FALSE)][string]$repo,
 		[Parameter(Mandatory=$FALSE)][string]$branch
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -42,9 +46,9 @@ Function Delete-AccessRestrictions
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/repos/$owner/$repo/branches/$branch/protection/restrictions?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/repos/$owner/$repo/branches/$branch/protection/restrictions?$($Querys -join '&')"
     }
     else
     {

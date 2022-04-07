@@ -27,6 +27,12 @@ Specifies a path to a file in the repository containing configuration settings u
 
 .LINK
 https://docs.github.com/en/rest/reference/releases
+
+.OUTPUTS
+ {
+  "name": "Release v1.0.0 is now available!",
+  "body": "##Changes in Release v1.0.0 ... ##Contributors @monalisa"
+}
 #>
 Function Generate-ReleaseNotesContentForARelease
 {
@@ -40,9 +46,10 @@ Function Generate-ReleaseNotesContentForARelease
 		[Parameter(Mandatory=$FALSE)][string]$previous_tag_name,
 		[Parameter(Mandatory=$FALSE)][string]$configuration_file_path
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -56,9 +63,9 @@ Function Generate-ReleaseNotesContentForARelease
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/repos/$owner/$repo/releases/generate-notes?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/repos/$owner/$repo/releases/generate-notes?$($Querys -join '&')"
     }
     else
     {

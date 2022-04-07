@@ -12,6 +12,9 @@ Setting toapplication/vnd.github.v3+json is recommended.
 
 .LINK
 https://docs.github.com/en/rest/reference/projects
+
+.OUTPUTS
+
 #>
 Function Delete-AProject
 {
@@ -20,9 +23,10 @@ Function Delete-AProject
 		[Parameter(Mandatory=$FALSE)][string]$accept,
 		[Parameter(Mandatory=$FALSE)][int]$project_id
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -33,9 +37,9 @@ Function Delete-AProject
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/projects/$project_id?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/projects/$project_id?$($Querys -join '&')"
     }
     else
     {

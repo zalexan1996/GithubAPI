@@ -19,6 +19,9 @@ Unique identifier of the self-hosted runner.
 
 .LINK
 https://docs.github.com/en/rest/reference/actions
+
+.OUTPUTS
+
 #>
 Function Remove-ASelf-HostedRunnerFromAGroupForAnEnterprise
 {
@@ -29,9 +32,10 @@ Function Remove-ASelf-HostedRunnerFromAGroupForAnEnterprise
 		[Parameter(Mandatory=$FALSE)][int]$runner_group_id,
 		[Parameter(Mandatory=$FALSE)][int]$runner_id
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -42,9 +46,9 @@ Function Remove-ASelf-HostedRunnerFromAGroupForAnEnterprise
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/enterprises/$enterprise/actions/runner-groups/$runner_group_id/runners/$runner_id?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/enterprises/$enterprise/actions/runner-groups/$runner_group_id/runners/$runner_id?$($Querys -join '&')"
     }
     else
     {

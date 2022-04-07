@@ -13,6 +13,9 @@ Setting toapplication/vnd.github.v3+json is recommended.
 
 .LINK
 https://docs.github.com/en/rest/reference/apps
+
+.OUTPUTS
+
 #>
 Function Redeliver-ADeliveryForAnAppWebhook
 {
@@ -21,9 +24,10 @@ Function Redeliver-ADeliveryForAnAppWebhook
 		[Parameter(Mandatory=$FALSE)][string]$accept,
 		[Parameter(Mandatory=$FALSE)][int]$delivery_id
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -34,9 +38,9 @@ Function Redeliver-ADeliveryForAnAppWebhook
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/app/hook/deliveries/$delivery_id/attempts?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/app/hook/deliveries/$delivery_id/attempts?$($Querys -join '&')"
     }
     else
     {

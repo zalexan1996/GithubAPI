@@ -41,6 +41,9 @@ Required. user emails
 
 .LINK
 https://docs.github.com/en/rest/reference/scim
+
+.OUTPUTS
+
 #>
 Function Update-AProvisionedOrganizationMembership
 {
@@ -58,9 +61,10 @@ Function Update-AProvisionedOrganizationMembership
 		[Parameter(Mandatory=$FALSE)][object]$name,
 		[Parameter(Mandatory=$FALSE)][object[]]$emails
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -78,9 +82,9 @@ Function Update-AProvisionedOrganizationMembership
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/scim/v2/organizations/$org/Users/$scim_user_id?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/scim/v2/organizations/$org/Users/$scim_user_id?$($Querys -join '&')"
     }
     else
     {

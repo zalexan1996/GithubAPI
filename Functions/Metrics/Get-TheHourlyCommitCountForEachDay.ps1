@@ -19,6 +19,25 @@ Setting toapplication/vnd.github.v3+json is recommended.
 
 .LINK
 https://docs.github.com/en/rest/reference/metrics
+
+.OUTPUTS
+ [
+  [
+    0,
+    0,
+    5
+  ],
+  [
+    0,
+    1,
+    43
+  ],
+  [
+    0,
+    2,
+    21
+  ]
+]
 #>
 Function Get-TheHourlyCommitCountForEachDay
 {
@@ -28,9 +47,10 @@ Function Get-TheHourlyCommitCountForEachDay
 		[Parameter(Mandatory=$FALSE)][string]$owner,
 		[Parameter(Mandatory=$FALSE)][string]$repo
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -41,9 +61,9 @@ Function Get-TheHourlyCommitCountForEachDay
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/repos/$owner/$repo/stats/punch_card?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/repos/$owner/$repo/stats/punch_card?$($Querys -join '&')"
     }
     else
     {

@@ -21,6 +21,12 @@ The expected SHA of the pull request's HEAD ref. This is the most recent commit 
 
 .LINK
 https://docs.github.com/en/rest/reference/pulls
+
+.OUTPUTS
+ {
+  "message": "Updating pull request branch.",
+  "url": "https://github.com/repos/octocat/Hello-World/pulls/53"
+}
 #>
 Function Update-APullRequestBranch
 {
@@ -32,9 +38,10 @@ Function Update-APullRequestBranch
 		[Parameter(Mandatory=$FALSE)][int]$pull_number,
 		[Parameter(Mandatory=$FALSE)][string]$expected_head_sha
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -45,9 +52,9 @@ Function Update-APullRequestBranch
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/repos/$owner/$repo/pulls/$pull_number/update-branch?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/repos/$owner/$repo/pulls/$pull_number/update-branch?$($Querys -join '&')"
     }
     else
     {

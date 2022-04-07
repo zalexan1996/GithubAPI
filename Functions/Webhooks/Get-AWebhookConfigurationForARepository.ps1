@@ -19,6 +19,14 @@ Setting toapplication/vnd.github.v3+json is recommended.
 
 .LINK
 https://docs.github.com/en/rest/reference/webhooks
+
+.OUTPUTS
+ {
+  "content_type": "json",
+  "insecure_ssl": "0",
+  "secret": "********",
+  "url": "https://example.com/webhook"
+}
 #>
 Function Get-AWebhookConfigurationForARepository
 {
@@ -29,9 +37,10 @@ Function Get-AWebhookConfigurationForARepository
 		[Parameter(Mandatory=$FALSE)][string]$repo,
 		[Parameter(Mandatory=$FALSE)][int]$hook_id
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -42,9 +51,9 @@ Function Get-AWebhookConfigurationForARepository
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/repos/$owner/$repo/hooks/$hook_id/config?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/repos/$owner/$repo/hooks/$hook_id/config?$($Querys -join '&')"
     }
     else
     {

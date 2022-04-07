@@ -15,6 +15,23 @@ Setting toapplication/vnd.github.v3+json is recommended.
 
 .LINK
 https://docs.github.com/en/rest/reference/metrics
+
+.OUTPUTS
+ [
+  {
+    "days": [
+      0,
+      3,
+      26,
+      20,
+      39,
+      1,
+      0
+    ],
+    "total": 89,
+    "week": 1336280400
+  }
+]
 #>
 Function Get-TheLastYearOfCommitActivity
 {
@@ -24,9 +41,10 @@ Function Get-TheLastYearOfCommitActivity
 		[Parameter(Mandatory=$FALSE)][string]$owner,
 		[Parameter(Mandatory=$FALSE)][string]$repo
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -37,9 +55,9 @@ Function Get-TheLastYearOfCommitActivity
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/repos/$owner/$repo/stats/commit_activity?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/repos/$owner/$repo/stats/commit_activity?$($Querys -join '&')"
     }
     else
     {

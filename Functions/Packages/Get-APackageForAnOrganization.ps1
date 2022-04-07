@@ -19,6 +19,39 @@ The name of the package.
 
 .LINK
 https://docs.github.com/en/rest/reference/packages
+
+.OUTPUTS
+ {
+  "id": 197,
+  "name": "hello_docker",
+  "package_type": "container",
+  "owner": {
+    "login": "github",
+    "id": 9919,
+    "node_id": "MDEyOk9yZ2FuaXphdGlvbjk5MTk=",
+    "avatar_url": "https://avatars.githubusercontent.com/u/9919?v=4",
+    "gravatar_id": "",
+    "url": "https://api.github.com/users/github",
+    "html_url": "https://github.com/github",
+    "followers_url": "https://api.github.com/users/github/followers",
+    "following_url": "https://api.github.com/users/github/following{/other_user}",
+    "gists_url": "https://api.github.com/users/github/gists{/gist_id}",
+    "starred_url": "https://api.github.com/users/github/starred{/owner}{/repo}",
+    "subscriptions_url": "https://api.github.com/users/github/subscriptions",
+    "organizations_url": "https://api.github.com/users/github/orgs",
+    "repos_url": "https://api.github.com/users/github/repos",
+    "events_url": "https://api.github.com/users/github/events{/privacy}",
+    "received_events_url": "https://api.github.com/users/github/received_events",
+    "type": "Organization",
+    "site_admin": false
+  },
+  "version_count": 1,
+  "visibility": "private",
+  "url": "https://api.github.com/orgs/github/packages/container/hello_docker",
+  "created_at": "2020-05-19T22:19:11Z",
+  "updated_at": "2020-05-19T22:19:11Z",
+  "html_url": "https://github.com/orgs/github/packages/container/package/hello_docker"
+}
 #>
 Function Get-APackageForAnOrganization
 {
@@ -29,9 +62,10 @@ Function Get-APackageForAnOrganization
 		[Parameter(Mandatory=$FALSE)][string]$package_name,
 		[Parameter(Mandatory=$FALSE)][string]$org
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -42,9 +76,9 @@ Function Get-APackageForAnOrganization
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/orgs/$org/packages/$package_type/$package_name?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/orgs/$org/packages/$package_type/$package_name?$($Querys -join '&')"
     }
     else
     {

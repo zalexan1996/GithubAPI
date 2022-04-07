@@ -1,6 +1,8 @@
 <#
 .SYNOPSIS
-Deletes a secret from a user's codespaces using the secret name. Deleting the secret will remove access from all codespaces that were allowed to access the secret. You must authenticate using an access token with the user scope to use this endpoint. User must have Codespaces access to use this endpoint.
+Deletes a secret from a user's codespaces using the secret name. Deleting the secret will remove access from all codespaces that were allowed to access the secret.
+You must authenticate using an access token with the codespace or codespace:secrets scope to use this endpoint. User must have Codespaces access to use this endpoint.
+GitHub Apps must have write access to the codespaces_user_secrets user permission to use this endpoint.
 
         
 .PARAMETER accept
@@ -12,6 +14,9 @@ secret_name parameter
 
 .LINK
 https://docs.github.com/en/rest/reference/codespaces
+
+.OUTPUTS
+
 #>
 Function Delete-ASecretForTheAuthenticatedUser
 {
@@ -20,9 +25,10 @@ Function Delete-ASecretForTheAuthenticatedUser
 		[Parameter(Mandatory=$FALSE)][string]$accept,
 		[Parameter(Mandatory=$FALSE)][string]$secret_name
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -33,9 +39,9 @@ Function Delete-ASecretForTheAuthenticatedUser
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/user/codespaces/secrets/$secret_name?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/user/codespaces/secrets/$secret_name?$($Querys -join '&')"
     }
     else
     {

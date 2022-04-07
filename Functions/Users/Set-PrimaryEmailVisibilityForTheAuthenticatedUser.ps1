@@ -12,6 +12,16 @@ Required. Denotes whether an email is publicly visible.
 
 .LINK
 https://docs.github.com/en/rest/reference/users
+
+.OUTPUTS
+ [
+  {
+    "email": "octocat@github.com",
+    "primary": true,
+    "verified": true,
+    "visibility": "private"
+  }
+]
 #>
 Function Set-PrimaryEmailVisibilityForTheAuthenticatedUser
 {
@@ -20,9 +30,10 @@ Function Set-PrimaryEmailVisibilityForTheAuthenticatedUser
 		[Parameter(Mandatory=$FALSE)][string]$accept,
 		[Parameter(Mandatory=$FALSE)][string]$visibility
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -33,9 +44,9 @@ Function Set-PrimaryEmailVisibilityForTheAuthenticatedUser
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/user/email/visibility?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/user/email/visibility?$($Querys -join '&')"
     }
     else
     {

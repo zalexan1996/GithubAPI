@@ -18,6 +18,13 @@ secret_name parameter
 
 .LINK
 https://docs.github.com/en/rest/reference/actions
+
+.OUTPUTS
+ {
+  "name": "GH_TOKEN",
+  "created_at": "2019-08-10T14:59:22Z",
+  "updated_at": "2020-01-10T14:59:22Z"
+}
 #>
 Function Get-AnEnvironmentSecret
 {
@@ -28,9 +35,10 @@ Function Get-AnEnvironmentSecret
 		[Parameter(Mandatory=$FALSE)][string]$environment_name,
 		[Parameter(Mandatory=$FALSE)][string]$secret_name
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -41,9 +49,9 @@ Function Get-AnEnvironmentSecret
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/repositories/$repository_id/environments/$environment_name/secrets/$secret_name?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/repositories/$repository_id/environments/$environment_name/secrets/$secret_name?$($Querys -join '&')"
     }
     else
     {

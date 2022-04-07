@@ -21,6 +21,9 @@ artifact_id parameter
 
 .LINK
 https://docs.github.com/en/rest/reference/actions
+
+.OUTPUTS
+
 #>
 Function Download-AnArtifact
 {
@@ -32,9 +35,10 @@ Function Download-AnArtifact
 		[Parameter(Mandatory=$FALSE)][int]$artifact_id,
 		[Parameter(Mandatory=$FALSE)][string]$archive_format
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -45,9 +49,9 @@ Function Download-AnArtifact
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/repos/$owner/$repo/actions/artifacts/$artifact_id/$archive_format?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/repos/$owner/$repo/actions/artifacts/$artifact_id/$archive_format?$($Querys -join '&')"
     }
     else
     {

@@ -18,6 +18,9 @@ ref parameter
 
 .LINK
 https://docs.github.com/en/rest/reference/git
+
+.OUTPUTS
+
 #>
 Function Delete-AReference
 {
@@ -28,9 +31,10 @@ Function Delete-AReference
 		[Parameter(Mandatory=$FALSE)][string]$repo,
 		[Parameter(Mandatory=$FALSE)][string]$ref
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -41,9 +45,9 @@ Function Delete-AReference
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/repos/$owner/$repo/git/refs/$ref?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/repos/$owner/$repo/git/refs/$ref?$($Querys -join '&')"
     }
     else
     {

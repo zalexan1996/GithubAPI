@@ -15,6 +15,9 @@ Required. The position of the column in a project. Can be one of: first, last, o
 
 .LINK
 https://docs.github.com/en/rest/reference/projects
+
+.OUTPUTS
+
 #>
 Function Move-AProjectColumn
 {
@@ -24,9 +27,10 @@ Function Move-AProjectColumn
 		[Parameter(Mandatory=$FALSE)][int]$column_id,
 		[Parameter(Mandatory=$FALSE)][string]$position
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -37,9 +41,9 @@ Function Move-AProjectColumn
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/projects/columns/$column_id/moves?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/projects/columns/$column_id/moves?$($Querys -join '&')"
     }
     else
     {

@@ -52,6 +52,31 @@ An object with information about the individual creating the tag.
 
 .LINK
 https://docs.github.com/en/rest/reference/git
+
+.OUTPUTS
+ {
+  "node_id": "MDM6VGFnOTQwYmQzMzYyNDhlZmFlMGY5ZWU1YmM3YjJkNWM5ODU4ODdiMTZhYw==",
+  "tag": "v0.0.1",
+  "sha": "940bd336248efae0f9ee5bc7b2d5c985887b16ac",
+  "url": "https://api.github.com/repos/octocat/Hello-World/git/tags/940bd336248efae0f9ee5bc7b2d5c985887b16ac",
+  "message": "initial version",
+  "tagger": {
+    "name": "Monalisa Octocat",
+    "email": "octocat@github.com",
+    "date": "2014-11-07T22:01:45Z"
+  },
+  "object": {
+    "type": "commit",
+    "sha": "c3d0be41ecbe669545ee3e94d31ed9a4bc91ee3c",
+    "url": "https://api.github.com/repos/octocat/Hello-World/git/commits/c3d0be41ecbe669545ee3e94d31ed9a4bc91ee3c"
+  },
+  "verification": {
+    "verified": false,
+    "reason": "unsigned",
+    "signature": null,
+    "payload": null
+  }
+}
 #>
 Function Create-ATagObject
 {
@@ -66,9 +91,10 @@ Function Create-ATagObject
 		[Parameter(Mandatory=$FALSE)][string]$type,
 		[Parameter(Mandatory=$FALSE)][object]$tagger
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -83,9 +109,9 @@ Function Create-ATagObject
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/repos/$owner/$repo/git/tags?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/repos/$owner/$repo/git/tags?$($Querys -join '&')"
     }
     else
     {

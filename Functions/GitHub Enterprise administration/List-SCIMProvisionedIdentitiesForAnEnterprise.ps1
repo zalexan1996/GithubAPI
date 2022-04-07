@@ -32,6 +32,76 @@ filter results
 
 .LINK
 https://docs.github.com/en/rest/reference/enterprise-admin
+
+.OUTPUTS
+ {
+  "schemas": [
+    "urn:ietf:params:scim:api:messages:2.0:ListResponse"
+  ],
+  "totalResults": 2,
+  "itemsPerPage": 2,
+  "startIndex": 1,
+  "Resources": [
+    {
+      "schemas": [
+        "urn:ietf:params:scim:schemas:core:2.0:User"
+      ],
+      "id": "92b58aaa-a1d6-11ea-8227-b9ce9e023ccc",
+      "externalId": "00dowz5dr9oSfDFRA0h7",
+      "userName": "octocat@github.com",
+      "name": {
+        "givenName": "Mona",
+        "familyName": "Octocat"
+      },
+      "emails": [
+        {
+          "value": "octocat@github.com",
+          "primary": true,
+          "type": "work"
+        }
+      ],
+      "groups": [
+        {
+          "value": "468dd3fa-a1d6-11ea-9031-15a1f0d7811d"
+        }
+      ],
+      "active": true,
+      "meta": {
+        "resourceType": "User",
+        "created": "2020-05-30T04:02:34.000+10:00",
+        "lastModified": "2020-05-30T04:05:04.000+10:00",
+        "location": "https://api.github.com/scim/v2/enterprises/octo-corp/Users/92b58aaa-a1d6-11ea-8227-b9ce9e023ccc"
+      }
+    },
+    {
+      "schemas": [
+        "urn:ietf:params:scim:schemas:core:2.0:User"
+      ],
+      "id": "e18b8c34-a6b2-11ea-9d70-54abbd1c8fd5",
+      "externalId": "sdfoiausdofiua",
+      "userName": "hubot@example.com",
+      "name": {
+        "givenName": "hu",
+        "familyName": "bot"
+      },
+      "emails": [
+        {
+          "value": "hubot@example.com",
+          "type": "work",
+          "primary": true
+        }
+      ],
+      "groups": [],
+      "active": true,
+      "meta": {
+        "resourceType": "User",
+        "created": "2020-06-05T08:29:40.000+10:00",
+        "lastModified": "2020-06-05T08:30:19.000+10:00",
+        "location": "https://api.github.com/scim/v2/enterprises/octo-corp/Users/e18b8c34-a6b2-11ea-9d70-54abbd1c8fd5"
+      }
+    }
+  ]
+}
 #>
 Function List-SCIMProvisionedIdentitiesForAnEnterprise
 {
@@ -43,11 +113,12 @@ Function List-SCIMProvisionedIdentitiesForAnEnterprise
 		[Parameter(Mandatory=$FALSE)][int]$count,
 		[Parameter(Mandatory=$FALSE)][string]$filter
     )
+    $Querys = @()
     $QueryStrings = @(
-        "startIndex=$startIndex",
-		"count=$count",
-		"filter=$filter"
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+        "startIndex",
+		"count",
+		"filter"
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -58,9 +129,9 @@ Function List-SCIMProvisionedIdentitiesForAnEnterprise
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/scim/v2/enterprises/$enterprise/Users?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/scim/v2/enterprises/$enterprise/Users?$($Querys -join '&')"
     }
     else
     {

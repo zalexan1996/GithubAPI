@@ -19,6 +19,12 @@ The name of the branch.
 
 .LINK
 https://docs.github.com/en/rest/reference/branches
+
+.OUTPUTS
+ {
+  "url": "https://api.github.com/repos/octocat/Hello-World/branches/master/protection/enforce_admins",
+  "enabled": true
+}
 #>
 Function Set-AdminBranchProtection
 {
@@ -29,9 +35,10 @@ Function Set-AdminBranchProtection
 		[Parameter(Mandatory=$FALSE)][string]$repo,
 		[Parameter(Mandatory=$FALSE)][string]$branch
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -42,9 +49,9 @@ Function Set-AdminBranchProtection
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/repos/$owner/$repo/branches/$branch/protection/enforce_admins?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/repos/$owner/$repo/branches/$branch/protection/enforce_admins?$($Querys -join '&')"
     }
     else
     {

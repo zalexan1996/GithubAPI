@@ -19,6 +19,33 @@ Required. The names of the custom labels to set for the runner. You can pass an 
 
 .LINK
 https://docs.github.com/en/rest/reference/actions
+
+.OUTPUTS
+ {
+  "total_count": 4,
+  "labels": [
+    {
+      "id": 5,
+      "name": "self-hosted",
+      "type": "read-only"
+    },
+    {
+      "id": 7,
+      "name": "X64",
+      "type": "read-only"
+    },
+    {
+      "id": 20,
+      "name": "macOS",
+      "type": "read-only"
+    },
+    {
+      "id": 21,
+      "name": "no-gpu",
+      "type": "custom"
+    }
+  ]
+}
 #>
 Function Set-CustomLabelsForASelf-HostedRunnerForAnOrganization
 {
@@ -29,9 +56,10 @@ Function Set-CustomLabelsForASelf-HostedRunnerForAnOrganization
 		[Parameter(Mandatory=$FALSE)][int]$runner_id,
 		[Parameter(Mandatory=$FALSE)][string[]]$labels
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -42,9 +70,9 @@ Function Set-CustomLabelsForASelf-HostedRunnerForAnOrganization
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/orgs/$org/actions/runners/$runner_id/labels?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/orgs/$org/actions/runners/$runner_id/labels?$($Querys -join '&')"
     }
     else
     {

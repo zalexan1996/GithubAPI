@@ -26,6 +26,28 @@ Default: 1
 
 .LINK
 https://docs.github.com/en/rest/reference/branches
+
+.OUTPUTS
+ [
+  {
+    "name": "master",
+    "commit": {
+      "sha": "c5b97d5ae6c19d5c5df71a34c7fbeeda2479ccbc",
+      "url": "https://api.github.com/repos/octocat/Hello-World/commits/c5b97d5ae6c19d5c5df71a34c7fbeeda2479ccbc"
+    },
+    "protected": true,
+    "protection": {
+      "required_status_checks": {
+        "enforcement_level": "non_admins",
+        "contexts": [
+          "ci-test",
+          "linter"
+        ]
+      }
+    },
+    "protection_url": "https://api.github.com/repos/octocat/hello-world/branches/master/protection"
+  }
+]
 #>
 Function List-Branches
 {
@@ -38,11 +60,12 @@ Function List-Branches
 		[Parameter(Mandatory=$FALSE)][int]$per_page,
 		[Parameter(Mandatory=$FALSE)][int]$page
     )
+    $Querys = @()
     $QueryStrings = @(
-        "protected=$protected",
-		"per_page=$per_page",
-		"page=$page"
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+        "protected",
+		"per_page",
+		"page"
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -53,9 +76,9 @@ Function List-Branches
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/repos/$owner/$repo/branches?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/repos/$owner/$repo/branches?$($Querys -join '&')"
     }
     else
     {

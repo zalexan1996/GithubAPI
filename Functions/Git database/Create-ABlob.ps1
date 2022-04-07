@@ -22,6 +22,12 @@ Default: utf-8
 
 .LINK
 https://docs.github.com/en/rest/reference/git
+
+.OUTPUTS
+ {
+  "url": "https://api.github.com/repos/octocat/example/git/blobs/3a0f86fb8db8eea7ccbb9a95f325ddbedfb25e15",
+  "sha": "3a0f86fb8db8eea7ccbb9a95f325ddbedfb25e15"
+}
 #>
 Function Create-ABlob
 {
@@ -33,9 +39,10 @@ Function Create-ABlob
 		[Parameter(Mandatory=$FALSE)][string]$content,
 		[Parameter(Mandatory=$FALSE)][string]$encoding
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -47,9 +54,9 @@ Function Create-ABlob
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/repos/$owner/$repo/git/blobs?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/repos/$owner/$repo/git/blobs?$($Querys -join '&')"
     }
     else
     {

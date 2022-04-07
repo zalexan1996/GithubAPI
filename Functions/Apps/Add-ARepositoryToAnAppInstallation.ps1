@@ -16,6 +16,9 @@ installation_id parameter
 
 .LINK
 https://docs.github.com/en/rest/reference/apps
+
+.OUTPUTS
+
 #>
 Function Add-ARepositoryToAnAppInstallation
 {
@@ -25,9 +28,10 @@ Function Add-ARepositoryToAnAppInstallation
 		[Parameter(Mandatory=$FALSE)][int]$installation_id,
 		[Parameter(Mandatory=$FALSE)][int]$repository_id
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -38,9 +42,9 @@ Function Add-ARepositoryToAnAppInstallation
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/user/installations/$installation_id/repositories/$repository_id?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/user/installations/$installation_id/repositories/$repository_id?$($Querys -join '&')"
     }
     else
     {

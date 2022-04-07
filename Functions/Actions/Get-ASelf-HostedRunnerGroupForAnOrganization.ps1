@@ -17,6 +17,23 @@ Unique identifier of the self-hosted runner group.
 
 .LINK
 https://docs.github.com/en/rest/reference/actions
+
+.OUTPUTS
+ {
+  "id": 2,
+  "name": "octo-runner-group",
+  "visibility": "selected",
+  "default": false,
+  "selected_repositories_url": "https://api.github.com/orgs/octo-org/actions/runner_groups/2/repositories",
+  "runners_url": "https://api.github.com/orgs/octo-org/actions/runner_groups/2/runners",
+  "inherited": false,
+  "allows_public_repositories": true,
+  "restricted_to_workflows": true,
+  "selected_workflows": [
+    "octo-org/octo-repo/.github/workflows/deploy.yaml@refs/heads/main"
+  ],
+  "workflow_restrictions_read_only": false
+}
 #>
 Function Get-ASelf-HostedRunnerGroupForAnOrganization
 {
@@ -26,9 +43,10 @@ Function Get-ASelf-HostedRunnerGroupForAnOrganization
 		[Parameter(Mandatory=$FALSE)][string]$org,
 		[Parameter(Mandatory=$FALSE)][int]$runner_group_id
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -39,9 +57,9 @@ Function Get-ASelf-HostedRunnerGroupForAnOrganization
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/orgs/$org/actions/runner-groups/$runner_group_id?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/orgs/$org/actions/runner-groups/$runner_group_id?$($Querys -join '&')"
     }
     else
     {

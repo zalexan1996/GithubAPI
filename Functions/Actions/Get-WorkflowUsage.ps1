@@ -19,6 +19,21 @@ The ID of the workflow. You can also pass the workflow file name as a string.
 
 .LINK
 https://docs.github.com/en/rest/reference/actions
+
+.OUTPUTS
+ {
+  "billable": {
+    "UBUNTU": {
+      "total_ms": 180000
+    },
+    "MACOS": {
+      "total_ms": 240000
+    },
+    "WINDOWS": {
+      "total_ms": 300000
+    }
+  }
+}
 #>
 Function Get-WorkflowUsage
 {
@@ -29,9 +44,10 @@ Function Get-WorkflowUsage
 		[Parameter(Mandatory=$FALSE)][string]$repo,
 		[Parameter(Mandatory=$FALSE)][string]$workflow_id
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -42,9 +58,9 @@ Function Get-WorkflowUsage
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/repos/$owner/$repo/actions/workflows/$workflow_id/timing?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/repos/$owner/$repo/actions/workflows/$workflow_id/timing?$($Querys -join '&')"
     }
     else
     {

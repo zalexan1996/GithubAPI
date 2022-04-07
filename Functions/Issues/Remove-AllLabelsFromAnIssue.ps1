@@ -18,6 +18,9 @@ issue_number parameter
 
 .LINK
 https://docs.github.com/en/rest/reference/issues
+
+.OUTPUTS
+
 #>
 Function Remove-AllLabelsFromAnIssue
 {
@@ -28,9 +31,10 @@ Function Remove-AllLabelsFromAnIssue
 		[Parameter(Mandatory=$FALSE)][string]$repo,
 		[Parameter(Mandatory=$FALSE)][int]$issue_number
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -41,9 +45,9 @@ Function Remove-AllLabelsFromAnIssue
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/repos/$owner/$repo/issues/$issue_number/labels?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/repos/$owner/$repo/issues/$issue_number/labels?$($Querys -join '&')"
     }
     else
     {

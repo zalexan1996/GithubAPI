@@ -17,6 +17,16 @@ Default: 1
 
 .LINK
 https://docs.github.com/en/rest/reference/users
+
+.OUTPUTS
+ [
+  {
+    "email": "octocat@github.com",
+    "verified": true,
+    "primary": true,
+    "visibility": "public"
+  }
+]
 #>
 Function List-EmailAddressesForTheAuthenticatedUser
 {
@@ -26,10 +36,11 @@ Function List-EmailAddressesForTheAuthenticatedUser
 		[Parameter(Mandatory=$FALSE)][int]$per_page,
 		[Parameter(Mandatory=$FALSE)][int]$page
     )
+    $Querys = @()
     $QueryStrings = @(
-        "per_page=$per_page",
-		"page=$page"
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+        "per_page",
+		"page"
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -40,9 +51,9 @@ Function List-EmailAddressesForTheAuthenticatedUser
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/user/emails?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/user/emails?$($Querys -join '&')"
     }
     else
     {

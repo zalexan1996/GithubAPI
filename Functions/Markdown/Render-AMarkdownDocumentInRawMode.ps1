@@ -9,6 +9,9 @@ Setting toapplication/vnd.github.v3+json is recommended.
 
 .LINK
 https://docs.github.com/en/rest/reference/markdown
+
+.OUTPUTS
+
 #>
 Function Render-AMarkdownDocumentInRawMode
 {
@@ -16,9 +19,10 @@ Function Render-AMarkdownDocumentInRawMode
     Param(
 		[Parameter(Mandatory=$FALSE)][string]$accept
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -29,9 +33,9 @@ Function Render-AMarkdownDocumentInRawMode
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/markdown/raw?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/markdown/raw?$($Querys -join '&')"
     }
     else
     {

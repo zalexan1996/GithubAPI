@@ -12,6 +12,12 @@ Setting toapplication/vnd.github.v3+json is recommended.
 
 .LINK
 https://docs.github.com/en/rest/reference/actions
+
+.OUTPUTS
+ {
+  "total_active_caches_size_in_bytes": 3344284,
+  "total_active_caches_count": 5
+}
 #>
 Function Get-GithubActionsCacheUsageForAnOrganization
 {
@@ -20,9 +26,10 @@ Function Get-GithubActionsCacheUsageForAnOrganization
 		[Parameter(Mandatory=$FALSE)][string]$accept,
 		[Parameter(Mandatory=$FALSE)][string]$org
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -33,9 +40,9 @@ Function Get-GithubActionsCacheUsageForAnOrganization
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/orgs/$org/actions/cache/usage?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/orgs/$org/actions/cache/usage?$($Querys -join '&')"
     }
     else
     {

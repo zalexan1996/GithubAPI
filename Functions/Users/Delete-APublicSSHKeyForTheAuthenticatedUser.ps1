@@ -12,6 +12,9 @@ key_id parameter
 
 .LINK
 https://docs.github.com/en/rest/reference/users
+
+.OUTPUTS
+
 #>
 Function Delete-APublicSSHKeyForTheAuthenticatedUser
 {
@@ -20,9 +23,10 @@ Function Delete-APublicSSHKeyForTheAuthenticatedUser
 		[Parameter(Mandatory=$FALSE)][string]$accept,
 		[Parameter(Mandatory=$FALSE)][int]$key_id
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -33,9 +37,9 @@ Function Delete-APublicSSHKeyForTheAuthenticatedUser
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/user/keys/$key_id?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/user/keys/$key_id?$($Querys -join '&')"
     }
     else
     {

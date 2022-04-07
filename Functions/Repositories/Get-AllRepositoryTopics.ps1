@@ -23,6 +23,16 @@ Default: 30
 
 .LINK
 https://docs.github.com/en/rest/reference/repos
+
+.OUTPUTS
+ {
+  "names": [
+    "octocat",
+    "atom",
+    "electron",
+    "api"
+  ]
+}
 #>
 Function Get-AllRepositoryTopics
 {
@@ -34,10 +44,11 @@ Function Get-AllRepositoryTopics
 		[Parameter(Mandatory=$FALSE)][int]$page,
 		[Parameter(Mandatory=$FALSE)][int]$per_page
     )
+    $Querys = @()
     $QueryStrings = @(
-        "page=$page",
-		"per_page=$per_page"
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+        "page",
+		"per_page"
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -48,9 +59,9 @@ Function Get-AllRepositoryTopics
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/repos/$owner/$repo/topics?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/repos/$owner/$repo/topics?$($Querys -join '&')"
     }
     else
     {

@@ -1,6 +1,8 @@
 <#
 .SYNOPSIS
-Select the repositories that will use a user's codespace secret. You must authenticate using an access token with the user or read:user scope to use this endpoint. User must have Codespaces access to use this endpoint.
+Select the repositories that will use a user's codespace secret.
+You must authenticate using an access token with the codespace or codespace:secrets scope to use this endpoint. User must have Codespaces access to use this endpoint.
+GitHub Apps must have write access to the codespaces_user_secrets user permission and write access to the codespace_secrets repository permission on all referenced repositories to use this endpoint.
 
         
 .PARAMETER accept
@@ -15,6 +17,9 @@ Required. An array of repository ids for which a codespace can access the secret
 
 .LINK
 https://docs.github.com/en/rest/reference/codespaces
+
+.OUTPUTS
+
 #>
 Function Set-SelectedRepositoriesForAUserSecret
 {
@@ -24,9 +29,10 @@ Function Set-SelectedRepositoriesForAUserSecret
 		[Parameter(Mandatory=$FALSE)][string]$secret_name,
 		[Parameter(Mandatory=$FALSE)][int[]]$selected_repository_ids
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -37,9 +43,9 @@ Function Set-SelectedRepositoriesForAUserSecret
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/user/codespaces/secrets/$secret_name/repositories?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/user/codespaces/secrets/$secret_name/repositories?$($Querys -join '&')"
     }
     else
     {

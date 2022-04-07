@@ -20,6 +20,15 @@ Default: 1
 
 .LINK
 https://docs.github.com/en/rest/reference/repos
+
+.OUTPUTS
+ [
+  {
+    "id": 1,
+    "key_prefix": "TICKET-",
+    "url_template": "https://example.com/TICKET?query=<num>"
+  }
+]
 #>
 Function List-AllAutolinksOfARepository
 {
@@ -30,9 +39,10 @@ Function List-AllAutolinksOfARepository
 		[Parameter(Mandatory=$FALSE)][string]$repo,
 		[Parameter(Mandatory=$FALSE)][int]$page
     )
+    $Querys = @()
     $QueryStrings = @(
-        "page=$page"
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+        "page"
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -43,9 +53,9 @@ Function List-AllAutolinksOfARepository
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/repos/$owner/$repo/autolinks?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/repos/$owner/$repo/autolinks?$($Querys -join '&')"
     }
     else
     {

@@ -21,6 +21,16 @@ Determines if all notifications should be blocked from this repository.
 
 .LINK
 https://docs.github.com/en/rest/reference/activity
+
+.OUTPUTS
+ {
+  "subscribed": true,
+  "ignored": false,
+  "reason": null,
+  "created_at": "2012-10-06T21:34:12Z",
+  "url": "https://api.github.com/repos/octocat/example/subscription",
+  "repository_url": "https://api.github.com/repos/octocat/example"
+}
 #>
 Function Set-ARepositorySubscription
 {
@@ -32,9 +42,10 @@ Function Set-ARepositorySubscription
 		[Parameter(Mandatory=$FALSE)][bool]$subscribed,
 		[Parameter(Mandatory=$FALSE)][bool]$ignored
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -46,9 +57,9 @@ Function Set-ARepositorySubscription
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/repos/$owner/$repo/subscription?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/repos/$owner/$repo/subscription?$($Querys -join '&')"
     }
     else
     {

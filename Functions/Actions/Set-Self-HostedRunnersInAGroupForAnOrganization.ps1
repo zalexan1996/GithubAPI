@@ -20,6 +20,9 @@ Required. List of runner IDs to add to the runner group.
 
 .LINK
 https://docs.github.com/en/rest/reference/actions
+
+.OUTPUTS
+
 #>
 Function Set-Self-HostedRunnersInAGroupForAnOrganization
 {
@@ -30,9 +33,10 @@ Function Set-Self-HostedRunnersInAGroupForAnOrganization
 		[Parameter(Mandatory=$FALSE)][int]$runner_group_id,
 		[Parameter(Mandatory=$FALSE)][int[]]$runners
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -43,9 +47,9 @@ Function Set-Self-HostedRunnersInAGroupForAnOrganization
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/orgs/$org/actions/runner-groups/$runner_group_id/runners?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/orgs/$org/actions/runner-groups/$runner_group_id/runners?$($Querys -join '&')"
     }
     else
     {

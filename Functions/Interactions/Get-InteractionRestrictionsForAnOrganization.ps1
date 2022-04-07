@@ -12,6 +12,13 @@ Setting toapplication/vnd.github.v3+json is recommended.
 
 .LINK
 https://docs.github.com/en/rest/reference/interactions
+
+.OUTPUTS
+ {
+  "limit": "collaborators_only",
+  "origin": "organization",
+  "expires_at": "2018-08-17T04:18:39Z"
+}
 #>
 Function Get-InteractionRestrictionsForAnOrganization
 {
@@ -20,9 +27,10 @@ Function Get-InteractionRestrictionsForAnOrganization
 		[Parameter(Mandatory=$FALSE)][string]$accept,
 		[Parameter(Mandatory=$FALSE)][string]$org
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -33,9 +41,9 @@ Function Get-InteractionRestrictionsForAnOrganization
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/orgs/$org/interaction-limits?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/orgs/$org/interaction-limits?$($Querys -join '&')"
     }
     else
     {

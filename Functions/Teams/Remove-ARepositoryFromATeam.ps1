@@ -22,6 +22,9 @@ team_slug parameter
 
 .LINK
 https://docs.github.com/en/rest/reference/teams
+
+.OUTPUTS
+
 #>
 Function Remove-ARepositoryFromATeam
 {
@@ -33,9 +36,10 @@ Function Remove-ARepositoryFromATeam
 		[Parameter(Mandatory=$FALSE)][string]$owner,
 		[Parameter(Mandatory=$FALSE)][string]$repo
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -46,9 +50,9 @@ Function Remove-ARepositoryFromATeam
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/orgs/$org/teams/$team_slug/repos/$owner/$repo?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/orgs/$org/teams/$team_slug/repos/$owner/$repo?$($Querys -join '&')"
     }
     else
     {

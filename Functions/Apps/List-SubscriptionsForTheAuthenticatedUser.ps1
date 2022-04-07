@@ -17,6 +17,45 @@ Default: 1
 
 .LINK
 https://docs.github.com/en/rest/reference/apps
+
+.OUTPUTS
+ [
+  {
+    "billing_cycle": "monthly",
+    "next_billing_date": "2017-11-11T00:00:00Z",
+    "unit_count": null,
+    "on_free_trial": true,
+    "free_trial_ends_on": "2017-11-11T00:00:00Z",
+    "updated_at": "2017-11-02T01:12:12Z",
+    "account": {
+      "login": "github",
+      "id": 4,
+      "node_id": "MDEyOk9yZ2FuaXphdGlvbjE=",
+      "url": "https://api.github.com/orgs/github",
+      "email": null,
+      "organization_billing_email": "billing@github.com",
+      "type": "Organization"
+    },
+    "plan": {
+      "url": "https://api.github.com/marketplace_listing/plans/1313",
+      "accounts_url": "https://api.github.com/marketplace_listing/plans/1313/accounts",
+      "id": 1313,
+      "number": 3,
+      "name": "Pro",
+      "description": "A professional-grade CI solution",
+      "monthly_price_in_cents": 1099,
+      "yearly_price_in_cents": 11870,
+      "price_model": "flat-rate",
+      "has_free_trial": true,
+      "unit_name": null,
+      "state": "published",
+      "bullets": [
+        "Up to 25 private repositories",
+        "11 concurrent builds"
+      ]
+    }
+  }
+]
 #>
 Function List-SubscriptionsForTheAuthenticatedUser
 {
@@ -26,10 +65,11 @@ Function List-SubscriptionsForTheAuthenticatedUser
 		[Parameter(Mandatory=$FALSE)][int]$per_page,
 		[Parameter(Mandatory=$FALSE)][int]$page
     )
+    $Querys = @()
     $QueryStrings = @(
-        "per_page=$per_page",
-		"page=$page"
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+        "per_page",
+		"page"
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -40,9 +80,9 @@ Function List-SubscriptionsForTheAuthenticatedUser
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/user/marketplace_purchases?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/user/marketplace_purchases?$($Querys -join '&')"
     }
     else
     {

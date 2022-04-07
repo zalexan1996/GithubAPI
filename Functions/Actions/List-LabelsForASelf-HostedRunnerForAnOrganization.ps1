@@ -16,6 +16,33 @@ Unique identifier of the self-hosted runner.
 
 .LINK
 https://docs.github.com/en/rest/reference/actions
+
+.OUTPUTS
+ {
+  "total_count": 4,
+  "labels": [
+    {
+      "id": 5,
+      "name": "self-hosted",
+      "type": "read-only"
+    },
+    {
+      "id": 7,
+      "name": "X64",
+      "type": "read-only"
+    },
+    {
+      "id": 20,
+      "name": "macOS",
+      "type": "read-only"
+    },
+    {
+      "id": 21,
+      "name": "no-gpu",
+      "type": "custom"
+    }
+  ]
+}
 #>
 Function List-LabelsForASelf-HostedRunnerForAnOrganization
 {
@@ -25,9 +52,10 @@ Function List-LabelsForASelf-HostedRunnerForAnOrganization
 		[Parameter(Mandatory=$FALSE)][string]$org,
 		[Parameter(Mandatory=$FALSE)][int]$runner_id
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -38,9 +66,9 @@ Function List-LabelsForASelf-HostedRunnerForAnOrganization
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/orgs/$org/actions/runners/$runner_id/labels?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/orgs/$org/actions/runners/$runner_id/labels?$($Querys -join '&')"
     }
     else
     {

@@ -13,6 +13,16 @@ thread_id parameter
 
 .LINK
 https://docs.github.com/en/rest/reference/activity
+
+.OUTPUTS
+ {
+  "subscribed": true,
+  "ignored": false,
+  "reason": null,
+  "created_at": "2012-10-06T21:34:12Z",
+  "url": "https://api.github.com/notifications/threads/1/subscription",
+  "thread_url": "https://api.github.com/notifications/threads/1"
+}
 #>
 Function Get-AThreadSubscriptionForTheAuthenticatedUser
 {
@@ -21,9 +31,10 @@ Function Get-AThreadSubscriptionForTheAuthenticatedUser
 		[Parameter(Mandatory=$FALSE)][string]$accept,
 		[Parameter(Mandatory=$FALSE)][int]$thread_id
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -34,9 +45,9 @@ Function Get-AThreadSubscriptionForTheAuthenticatedUser
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/notifications/threads/$thread_id/subscription?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/notifications/threads/$thread_id/subscription?$($Querys -join '&')"
     }
     else
     {

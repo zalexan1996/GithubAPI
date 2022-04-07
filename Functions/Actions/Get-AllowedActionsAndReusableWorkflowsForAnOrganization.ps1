@@ -13,6 +13,16 @@ Setting toapplication/vnd.github.v3+json is recommended.
 
 .LINK
 https://docs.github.com/en/rest/reference/actions
+
+.OUTPUTS
+ {
+  "github_owned_allowed": true,
+  "verified_allowed": false,
+  "patterns_allowed": [
+    "monalisa/octocat@*",
+    "docker/*"
+  ]
+}
 #>
 Function Get-AllowedActionsAndReusableWorkflowsForAnOrganization
 {
@@ -21,9 +31,10 @@ Function Get-AllowedActionsAndReusableWorkflowsForAnOrganization
 		[Parameter(Mandatory=$FALSE)][string]$accept,
 		[Parameter(Mandatory=$FALSE)][string]$org
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -34,9 +45,9 @@ Function Get-AllowedActionsAndReusableWorkflowsForAnOrganization
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/orgs/$org/actions/permissions/selected-actions?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/orgs/$org/actions/permissions/selected-actions?$($Querys -join '&')"
     }
     else
     {

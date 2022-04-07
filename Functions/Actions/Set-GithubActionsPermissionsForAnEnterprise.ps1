@@ -19,6 +19,9 @@ The permissions policy that controls the actions and reusable workflows that are
 
 .LINK
 https://docs.github.com/en/rest/reference/actions
+
+.OUTPUTS
+
 #>
 Function Set-GithubActionsPermissionsForAnEnterprise
 {
@@ -29,9 +32,10 @@ Function Set-GithubActionsPermissionsForAnEnterprise
 		[Parameter(Mandatory=$FALSE)][string]$enabled_organizations,
 		[Parameter(Mandatory=$FALSE)][string]$allowed_actions
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -43,9 +47,9 @@ Function Set-GithubActionsPermissionsForAnEnterprise
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/enterprises/$enterprise/actions/permissions?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/enterprises/$enterprise/actions/permissions?$($Querys -join '&')"
     }
     else
     {

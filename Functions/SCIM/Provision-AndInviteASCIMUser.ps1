@@ -36,6 +36,9 @@ Required. user emails
 
 .LINK
 https://docs.github.com/en/rest/reference/scim
+
+.OUTPUTS
+
 #>
 Function Provision-AndInviteASCIMUser
 {
@@ -52,9 +55,10 @@ Function Provision-AndInviteASCIMUser
 		[Parameter(Mandatory=$FALSE)][string[]]$groups,
 		[Parameter(Mandatory=$FALSE)][bool]$active
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -72,9 +76,9 @@ Function Provision-AndInviteASCIMUser
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/scim/v2/organizations/$org/Users?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/scim/v2/organizations/$org/Users?$($Querys -join '&')"
     }
     else
     {

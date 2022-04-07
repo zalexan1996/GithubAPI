@@ -15,6 +15,9 @@ Whether the notification has been read.
 
 .LINK
 https://docs.github.com/en/rest/reference/activity
+
+.OUTPUTS
+
 #>
 Function Mark-NotificationsAsRead
 {
@@ -24,9 +27,10 @@ Function Mark-NotificationsAsRead
 		[Parameter(Mandatory=$FALSE)][string]$last_read_at,
 		[Parameter(Mandatory=$FALSE)][bool]$read
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -38,9 +42,9 @@ Function Mark-NotificationsAsRead
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/notifications?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/notifications?$($Querys -join '&')"
     }
     else
     {

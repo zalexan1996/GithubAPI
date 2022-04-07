@@ -38,6 +38,52 @@ Filter analyses belonging to the same SARIF upload.
 
 .LINK
 https://docs.github.com/en/rest/reference/code-scanning
+
+.OUTPUTS
+ [
+  {
+    "ref": "refs/heads/main",
+    "commit_sha": "d99612c3e1f2970085cfbaeadf8f010ef69bad83",
+    "analysis_key": ".github/workflows/codeql-analysis.yml:analyze",
+    "environment": "{\"language\":\"python\"}",
+    "error": "",
+    "category": ".github/workflows/codeql-analysis.yml:analyze/language:python",
+    "created_at": "2020-08-27T15:05:21Z",
+    "results_count": 17,
+    "rules_count": 49,
+    "id": 201,
+    "url": "https://api.github.com/repos/octocat/hello-world/code-scanning/analyses/201",
+    "sarif_id": "6c81cd8e-b078-4ac3-a3be-1dad7dbd0b53",
+    "tool": {
+      "name": "CodeQL",
+      "guid": null,
+      "version": "2.4.0"
+    },
+    "deletable": true,
+    "warning": ""
+  },
+  {
+    "ref": "refs/heads/my-branch",
+    "commit_sha": "c8cff6510d4d084fb1b4aa13b64b97ca12b07321",
+    "analysis_key": ".github/workflows/shiftleft.yml:build",
+    "environment": "{}",
+    "error": "",
+    "category": ".github/workflows/shiftleft.yml:build/",
+    "created_at": "2020-08-31T22:46:44Z",
+    "results_count": 17,
+    "rules_count": 32,
+    "id": 200,
+    "url": "https://api.github.com/repos/octocat/hello-world/code-scanning/analyses/200",
+    "sarif_id": "8981cd8e-b078-4ac3-a3be-1dad7dbd0b582",
+    "tool": {
+      "name": "Python Security Analysis",
+      "guid": null,
+      "version": "1.2.0"
+    },
+    "deletable": true,
+    "warning": ""
+  }
+]
 #>
 Function List-CodeScanningAnalysesForARepository
 {
@@ -53,14 +99,15 @@ Function List-CodeScanningAnalysesForARepository
 		[Parameter(Mandatory=$FALSE)][string]$ref,
 		[Parameter(Mandatory=$FALSE)][string]$sarif_id
     )
+    $Querys = @()
     $QueryStrings = @(
-        "tool_name=$tool_name",
-		"tool_guid=$tool_guid",
-		"page=$page",
-		"per_page=$per_page",
-		"ref=$ref",
-		"sarif_id=$sarif_id"
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+        "tool_name",
+		"tool_guid",
+		"page",
+		"per_page",
+		"ref",
+		"sarif_id"
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -71,9 +118,9 @@ Function List-CodeScanningAnalysesForARepository
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/repos/$owner/$repo/code-scanning/analyses?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/repos/$owner/$repo/code-scanning/analyses?$($Querys -join '&')"
     }
     else
     {

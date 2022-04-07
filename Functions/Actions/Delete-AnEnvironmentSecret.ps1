@@ -18,6 +18,9 @@ secret_name parameter
 
 .LINK
 https://docs.github.com/en/rest/reference/actions
+
+.OUTPUTS
+
 #>
 Function Delete-AnEnvironmentSecret
 {
@@ -28,9 +31,10 @@ Function Delete-AnEnvironmentSecret
 		[Parameter(Mandatory=$FALSE)][string]$environment_name,
 		[Parameter(Mandatory=$FALSE)][string]$secret_name
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -41,9 +45,9 @@ Function Delete-AnEnvironmentSecret
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/repositories/$repository_id/environments/$environment_name/secrets/$secret_name?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/repositories/$repository_id/environments/$environment_name/secrets/$secret_name?$($Querys -join '&')"
     }
     else
     {

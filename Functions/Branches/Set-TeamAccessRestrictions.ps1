@@ -24,6 +24,24 @@ Required. teams parameter
 
 .LINK
 https://docs.github.com/en/rest/reference/branches
+
+.OUTPUTS
+ [
+  {
+    "id": 1,
+    "node_id": "MDQ6VGVhbTE=",
+    "url": "https://api.github.com/teams/1",
+    "html_url": "https://github.com/orgs/github/teams/justice-league",
+    "name": "Justice League",
+    "slug": "justice-league",
+    "description": "A great team.",
+    "privacy": "closed",
+    "permission": "admin",
+    "members_url": "https://api.github.com/teams/1/members{/member}",
+    "repositories_url": "https://api.github.com/teams/1/repos",
+    "parent": null
+  }
+]
 #>
 Function Set-TeamAccessRestrictions
 {
@@ -35,9 +53,10 @@ Function Set-TeamAccessRestrictions
 		[Parameter(Mandatory=$FALSE)][string]$branch,
 		[Parameter(Mandatory=$FALSE)][string[]]$teams
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -48,9 +67,9 @@ Function Set-TeamAccessRestrictions
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/repos/$owner/$repo/branches/$branch/protection/restrictions/teams?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/repos/$owner/$repo/branches/$branch/protection/restrictions/teams?$($Querys -join '&')"
     }
     else
     {

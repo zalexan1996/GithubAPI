@@ -24,6 +24,9 @@ Specifies a list of string-matching patterns to allow specific action(s) and reu
 
 .LINK
 https://docs.github.com/en/rest/reference/actions
+
+.OUTPUTS
+
 #>
 Function Set-AllowedActionsAndReusableWorkflowsForAnOrganization
 {
@@ -35,9 +38,10 @@ Function Set-AllowedActionsAndReusableWorkflowsForAnOrganization
 		[Parameter(Mandatory=$FALSE)][bool]$verified_allowed,
 		[Parameter(Mandatory=$FALSE)][string[]]$patterns_allowed
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -50,9 +54,9 @@ Function Set-AllowedActionsAndReusableWorkflowsForAnOrganization
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/orgs/$org/actions/permissions/selected-actions?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/orgs/$org/actions/permissions/selected-actions?$($Querys -join '&')"
     }
     else
     {

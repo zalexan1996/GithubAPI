@@ -10,6 +10,48 @@ Setting toapplication/vnd.github.v3+json is recommended.
 
 .LINK
 https://docs.github.com/en/rest/reference/rate-limit
+
+.OUTPUTS
+ {
+  "resources": {
+    "core": {
+      "limit": 5000,
+      "remaining": 4999,
+      "reset": 1372700873,
+      "used": 1
+    },
+    "search": {
+      "limit": 30,
+      "remaining": 18,
+      "reset": 1372697452,
+      "used": 12
+    },
+    "graphql": {
+      "limit": 5000,
+      "remaining": 4993,
+      "reset": 1372700389,
+      "used": 7
+    },
+    "integration_manifest": {
+      "limit": 5000,
+      "remaining": 4999,
+      "reset": 1551806725,
+      "used": 1
+    },
+    "code_scanning_upload": {
+      "limit": 500,
+      "remaining": 499,
+      "reset": 1551806725,
+      "used": 1
+    }
+  },
+  "rate": {
+    "limit": 5000,
+    "remaining": 4999,
+    "reset": 1372700873,
+    "used": 1
+  }
+}
 #>
 Function Get-RateLimitStatusForTheAuthenticatedUser
 {
@@ -17,9 +59,10 @@ Function Get-RateLimitStatusForTheAuthenticatedUser
     Param(
 		[Parameter(Mandatory=$FALSE)][string]$accept
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -30,9 +73,9 @@ Function Get-RateLimitStatusForTheAuthenticatedUser
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/rate_limit?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/rate_limit?$($Querys -join '&')"
     }
     else
     {

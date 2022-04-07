@@ -23,6 +23,9 @@ Default: 1
 
 .LINK
 https://docs.github.com/en/rest/reference/activity
+
+.OUTPUTS
+
 #>
 Function List-OrganizationEventsForTheAuthenticatedUser
 {
@@ -34,10 +37,11 @@ Function List-OrganizationEventsForTheAuthenticatedUser
 		[Parameter(Mandatory=$FALSE)][int]$per_page,
 		[Parameter(Mandatory=$FALSE)][int]$page
     )
+    $Querys = @()
     $QueryStrings = @(
-        "per_page=$per_page",
-		"page=$page"
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+        "per_page",
+		"page"
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -48,9 +52,9 @@ Function List-OrganizationEventsForTheAuthenticatedUser
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/users/$username/events/orgs/$org?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/users/$username/events/orgs/$org?$($Querys -join '&')"
     }
     else
     {

@@ -16,6 +16,22 @@ team_slug parameter
 
 .LINK
 https://docs.github.com/en/rest/reference/teams
+
+.OUTPUTS
+ {
+  "groups": [
+    {
+      "group_id": "123",
+      "group_name": "Octocat admins",
+      "updated_at": "2021-01-24T11:31:04-06:00"
+    },
+    {
+      "group_id": "456",
+      "group_name": "Octocat docs members",
+      "updated_at": "2021-03-24T11:31:04-06:00"
+    }
+  ]
+}
 #>
 Function List-AConnectionBetweenAnExternalGroupAndATeam
 {
@@ -25,9 +41,10 @@ Function List-AConnectionBetweenAnExternalGroupAndATeam
 		[Parameter(Mandatory=$FALSE)][string]$org,
 		[Parameter(Mandatory=$FALSE)][string]$team_slug
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -38,9 +55,9 @@ Function List-AConnectionBetweenAnExternalGroupAndATeam
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/orgs/$org/teams/$team_slug/external-groups?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/orgs/$org/teams/$team_slug/external-groups?$($Querys -join '&')"
     }
     else
     {

@@ -21,6 +21,16 @@ Uses the ID for the subject_type you specified. Required when using subject_type
 
 .LINK
 https://docs.github.com/en/rest/reference/users
+
+.OUTPUTS
+ {
+  "contexts": [
+    {
+      "message": "Owns this repository",
+      "octicon": "repo"
+    }
+  ]
+}
 #>
 Function Get-ContextualInformationForAUser
 {
@@ -31,10 +41,11 @@ Function Get-ContextualInformationForAUser
 		[Parameter(Mandatory=$FALSE)][string]$subject_type,
 		[Parameter(Mandatory=$FALSE)][string]$subject_id
     )
+    $Querys = @()
     $QueryStrings = @(
-        "subject_type=$subject_type",
-		"subject_id=$subject_id"
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+        "subject_type",
+		"subject_id"
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -45,9 +56,9 @@ Function Get-ContextualInformationForAUser
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/users/$username/hovercard?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/users/$username/hovercard?$($Querys -join '&')"
     }
     else
     {

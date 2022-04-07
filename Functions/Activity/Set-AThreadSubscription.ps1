@@ -17,6 +17,16 @@ Whether to block all notifications from a thread.
 
 .LINK
 https://docs.github.com/en/rest/reference/activity
+
+.OUTPUTS
+ {
+  "subscribed": true,
+  "ignored": false,
+  "reason": null,
+  "created_at": "2012-10-06T21:34:12Z",
+  "url": "https://api.github.com/notifications/threads/1/subscription",
+  "thread_url": "https://api.github.com/notifications/threads/1"
+}
 #>
 Function Set-AThreadSubscription
 {
@@ -26,9 +36,10 @@ Function Set-AThreadSubscription
 		[Parameter(Mandatory=$FALSE)][int]$thread_id,
 		[Parameter(Mandatory=$FALSE)][bool]$ignored
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -39,9 +50,9 @@ Function Set-AThreadSubscription
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/notifications/threads/$thread_id/subscription?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/notifications/threads/$thread_id/subscription?$($Querys -join '&')"
     }
     else
     {

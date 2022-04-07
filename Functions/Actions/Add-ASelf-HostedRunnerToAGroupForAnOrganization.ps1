@@ -20,6 +20,9 @@ Unique identifier of the self-hosted runner.
 
 .LINK
 https://docs.github.com/en/rest/reference/actions
+
+.OUTPUTS
+
 #>
 Function Add-ASelf-HostedRunnerToAGroupForAnOrganization
 {
@@ -30,9 +33,10 @@ Function Add-ASelf-HostedRunnerToAGroupForAnOrganization
 		[Parameter(Mandatory=$FALSE)][int]$runner_group_id,
 		[Parameter(Mandatory=$FALSE)][int]$runner_id
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -43,9 +47,9 @@ Function Add-ASelf-HostedRunnerToAGroupForAnOrganization
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/orgs/$org/actions/runner-groups/$runner_group_id/runners/$runner_id?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/orgs/$org/actions/runner-groups/$runner_group_id/runners/$runner_id?$($Querys -join '&')"
     }
     else
     {

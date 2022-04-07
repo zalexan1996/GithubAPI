@@ -16,6 +16,9 @@ The name of the package.
 
 .LINK
 https://docs.github.com/en/rest/reference/packages
+
+.OUTPUTS
+
 #>
 Function Delete-APackageForTheAuthenticatedUser
 {
@@ -25,9 +28,10 @@ Function Delete-APackageForTheAuthenticatedUser
 		[Parameter(Mandatory=$FALSE)][string]$package_type,
 		[Parameter(Mandatory=$FALSE)][string]$package_name
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -38,9 +42,9 @@ Function Delete-APackageForTheAuthenticatedUser
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/user/packages/$package_type/$package_name?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/user/packages/$package_type/$package_name?$($Querys -join '&')"
     }
     else
     {

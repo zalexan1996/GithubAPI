@@ -15,6 +15,9 @@ Setting toapplication/vnd.github.v3+json is recommended.
 
 .LINK
 https://docs.github.com/en/rest/reference/activity
+
+.OUTPUTS
+
 #>
 Function Star-ARepositoryForTheAuthenticatedUser
 {
@@ -24,9 +27,10 @@ Function Star-ARepositoryForTheAuthenticatedUser
 		[Parameter(Mandatory=$FALSE)][string]$owner,
 		[Parameter(Mandatory=$FALSE)][string]$repo
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -37,9 +41,9 @@ Function Star-ARepositoryForTheAuthenticatedUser
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/user/starred/$owner/$repo?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/user/starred/$owner/$repo?$($Querys -join '&')"
     }
     else
     {

@@ -26,6 +26,9 @@ Input keys and values configured in the workflow file. The maximum number of pro
 
 .LINK
 https://docs.github.com/en/rest/reference/actions
+
+.OUTPUTS
+
 #>
 Function Create-AWorkflowDispatchEvent
 {
@@ -38,9 +41,10 @@ Function Create-AWorkflowDispatchEvent
 		[Parameter(Mandatory=$FALSE)][string]$ref,
 		[Parameter(Mandatory=$FALSE)][object]$inputs
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -52,9 +56,9 @@ Function Create-AWorkflowDispatchEvent
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/repos/$owner/$repo/actions/workflows/$workflow_id/dispatches?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/repos/$owner/$repo/actions/workflows/$workflow_id/dispatches?$($Querys -join '&')"
     }
     else
     {

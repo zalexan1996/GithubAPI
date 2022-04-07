@@ -18,6 +18,9 @@ secret_name parameter
 
 .LINK
 https://docs.github.com/en/rest/reference/dependabot
+
+.OUTPUTS
+
 #>
 Function Remove-SelectedRepositoryFromAnOrganizationSecret
 {
@@ -28,9 +31,10 @@ Function Remove-SelectedRepositoryFromAnOrganizationSecret
 		[Parameter(Mandatory=$FALSE)][string]$secret_name,
 		[Parameter(Mandatory=$FALSE)][int]$repository_id
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -41,9 +45,9 @@ Function Remove-SelectedRepositoryFromAnOrganizationSecret
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/orgs/$org/dependabot/secrets/$secret_name/repositories/$repository_id?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/orgs/$org/dependabot/secrets/$secret_name/repositories/$repository_id?$($Querys -join '&')"
     }
     else
     {

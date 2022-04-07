@@ -15,6 +15,9 @@ Setting toapplication/vnd.github.v3+json is recommended.
 
 .LINK
 https://docs.github.com/en/rest/reference/projects
+
+.OUTPUTS
+
 #>
 Function Remove-UserAsACollaborator
 {
@@ -24,9 +27,10 @@ Function Remove-UserAsACollaborator
 		[Parameter(Mandatory=$FALSE)][int]$project_id,
 		[Parameter(Mandatory=$FALSE)][string]$username
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -37,9 +41,9 @@ Function Remove-UserAsACollaborator
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/projects/$project_id/collaborators/$username?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/projects/$project_id/collaborators/$username?$($Querys -join '&')"
     }
     else
     {

@@ -30,6 +30,24 @@ For a tfvc import, the name of the project that is being imported.
 
 .LINK
 https://docs.github.com/en/rest/reference/migrations
+
+.OUTPUTS
+ {
+  "vcs": "subversion",
+  "use_lfs": true,
+  "vcs_url": "http://svn.mycompany.com/svn/myproject",
+  "status": "importing",
+  "status_text": "Importing...",
+  "has_large_files": false,
+  "large_files_size": 0,
+  "large_files_count": 0,
+  "authors_count": 0,
+  "commit_count": 1042,
+  "url": "https://api.github.com/repos/octocat/socm/import",
+  "html_url": "https://import.github.com/octocat/socm/import",
+  "authors_url": "https://api.github.com/repos/octocat/socm/import/authors",
+  "repository_url": "https://api.github.com/repos/octocat/socm"
+}
 #>
 Function Start-AnImport
 {
@@ -44,9 +62,10 @@ Function Start-AnImport
 		[Parameter(Mandatory=$FALSE)][string]$vcs_password,
 		[Parameter(Mandatory=$FALSE)][string]$tfvc_project
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -61,9 +80,9 @@ Function Start-AnImport
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/repos/$owner/$repo/import?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/repos/$owner/$repo/import?$($Querys -join '&')"
     }
     else
     {

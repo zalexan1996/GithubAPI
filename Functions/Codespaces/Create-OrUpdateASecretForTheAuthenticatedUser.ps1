@@ -1,6 +1,8 @@
 <#
 .SYNOPSIS
-Creates or updates a secret for a user's codespace with an encrypted value. Encrypt your secret using LibSodium. You must authenticate using an access token with the user scope to use this endpoint. User must also have Codespaces access to use this endpoint.
+Creates or updates a secret for a user's codespace with an encrypted value. Encrypt your secret using LibSodium.
+You must authenticate using an access token with the codespace or codespace:secrets scope to use this endpoint. User must also have Codespaces access to use this endpoint.
+GitHub Apps must have read access to the codespaces_user_secrets user permission and codespace_secrets repository permission on all referenced repositories to use this endpoint.
 Example encrypting a secret using Node.js
 Encrypt your secret using the tweetsodium library.
 const sodium = require('tweetsodium');
@@ -71,6 +73,9 @@ An array of repository ids that can access the user secret. You can manage the l
 
 .LINK
 https://docs.github.com/en/rest/reference/codespaces
+
+.OUTPUTS
+
 #>
 Function Create-OrUpdateASecretForTheAuthenticatedUser
 {
@@ -82,9 +87,10 @@ Function Create-OrUpdateASecretForTheAuthenticatedUser
 		[Parameter(Mandatory=$FALSE)][string]$key_id,
 		[Parameter(Mandatory=$FALSE)][string[]]$selected_repository_ids
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -97,9 +103,9 @@ Function Create-OrUpdateASecretForTheAuthenticatedUser
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/user/codespaces/secrets/$secret_name?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/user/codespaces/secrets/$secret_name?$($Querys -join '&')"
     }
     else
     {

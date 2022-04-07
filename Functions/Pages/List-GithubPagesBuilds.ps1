@@ -23,6 +23,41 @@ Default: 1
 
 .LINK
 https://docs.github.com/en/rest/reference/pages
+
+.OUTPUTS
+ [
+  {
+    "url": "https://api.github.com/repos/github/developer.github.com/pages/builds/5472601",
+    "status": "built",
+    "error": {
+      "message": null
+    },
+    "pusher": {
+      "login": "octocat",
+      "id": 1,
+      "node_id": "MDQ6VXNlcjE=",
+      "avatar_url": "https://github.com/images/error/octocat_happy.gif",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/octocat",
+      "html_url": "https://github.com/octocat",
+      "followers_url": "https://api.github.com/users/octocat/followers",
+      "following_url": "https://api.github.com/users/octocat/following{/other_user}",
+      "gists_url": "https://api.github.com/users/octocat/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/octocat/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/octocat/subscriptions",
+      "organizations_url": "https://api.github.com/users/octocat/orgs",
+      "repos_url": "https://api.github.com/users/octocat/repos",
+      "events_url": "https://api.github.com/users/octocat/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/octocat/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "commit": "351391cdcb88ffae71ec3028c91f375a8036a26b",
+    "duration": 2104,
+    "created_at": "2014-02-10T19:00:49Z",
+    "updated_at": "2014-02-10T19:00:51Z"
+  }
+]
 #>
 Function List-GithubPagesBuilds
 {
@@ -34,10 +69,11 @@ Function List-GithubPagesBuilds
 		[Parameter(Mandatory=$FALSE)][int]$per_page,
 		[Parameter(Mandatory=$FALSE)][int]$page
     )
+    $Querys = @()
     $QueryStrings = @(
-        "per_page=$per_page",
-		"page=$page"
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+        "per_page",
+		"page"
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -48,9 +84,9 @@ Function List-GithubPagesBuilds
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/repos/$owner/$repo/pages/builds?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/repos/$owner/$repo/pages/builds?$($Querys -join '&')"
     }
     else
     {

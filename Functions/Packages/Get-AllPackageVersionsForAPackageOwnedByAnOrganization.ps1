@@ -31,6 +31,34 @@ Default: active
 
 .LINK
 https://docs.github.com/en/rest/reference/packages
+
+.OUTPUTS
+ [
+  {
+    "id": 245301,
+    "name": "1.0.4",
+    "url": "https://api.github.com/orgs/octo-org/packages/npm/hello-world-npm/versions/245301",
+    "package_html_url": "https://github.com/octo-org/hello-world-npm/packages/43752",
+    "created_at": "2019-11-05T22:49:04Z",
+    "updated_at": "2019-11-05T22:49:04Z",
+    "html_url": "https://github.com/octo-org/hello-world-npm/packages/43752?version=1.0.4",
+    "metadata": {
+      "package_type": "npm"
+    }
+  },
+  {
+    "id": 209672,
+    "name": "1.0.3",
+    "url": "https://api.github.com/orgs/octo-org/packages/npm/hello-world-npm/versions/209672",
+    "package_html_url": "https://github.com/octo-org/hello-world-npm/packages/43752",
+    "created_at": "2019-10-29T15:42:11Z",
+    "updated_at": "2019-10-29T15:42:12Z",
+    "html_url": "https://github.com/octo-org/hello-world-npm/packages/43752?version=1.0.3",
+    "metadata": {
+      "package_type": "npm"
+    }
+  }
+]
 #>
 Function Get-AllPackageVersionsForAPackageOwnedByAnOrganization
 {
@@ -44,11 +72,12 @@ Function Get-AllPackageVersionsForAPackageOwnedByAnOrganization
 		[Parameter(Mandatory=$FALSE)][int]$per_page,
 		[Parameter(Mandatory=$FALSE)][string]$state
     )
+    $Querys = @()
     $QueryStrings = @(
-        "page=$page",
-		"per_page=$per_page",
-		"state=$state"
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+        "page",
+		"per_page",
+		"state"
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -59,9 +88,9 @@ Function Get-AllPackageVersionsForAPackageOwnedByAnOrganization
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/orgs/$org/packages/$package_type/$package_name/versions?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/orgs/$org/packages/$package_type/$package_name/versions?$($Querys -join '&')"
     }
     else
     {

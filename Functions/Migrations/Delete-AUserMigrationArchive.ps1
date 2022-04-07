@@ -12,6 +12,9 @@ migration_id parameter
 
 .LINK
 https://docs.github.com/en/rest/reference/migrations
+
+.OUTPUTS
+
 #>
 Function Delete-AUserMigrationArchive
 {
@@ -20,9 +23,10 @@ Function Delete-AUserMigrationArchive
 		[Parameter(Mandatory=$FALSE)][string]$accept,
 		[Parameter(Mandatory=$FALSE)][int]$migration_id
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -33,9 +37,9 @@ Function Delete-AUserMigrationArchive
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/user/migrations/$migration_id/archive?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/user/migrations/$migration_id/archive?$($Querys -join '&')"
     }
     else
     {

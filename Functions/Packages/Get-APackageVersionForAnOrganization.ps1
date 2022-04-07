@@ -22,6 +22,25 @@ Unique identifier of the package version.
 
 .LINK
 https://docs.github.com/en/rest/reference/packages
+
+.OUTPUTS
+ {
+  "id": 836,
+  "name": "sha256:b3d3e366b55f9a54599220198b3db5da8f53592acbbb7dc7e4e9878762fc5344",
+  "url": "https://api.github.com/orgs/github/packages/container/hello_docker/versions/836",
+  "package_html_url": "https://github.com/orgs/github/packages/container/package/hello_docker",
+  "created_at": "2020-05-19T22:19:11Z",
+  "updated_at": "2020-05-19T22:19:11Z",
+  "html_url": "https://github.com/orgs/github/packages/container/hello_docker/836",
+  "metadata": {
+    "package_type": "container",
+    "container": {
+      "tags": [
+        "latest"
+      ]
+    }
+  }
+}
 #>
 Function Get-APackageVersionForAnOrganization
 {
@@ -33,9 +52,10 @@ Function Get-APackageVersionForAnOrganization
 		[Parameter(Mandatory=$FALSE)][string]$org,
 		[Parameter(Mandatory=$FALSE)][int]$package_version_id
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -46,9 +66,9 @@ Function Get-APackageVersionForAnOrganization
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/orgs/$org/packages/$package_type/$package_name/versions/$package_version_id?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/orgs/$org/packages/$package_type/$package_name/versions/$package_version_id?$($Querys -join '&')"
     }
     else
     {

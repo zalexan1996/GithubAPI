@@ -31,6 +31,14 @@ Determines whether the SSL certificate of the host for url will be verified when
 
 .LINK
 https://docs.github.com/en/rest/reference/webhooks
+
+.OUTPUTS
+ {
+  "content_type": "json",
+  "insecure_ssl": "0",
+  "secret": "********",
+  "url": "https://example.com/webhook"
+}
 #>
 Function Update-AWebhookConfigurationForARepository
 {
@@ -45,9 +53,10 @@ Function Update-AWebhookConfigurationForARepository
 		[Parameter(Mandatory=$FALSE)][string]$secret,
 		[Parameter(Mandatory=$FALSE)][string]$insecure_ssl
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -61,9 +70,9 @@ Function Update-AWebhookConfigurationForARepository
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/repos/$owner/$repo/hooks/$hook_id/config?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/repos/$owner/$repo/hooks/$hook_id/config?$($Querys -join '&')"
     }
     else
     {

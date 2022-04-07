@@ -19,6 +19,18 @@ commit_sha parameter
 
 .LINK
 https://docs.github.com/en/rest/reference/commits
+
+.OUTPUTS
+ [
+  {
+    "name": "branch_5",
+    "commit": {
+      "sha": "c5b97d5ae6c19d5c5df71a34c7fbeeda2479ccbc",
+      "url": "https://api.github.com/repos/octocat/Hello-World/commits/c5b97d5ae6c19d5c5df71a34c7fbeeda2479ccbc"
+    },
+    "protected": false
+  }
+]
 #>
 Function List-BranchesForHEADCommit
 {
@@ -29,9 +41,10 @@ Function List-BranchesForHEADCommit
 		[Parameter(Mandatory=$FALSE)][string]$repo,
 		[Parameter(Mandatory=$FALSE)][string]$commit_sha
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -42,9 +55,9 @@ Function List-BranchesForHEADCommit
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/repos/$owner/$repo/commits/$commit_sha/branches-where-head?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/repos/$owner/$repo/commits/$commit_sha/branches-where-head?$($Querys -join '&')"
     }
     else
     {

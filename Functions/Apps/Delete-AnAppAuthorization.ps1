@@ -15,6 +15,9 @@ Required. The OAuth access token used to authenticate to the GitHub API.
 
 .LINK
 https://docs.github.com/en/rest/reference/apps
+
+.OUTPUTS
+
 #>
 Function Delete-AnAppAuthorization
 {
@@ -24,9 +27,10 @@ Function Delete-AnAppAuthorization
 		[Parameter(Mandatory=$FALSE)][string]$client_id,
 		[Parameter(Mandatory=$FALSE)][string]$access_token
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -37,9 +41,9 @@ Function Delete-AnAppAuthorization
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/applications/$client_id/grant?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/applications/$client_id/grant?$($Querys -join '&')"
     }
     else
     {

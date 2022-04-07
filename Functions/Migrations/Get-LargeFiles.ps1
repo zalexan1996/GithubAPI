@@ -15,6 +15,28 @@ Setting toapplication/vnd.github.v3+json is recommended.
 
 .LINK
 https://docs.github.com/en/rest/reference/migrations
+
+.OUTPUTS
+ [
+  {
+    "ref_name": "refs/heads/master",
+    "path": "foo/bar/1",
+    "oid": "d3d9446802a44259755d38e6d163e820",
+    "size": 10485760
+  },
+  {
+    "ref_name": "refs/heads/master",
+    "path": "foo/bar/2",
+    "oid": "6512bd43d9caa6e02c990b0a82652dca",
+    "size": 11534336
+  },
+  {
+    "ref_name": "refs/heads/master",
+    "path": "foo/bar/3",
+    "oid": "c20ad4d76fe97759aa27a0c99bff6710",
+    "size": 12582912
+  }
+]
 #>
 Function Get-LargeFiles
 {
@@ -24,9 +46,10 @@ Function Get-LargeFiles
 		[Parameter(Mandatory=$FALSE)][string]$owner,
 		[Parameter(Mandatory=$FALSE)][string]$repo
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -37,9 +60,9 @@ Function Get-LargeFiles
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/repos/$owner/$repo/import/large_files?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/repos/$owner/$repo/import/large_files?$($Querys -join '&')"
     }
     else
     {

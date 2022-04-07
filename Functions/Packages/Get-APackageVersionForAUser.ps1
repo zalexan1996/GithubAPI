@@ -22,6 +22,22 @@ Unique identifier of the package version.
 
 .LINK
 https://docs.github.com/en/rest/reference/packages
+
+.OUTPUTS
+ {
+  "id": 387039,
+  "name": "0.2.0",
+  "url": "https://api.github.com/users/octocat/packages/rubygems/octo-name/versions/387039",
+  "package_html_url": "https://github.com/octocat/octo-name-repo/packages/40201",
+  "license": "MIT",
+  "created_at": "2019-12-01T20:49:29Z",
+  "updated_at": "2019-12-01T20:49:30Z",
+  "description": "Octo-name client for Ruby",
+  "html_url": "https://github.com/octocat/octo-name-repo/packages/40201?version=0.2.0",
+  "metadata": {
+    "package_type": "rubygems"
+  }
+}
 #>
 Function Get-APackageVersionForAUser
 {
@@ -33,9 +49,10 @@ Function Get-APackageVersionForAUser
 		[Parameter(Mandatory=$FALSE)][int]$package_version_id,
 		[Parameter(Mandatory=$FALSE)][string]$username
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -46,9 +63,9 @@ Function Get-APackageVersionForAUser
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/users/$username/packages/$package_type/$package_name/versions/$package_version_id?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/users/$username/packages/$package_type/$package_name/versions/$package_version_id?$($Querys -join '&')"
     }
     else
     {

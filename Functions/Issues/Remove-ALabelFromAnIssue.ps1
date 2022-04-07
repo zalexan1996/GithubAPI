@@ -21,6 +21,19 @@ issue_number parameter
 
 .LINK
 https://docs.github.com/en/rest/reference/issues
+
+.OUTPUTS
+ [
+  {
+    "id": 208045946,
+    "node_id": "MDU6TGFiZWwyMDgwNDU5NDY=",
+    "url": "https://api.github.com/repos/octocat/Hello-World/labels/bug",
+    "name": "bug",
+    "description": "Something isn't working",
+    "color": "f29513",
+    "default": true
+  }
+]
 #>
 Function Remove-ALabelFromAnIssue
 {
@@ -32,9 +45,10 @@ Function Remove-ALabelFromAnIssue
 		[Parameter(Mandatory=$FALSE)][int]$issue_number,
 		[Parameter(Mandatory=$FALSE)][string]$name
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -45,9 +59,9 @@ Function Remove-ALabelFromAnIssue
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/repos/$owner/$repo/issues/$issue_number/labels/$name?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/repos/$owner/$repo/issues/$issue_number/labels/$name?$($Querys -join '&')"
     }
     else
     {

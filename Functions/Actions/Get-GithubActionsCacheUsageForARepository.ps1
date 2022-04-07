@@ -15,6 +15,13 @@ Setting toapplication/vnd.github.v3+json is recommended.
 
 .LINK
 https://docs.github.com/en/rest/reference/actions
+
+.OUTPUTS
+ {
+  "full_name": "octo-org/Hello-World",
+  "active_caches_size_in_bytes": 2322142,
+  "active_caches_count": 3
+}
 #>
 Function Get-GithubActionsCacheUsageForARepository
 {
@@ -24,9 +31,10 @@ Function Get-GithubActionsCacheUsageForARepository
 		[Parameter(Mandatory=$FALSE)][string]$owner,
 		[Parameter(Mandatory=$FALSE)][string]$repo
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -37,9 +45,9 @@ Function Get-GithubActionsCacheUsageForARepository
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/repos/$owner/$repo/actions/cache/usage?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/repos/$owner/$repo/actions/cache/usage?$($Querys -join '&')"
     }
     else
     {

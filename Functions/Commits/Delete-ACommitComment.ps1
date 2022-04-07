@@ -18,6 +18,9 @@ comment_id parameter
 
 .LINK
 https://docs.github.com/en/rest/reference/commits
+
+.OUTPUTS
+
 #>
 Function Delete-ACommitComment
 {
@@ -28,9 +31,10 @@ Function Delete-ACommitComment
 		[Parameter(Mandatory=$FALSE)][string]$repo,
 		[Parameter(Mandatory=$FALSE)][int]$comment_id
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -41,9 +45,9 @@ Function Delete-ACommitComment
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/repos/$owner/$repo/comments/$comment_id?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/repos/$owner/$repo/comments/$comment_id?$($Querys -join '&')"
     }
     else
     {

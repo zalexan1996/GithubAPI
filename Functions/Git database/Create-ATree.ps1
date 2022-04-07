@@ -22,6 +22,23 @@ The SHA1 of an existing Git tree object which will be used as the base for the n
 
 .LINK
 https://docs.github.com/en/rest/reference/git
+
+.OUTPUTS
+ {
+  "sha": "cd8274d15fa3ae2ab983129fb037999f264ba9a7",
+  "url": "https://api.github.com/repos/octocat/Hello-World/trees/cd8274d15fa3ae2ab983129fb037999f264ba9a7",
+  "tree": [
+    {
+      "path": "file.rb",
+      "mode": "100644",
+      "type": "blob",
+      "size": 132,
+      "sha": "7c258a9869f33c1e1e1f74fbb32f07c86cb5a75b",
+      "url": "https://api.github.com/repos/octocat/Hello-World/git/blobs/7c258a9869f33c1e1e1f74fbb32f07c86cb5a75b"
+    }
+  ],
+  "truncated": true
+}
 #>
 Function Create-ATree
 {
@@ -33,9 +50,10 @@ Function Create-ATree
 		[Parameter(Mandatory=$FALSE)][object[]]$tree,
 		[Parameter(Mandatory=$FALSE)][string]$base_tree
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -47,9 +65,9 @@ Function Create-ATree
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/repos/$owner/$repo/git/trees?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/repos/$owner/$repo/git/trees?$($Querys -join '&')"
     }
     else
     {

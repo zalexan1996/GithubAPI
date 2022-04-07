@@ -25,6 +25,41 @@ Required when the state is resolved. The reason for resolving the alert. Can be 
 
 .LINK
 https://docs.github.com/en/rest/reference/secret-scanning
+
+.OUTPUTS
+ {
+  "number": 42,
+  "created_at": "2020-11-06T18:18:30Z",
+  "url": "https://api.github.com/repos/owner/private-repo/secret-scanning/alerts/42",
+  "html_url": "https://github.com/owner/private-repo/security/secret-scanning/42",
+  "locations_url": "https://api.github.com/repos/owner/private-repo/secret-scanning/alerts/42/locations",
+  "state": "resolved",
+  "resolution": "used_in_tests",
+  "resolved_at": "2020-11-16T22:42:07Z",
+  "resolved_by": {
+    "login": "monalisa",
+    "id": 2,
+    "node_id": "MDQ6VXNlcjI=",
+    "avatar_url": "https://alambic.github.com/avatars/u/2?",
+    "gravatar_id": "",
+    "url": "https://api.github.com/users/monalisa",
+    "html_url": "https://github.com/monalisa",
+    "followers_url": "https://api.github.com/users/monalisa/followers",
+    "following_url": "https://api.github.com/users/monalisa/following{/other_user}",
+    "gists_url": "https://api.github.com/users/monalisa/gists{/gist_id}",
+    "starred_url": "https://api.github.com/users/monalisa/starred{/owner}{/repo}",
+    "subscriptions_url": "https://api.github.com/users/monalisa/subscriptions",
+    "organizations_url": "https://api.github.com/users/monalisa/orgs",
+    "repos_url": "https://api.github.com/users/monalisa/repos",
+    "events_url": "https://api.github.com/users/monalisa/events{/privacy}",
+    "received_events_url": "https://api.github.com/users/monalisa/received_events",
+    "type": "User",
+    "site_admin": true
+  },
+  "secret_type": "mailchimp_api_key",
+  "secret_type_display_name": "Mailchimp API Key",
+  "secret": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX-us2"
+}
 #>
 Function Update-ASecretScanningAlert
 {
@@ -37,9 +72,10 @@ Function Update-ASecretScanningAlert
 		[Parameter(Mandatory=$FALSE)][string]$state,
 		[Parameter(Mandatory=$FALSE)][string]$resolution
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -51,9 +87,9 @@ Function Update-ASecretScanningAlert
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/repos/$owner/$repo/secret-scanning/alerts/$alert_number?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/repos/$owner/$repo/secret-scanning/alerts/$alert_number?$($Querys -join '&')"
     }
     else
     {

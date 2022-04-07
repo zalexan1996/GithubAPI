@@ -16,6 +16,9 @@ Setting toapplication/vnd.github.v3+json is recommended.
 
 .LINK
 https://docs.github.com/en/rest/reference/orgs
+
+.OUTPUTS
+
 #>
 Function Remove-ASAMLSSOAuthorizationForAnOrganization
 {
@@ -25,9 +28,10 @@ Function Remove-ASAMLSSOAuthorizationForAnOrganization
 		[Parameter(Mandatory=$FALSE)][string]$org,
 		[Parameter(Mandatory=$FALSE)][int]$credential_id
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -38,9 +42,9 @@ Function Remove-ASAMLSSOAuthorizationForAnOrganization
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/orgs/$org/credential-authorizations/$credential_id?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/orgs/$org/credential-authorizations/$credential_id?$($Querys -join '&')"
     }
     else
     {

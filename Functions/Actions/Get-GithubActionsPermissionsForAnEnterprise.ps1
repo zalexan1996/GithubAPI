@@ -13,6 +13,13 @@ The slug version of the enterprise name. You can also substitute this value with
 
 .LINK
 https://docs.github.com/en/rest/reference/actions
+
+.OUTPUTS
+ {
+  "enabled_organizations": "all",
+  "allowed_actions": "selected",
+  "selected_actions_url": "https://api.github.com/enterprises/2/actions/permissions/selected-actions"
+}
 #>
 Function Get-GithubActionsPermissionsForAnEnterprise
 {
@@ -21,9 +28,10 @@ Function Get-GithubActionsPermissionsForAnEnterprise
 		[Parameter(Mandatory=$FALSE)][string]$accept,
 		[Parameter(Mandatory=$FALSE)][string]$enterprise
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -34,9 +42,9 @@ Function Get-GithubActionsPermissionsForAnEnterprise
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/enterprises/$enterprise/actions/permissions?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/enterprises/$enterprise/actions/permissions?$($Querys -join '&')"
     }
     else
     {

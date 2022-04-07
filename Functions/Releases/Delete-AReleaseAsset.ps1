@@ -18,6 +18,9 @@ asset_id parameter
 
 .LINK
 https://docs.github.com/en/rest/reference/releases
+
+.OUTPUTS
+
 #>
 Function Delete-AReleaseAsset
 {
@@ -28,9 +31,10 @@ Function Delete-AReleaseAsset
 		[Parameter(Mandatory=$FALSE)][string]$repo,
 		[Parameter(Mandatory=$FALSE)][int]$asset_id
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -41,9 +45,9 @@ Function Delete-AReleaseAsset
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/repos/$owner/$repo/releases/assets/$asset_id?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/repos/$owner/$repo/releases/assets/$asset_id?$($Querys -join '&')"
     }
     else
     {

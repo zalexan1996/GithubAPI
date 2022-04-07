@@ -23,6 +23,22 @@ Limits the list to groups containing the text in the group name
 
 .LINK
 https://docs.github.com/en/rest/reference/teams
+
+.OUTPUTS
+ {
+  "groups": [
+    {
+      "group_id": "123",
+      "group_name": "Octocat admins",
+      "updated_at": "2021-01-24T11:31:04-06:00"
+    },
+    {
+      "group_id": "456",
+      "group_name": "Octocat docs members",
+      "updated_at": "2021-03-24T11:31:04-06:00"
+    }
+  ]
+}
 #>
 Function List-ExternalGroupsInAnOrganization
 {
@@ -34,11 +50,12 @@ Function List-ExternalGroupsInAnOrganization
 		[Parameter(Mandatory=$FALSE)][int]$page,
 		[Parameter(Mandatory=$FALSE)][string]$display_name
     )
+    $Querys = @()
     $QueryStrings = @(
-        "per_page=$per_page",
-		"page=$page",
-		"display_name=$display_name"
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+        "per_page",
+		"page",
+		"display_name"
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -49,9 +66,9 @@ Function List-ExternalGroupsInAnOrganization
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/orgs/$org/external-groups?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/orgs/$org/external-groups?$($Querys -join '&')"
     }
     else
     {

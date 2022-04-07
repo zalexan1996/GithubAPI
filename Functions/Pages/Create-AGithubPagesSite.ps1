@@ -18,6 +18,29 @@ Required. The source branch and directory used to publish your Pages site.
 
 .LINK
 https://docs.github.com/en/rest/reference/pages
+
+.OUTPUTS
+ {
+  "url": "https://api.github.com/repos/github/developer.github.com/pages",
+  "status": "built",
+  "cname": "developer.github.com",
+  "custom_404": false,
+  "html_url": "https://developer.github.com",
+  "source": {
+    "branch": "master",
+    "path": "/"
+  },
+  "public": true,
+  "https_certificate": {
+    "state": "approved",
+    "description": "Certificate is approved",
+    "domains": [
+      "developer.github.com"
+    ],
+    "expires_at": "2021-05-22"
+  },
+  "https_enforced": true
+}
 #>
 Function Create-AGithubPagesSite
 {
@@ -28,9 +51,10 @@ Function Create-AGithubPagesSite
 		[Parameter(Mandatory=$FALSE)][string]$repo,
 		[Parameter(Mandatory=$FALSE)][object]$source
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -41,9 +65,9 @@ Function Create-AGithubPagesSite
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/repos/$owner/$repo/pages?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/repos/$owner/$repo/pages?$($Querys -join '&')"
     }
     else
     {

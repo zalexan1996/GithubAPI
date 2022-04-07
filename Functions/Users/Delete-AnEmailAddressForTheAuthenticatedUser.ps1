@@ -12,6 +12,9 @@ Required. Email addresses associated with the GitHub user account.
 
 .LINK
 https://docs.github.com/en/rest/reference/users
+
+.OUTPUTS
+
 #>
 Function Delete-AnEmailAddressForTheAuthenticatedUser
 {
@@ -20,9 +23,10 @@ Function Delete-AnEmailAddressForTheAuthenticatedUser
 		[Parameter(Mandatory=$FALSE)][string]$accept,
 		[Parameter(Mandatory=$FALSE)][string[]]$emails
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -33,9 +37,9 @@ Function Delete-AnEmailAddressForTheAuthenticatedUser
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/user/emails?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/user/emails?$($Querys -join '&')"
     }
     else
     {

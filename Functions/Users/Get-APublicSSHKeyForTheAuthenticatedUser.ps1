@@ -12,6 +12,17 @@ key_id parameter
 
 .LINK
 https://docs.github.com/en/rest/reference/users
+
+.OUTPUTS
+ {
+  "key": "2Sg8iYjAxxmI2LvUXpJjkYrMxURPc8r+dB7TJyvv1234",
+  "id": 2,
+  "url": "https://api.github.com/user/keys/2",
+  "title": "ssh-rsa AAAAB3NzaC1yc2EAAA",
+  "created_at": "2020-06-11T21:31:57Z",
+  "verified": false,
+  "read_only": false
+}
 #>
 Function Get-APublicSSHKeyForTheAuthenticatedUser
 {
@@ -20,9 +31,10 @@ Function Get-APublicSSHKeyForTheAuthenticatedUser
 		[Parameter(Mandatory=$FALSE)][string]$accept,
 		[Parameter(Mandatory=$FALSE)][int]$key_id
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -33,9 +45,9 @@ Function Get-APublicSSHKeyForTheAuthenticatedUser
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/user/keys/$key_id?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/user/keys/$key_id?$($Querys -join '&')"
     }
     else
     {

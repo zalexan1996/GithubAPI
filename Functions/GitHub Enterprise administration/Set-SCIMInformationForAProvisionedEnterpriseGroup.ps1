@@ -25,6 +25,34 @@ Required. The name of the SCIM group. This must match the GitHub organization th
 
 .LINK
 https://docs.github.com/en/rest/reference/enterprise-admin
+
+.OUTPUTS
+ {
+  "schemas": [
+    "urn:ietf:params:scim:schemas:core:2.0:Group"
+  ],
+  "id": "abcd27f8-a9aa-11ea-8221-f59b2be9cccc",
+  "externalId": null,
+  "displayName": "octo-org",
+  "members": [
+    {
+      "value": "92b58aaa-a1d6-11ea-8227-b9ce9e023ccc",
+      "$ref": "https://api.github.com/scim/v2/enterprises/octo-corp/Users/92b58aaa-a1d6-11ea-8227-b9ce9e023ccc",
+      "display": "octocat@github.com"
+    },
+    {
+      "value": "aaaa8c34-a6b2-11ea-9d70-bbbbbd1c8fd5",
+      "$ref": "https://api.github.com/scim/v2/enterprises/octo-corp/Users/aaaa8c34-a6b2-11ea-9d70-bbbbbd1c8fd5",
+      "display": "hubot@example.com"
+    }
+  ],
+  "meta": {
+    "resourceType": "Group",
+    "created": "2020-06-09T03:10:17.000+10:0",
+    "lastModified": "2020-06-09T03:10:17.000+10:00",
+    "location": "https://api.github.com/scim/v2/enterprises/octo-corp/Groups/abcd27f8-a9aa-11ea-8221-f59b2be9cccc"
+  }
+}
 #>
 Function Set-SCIMInformationForAProvisionedEnterpriseGroup
 {
@@ -37,9 +65,10 @@ Function Set-SCIMInformationForAProvisionedEnterpriseGroup
 		[Parameter(Mandatory=$FALSE)][string]$displayName,
 		[Parameter(Mandatory=$FALSE)][object[]]$members
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -52,9 +81,9 @@ Function Set-SCIMInformationForAProvisionedEnterpriseGroup
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/scim/v2/enterprises/$enterprise/Groups/$scim_group_id?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/scim/v2/enterprises/$enterprise/Groups/$scim_group_id?$($Querys -join '&')"
     }
     else
     {

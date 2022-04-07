@@ -16,6 +16,9 @@ Required. List of repository IDs to enable for GitHub Actions.
 
 .LINK
 https://docs.github.com/en/rest/reference/actions
+
+.OUTPUTS
+
 #>
 Function Set-SelectedRepositoriesEnabledForGithubActionsInAnOrganization
 {
@@ -25,9 +28,10 @@ Function Set-SelectedRepositoriesEnabledForGithubActionsInAnOrganization
 		[Parameter(Mandatory=$FALSE)][string]$org,
 		[Parameter(Mandatory=$FALSE)][int[]]$selected_repository_ids
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -38,9 +42,9 @@ Function Set-SelectedRepositoriesEnabledForGithubActionsInAnOrganization
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/orgs/$org/actions/permissions/repositories?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/orgs/$org/actions/permissions/repositories?$($Querys -join '&')"
     }
     else
     {

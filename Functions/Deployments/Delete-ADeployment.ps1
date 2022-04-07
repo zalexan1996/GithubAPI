@@ -22,6 +22,9 @@ deployment_id parameter
 
 .LINK
 https://docs.github.com/en/rest/reference/deployments
+
+.OUTPUTS
+
 #>
 Function Delete-ADeployment
 {
@@ -32,9 +35,10 @@ Function Delete-ADeployment
 		[Parameter(Mandatory=$FALSE)][string]$repo,
 		[Parameter(Mandatory=$FALSE)][int]$deployment_id
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -45,9 +49,9 @@ Function Delete-ADeployment
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/repos/$owner/$repo/deployments/$deployment_id?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/repos/$owner/$repo/deployments/$deployment_id?$($Querys -join '&')"
     }
     else
     {

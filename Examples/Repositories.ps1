@@ -1,5 +1,5 @@
 # Import the module
-Import-Module "$(Split-Path $PSScriptRoot)\..\GithubAPI.psm1" -ArgumentList "Repositories"
+Import-Module "$(Split-Path $PSScriptRoot)\GithubAPI.psm1" -ArgumentList "Repositories"
 
 # Create a repository
 $CreateParams = @{

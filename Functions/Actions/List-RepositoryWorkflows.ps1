@@ -23,6 +23,37 @@ Default: 1
 
 .LINK
 https://docs.github.com/en/rest/reference/actions
+
+.OUTPUTS
+ {
+  "total_count": 2,
+  "workflows": [
+    {
+      "id": 161335,
+      "node_id": "MDg6V29ya2Zsb3cxNjEzMzU=",
+      "name": "CI",
+      "path": ".github/workflows/blank.yaml",
+      "state": "active",
+      "created_at": "2020-01-08T23:48:37.000-08:00",
+      "updated_at": "2020-01-08T23:50:21.000-08:00",
+      "url": "https://api.github.com/repos/octo-org/octo-repo/actions/workflows/161335",
+      "html_url": "https://github.com/octo-org/octo-repo/blob/master/.github/workflows/161335",
+      "badge_url": "https://github.com/octo-org/octo-repo/workflows/CI/badge.svg"
+    },
+    {
+      "id": 269289,
+      "node_id": "MDE4OldvcmtmbG93IFNlY29uZGFyeTI2OTI4OQ==",
+      "name": "Linter",
+      "path": ".github/workflows/linter.yaml",
+      "state": "active",
+      "created_at": "2020-01-08T23:48:37.000-08:00",
+      "updated_at": "2020-01-08T23:50:21.000-08:00",
+      "url": "https://api.github.com/repos/octo-org/octo-repo/actions/workflows/269289",
+      "html_url": "https://github.com/octo-org/octo-repo/blob/master/.github/workflows/269289",
+      "badge_url": "https://github.com/octo-org/octo-repo/workflows/Linter/badge.svg"
+    }
+  ]
+}
 #>
 Function List-RepositoryWorkflows
 {
@@ -34,10 +65,11 @@ Function List-RepositoryWorkflows
 		[Parameter(Mandatory=$FALSE)][int]$per_page,
 		[Parameter(Mandatory=$FALSE)][int]$page
     )
+    $Querys = @()
     $QueryStrings = @(
-        "per_page=$per_page",
-		"page=$page"
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+        "per_page",
+		"page"
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -48,9 +80,9 @@ Function List-RepositoryWorkflows
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/repos/$owner/$repo/actions/workflows?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/repos/$owner/$repo/actions/workflows?$($Querys -join '&')"
     }
     else
     {

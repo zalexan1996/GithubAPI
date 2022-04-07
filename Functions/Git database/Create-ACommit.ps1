@@ -55,6 +55,42 @@ The PGP signature of the commit. GitHub adds the signature to the gpgsig header 
 
 .LINK
 https://docs.github.com/en/rest/reference/git
+
+.OUTPUTS
+ {
+  "sha": "7638417db6d59f3c431d3e1f261cc637155684cd",
+  "node_id": "MDY6Q29tbWl0NzYzODQxN2RiNmQ1OWYzYzQzMWQzZTFmMjYxY2M2MzcxNTU2ODRjZA==",
+  "url": "https://api.github.com/repos/octocat/Hello-World/git/commits/7638417db6d59f3c431d3e1f261cc637155684cd",
+  "author": {
+    "date": "2014-11-07T22:01:45Z",
+    "name": "Monalisa Octocat",
+    "email": "octocat@github.com"
+  },
+  "committer": {
+    "date": "2014-11-07T22:01:45Z",
+    "name": "Monalisa Octocat",
+    "email": "octocat@github.com"
+  },
+  "message": "my commit message",
+  "tree": {
+    "url": "https://api.github.com/repos/octocat/Hello-World/git/trees/827efc6d56897b048c772eb4087f854f46256132",
+    "sha": "827efc6d56897b048c772eb4087f854f46256132"
+  },
+  "parents": [
+    {
+      "url": "https://api.github.com/repos/octocat/Hello-World/git/commits/7d1b31e74ee336d15cbd21741bc88a537ed063a0",
+      "sha": "7d1b31e74ee336d15cbd21741bc88a537ed063a0",
+      "html_url": "https://github.com/octocat/Hello-World/commit/7d1b31e74ee336d15cbd21741bc88a537ed063a0"
+    }
+  ],
+  "verification": {
+    "verified": false,
+    "reason": "unsigned",
+    "signature": null,
+    "payload": null
+  },
+  "html_url": "https://github.com/octocat/Hello-World/commit/7638417db6d59f3c431d3e1f261cc637155684cd"
+}
 #>
 Function Create-ACommit
 {
@@ -70,9 +106,10 @@ Function Create-ACommit
 		[Parameter(Mandatory=$FALSE)][object]$committer,
 		[Parameter(Mandatory=$FALSE)][string]$signature
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -88,9 +125,9 @@ Function Create-ACommit
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/repos/$owner/$repo/git/commits?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/repos/$owner/$repo/git/commits?$($Querys -join '&')"
     }
     else
     {

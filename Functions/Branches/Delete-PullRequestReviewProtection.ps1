@@ -18,6 +18,9 @@ The name of the branch.
 
 .LINK
 https://docs.github.com/en/rest/reference/branches
+
+.OUTPUTS
+
 #>
 Function Delete-PullRequestReviewProtection
 {
@@ -28,9 +31,10 @@ Function Delete-PullRequestReviewProtection
 		[Parameter(Mandatory=$FALSE)][string]$repo,
 		[Parameter(Mandatory=$FALSE)][string]$branch
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -41,9 +45,9 @@ Function Delete-PullRequestReviewProtection
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/repos/$owner/$repo/branches/$branch/protection/required_pull_request_reviews?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/repos/$owner/$repo/branches/$branch/protection/required_pull_request_reviews?$($Querys -join '&')"
     }
     else
     {

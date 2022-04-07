@@ -14,6 +14,18 @@ Setting toapplication/vnd.github.v3+json is recommended.
 
 .LINK
 https://docs.github.com/en/rest/reference/billing
+
+.OUTPUTS
+ {
+  "total_minutes_used": 305,
+  "total_paid_minutes_used": 0,
+  "included_minutes": 3000,
+  "minutes_used_breakdown": {
+    "UBUNTU": 205,
+    "MACOS": 10,
+    "WINDOWS": 90
+  }
+}
 #>
 Function Get-GithubActionsBillingForAUser
 {
@@ -22,9 +34,10 @@ Function Get-GithubActionsBillingForAUser
 		[Parameter(Mandatory=$FALSE)][string]$accept,
 		[Parameter(Mandatory=$FALSE)][string]$username
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -35,9 +48,9 @@ Function Get-GithubActionsBillingForAUser
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/users/$username/settings/billing/actions?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/users/$username/settings/billing/actions?$($Querys -join '&')"
     }
     else
     {

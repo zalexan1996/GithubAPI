@@ -12,6 +12,9 @@ card_id parameter
 
 .LINK
 https://docs.github.com/en/rest/reference/projects
+
+.OUTPUTS
+
 #>
 Function Delete-AProjectCard
 {
@@ -20,9 +23,10 @@ Function Delete-AProjectCard
 		[Parameter(Mandatory=$FALSE)][string]$accept,
 		[Parameter(Mandatory=$FALSE)][int]$card_id
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -33,9 +37,9 @@ Function Delete-AProjectCard
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/projects/columns/cards/$card_id?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/projects/columns/cards/$card_id?$($Querys -join '&')"
     }
     else
     {

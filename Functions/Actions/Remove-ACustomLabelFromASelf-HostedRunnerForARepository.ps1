@@ -23,6 +23,33 @@ The name of a self-hosted runner's custom label.
 
 .LINK
 https://docs.github.com/en/rest/reference/actions
+
+.OUTPUTS
+ {
+  "total_count": 4,
+  "labels": [
+    {
+      "id": 5,
+      "name": "self-hosted",
+      "type": "read-only"
+    },
+    {
+      "id": 7,
+      "name": "X64",
+      "type": "read-only"
+    },
+    {
+      "id": 20,
+      "name": "macOS",
+      "type": "read-only"
+    },
+    {
+      "id": 21,
+      "name": "no-gpu",
+      "type": "custom"
+    }
+  ]
+}
 #>
 Function Remove-ACustomLabelFromASelf-HostedRunnerForARepository
 {
@@ -34,9 +61,10 @@ Function Remove-ACustomLabelFromASelf-HostedRunnerForARepository
 		[Parameter(Mandatory=$FALSE)][int]$runner_id,
 		[Parameter(Mandatory=$FALSE)][string]$name
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -47,9 +75,9 @@ Function Remove-ACustomLabelFromASelf-HostedRunnerForARepository
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/repos/$owner/$repo/actions/runners/$runner_id/labels/$name?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/repos/$owner/$repo/actions/runners/$runner_id/labels/$name?$($Querys -join '&')"
     }
     else
     {

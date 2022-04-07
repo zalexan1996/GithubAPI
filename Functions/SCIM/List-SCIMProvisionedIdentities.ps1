@@ -34,6 +34,9 @@ To filter results for the identity with the email octocat@github.com, you would 
 
 .LINK
 https://docs.github.com/en/rest/reference/scim
+
+.OUTPUTS
+
 #>
 Function List-SCIMProvisionedIdentities
 {
@@ -45,11 +48,12 @@ Function List-SCIMProvisionedIdentities
 		[Parameter(Mandatory=$FALSE)][int]$count,
 		[Parameter(Mandatory=$FALSE)][string]$filter
     )
+    $Querys = @()
     $QueryStrings = @(
-        "startIndex=$startIndex",
-		"count=$count",
-		"filter=$filter"
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+        "startIndex",
+		"count",
+		"filter"
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -60,9 +64,9 @@ Function List-SCIMProvisionedIdentities
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/scim/v2/organizations/$org/Users?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/scim/v2/organizations/$org/Users?$($Querys -join '&')"
     }
     else
     {

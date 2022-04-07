@@ -31,6 +31,9 @@ Required. Set of operations to be performed
 
 .LINK
 https://docs.github.com/en/rest/reference/scim
+
+.OUTPUTS
+
 #>
 Function Update-AnAttributeForASCIMUser
 {
@@ -42,9 +45,10 @@ Function Update-AnAttributeForASCIMUser
 		[Parameter(Mandatory=$FALSE)][string[]]$schemas,
 		[Parameter(Mandatory=$FALSE)][object[]]$Operations
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -56,9 +60,9 @@ Function Update-AnAttributeForASCIMUser
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/scim/v2/organizations/$org/Users/$scim_user_id?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/scim/v2/organizations/$org/Users/$scim_user_id?$($Querys -join '&')"
     }
     else
     {

@@ -12,6 +12,12 @@ Setting toapplication/vnd.github.v3+json is recommended.
 
 .LINK
 https://docs.github.com/en/rest/reference/gitignore
+
+.OUTPUTS
+ {
+  "name": "C",
+  "source": "# Object files\n*.o\n\n# Libraries\n*.lib\n*.a\n\n# Shared objects (inc. Windows DLLs)\n*.dll\n*.so\n*.so.*\n*.dylib\n\n# Executables\n*.exe\n*.out\n*.app\n"
+}
 #>
 Function Get-AGitignoreTemplate
 {
@@ -20,9 +26,10 @@ Function Get-AGitignoreTemplate
 		[Parameter(Mandatory=$FALSE)][string]$accept,
 		[Parameter(Mandatory=$FALSE)][string]$name
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -33,9 +40,9 @@ Function Get-AGitignoreTemplate
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/gitignore/templates/$name?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/gitignore/templates/$name?$($Querys -join '&')"
     }
     else
     {

@@ -29,6 +29,34 @@ Default:
 
 .LINK
 https://docs.github.com/en/rest/reference/webhooks
+
+.OUTPUTS
+ {
+  "type": "Repository",
+  "id": 12345678,
+  "name": "web",
+  "active": true,
+  "events": [
+    "push",
+    "pull_request"
+  ],
+  "config": {
+    "content_type": "json",
+    "insecure_ssl": "0",
+    "url": "https://example.com/webhook"
+  },
+  "updated_at": "2019-06-03T00:57:16Z",
+  "created_at": "2019-06-03T00:57:16Z",
+  "url": "https://api.github.com/repos/octocat/Hello-World/hooks/12345678",
+  "test_url": "https://api.github.com/repos/octocat/Hello-World/hooks/12345678/test",
+  "ping_url": "https://api.github.com/repos/octocat/Hello-World/hooks/12345678/pings",
+  "deliveries_url": "https://api.github.com/repos/octocat/Hello-World/hooks/12345678/deliveries",
+  "last_response": {
+    "code": null,
+    "status": "unused",
+    "message": null
+  }
+}
 #>
 Function Create-ARepositoryWebhook
 {
@@ -42,9 +70,10 @@ Function Create-ARepositoryWebhook
 		[Parameter(Mandatory=$FALSE)][string[]]$events,
 		[Parameter(Mandatory=$FALSE)][bool]$active
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -58,9 +87,9 @@ Function Create-ARepositoryWebhook
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/repos/$owner/$repo/hooks?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/repos/$owner/$repo/hooks?$($Querys -join '&')"
     }
     else
     {

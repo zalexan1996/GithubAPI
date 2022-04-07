@@ -12,6 +12,9 @@ gist_id parameter
 
 .LINK
 https://docs.github.com/en/rest/reference/gists
+
+.OUTPUTS
+
 #>
 Function Unstar-AGist
 {
@@ -20,9 +23,10 @@ Function Unstar-AGist
 		[Parameter(Mandatory=$FALSE)][string]$accept,
 		[Parameter(Mandatory=$FALSE)][string]$gist_id
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -33,9 +37,9 @@ Function Unstar-AGist
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/gists/$gist_id/star?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/gists/$gist_id/star?$($Querys -join '&')"
     }
     else
     {

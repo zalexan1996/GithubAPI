@@ -19,6 +19,25 @@ Unique identifier of the package version.
 
 .LINK
 https://docs.github.com/en/rest/reference/packages
+
+.OUTPUTS
+ {
+  "id": 214,
+  "name": "sha256:3561f0cff06caccddb99c93bd26e712fcc56a811de0f8ea7a17bb865f30b176a",
+  "url": "https://api.github.com/users/octocat/packages/container/hello_docker/versions/214",
+  "package_html_url": "https://github.com/users/octocat/packages/container/package/hello_docker",
+  "created_at": "2020-05-15T03:46:45Z",
+  "updated_at": "2020-05-15T03:46:45Z",
+  "html_url": "https://github.com/users/octocat/packages/container/hello_docker/214",
+  "metadata": {
+    "package_type": "container",
+    "container": {
+      "tags": [
+        "1.13.6"
+      ]
+    }
+  }
+}
 #>
 Function Get-APackageVersionForTheAuthenticatedUser
 {
@@ -29,9 +48,10 @@ Function Get-APackageVersionForTheAuthenticatedUser
 		[Parameter(Mandatory=$FALSE)][string]$package_name,
 		[Parameter(Mandatory=$FALSE)][int]$package_version_id
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -42,9 +62,9 @@ Function Get-APackageVersionForTheAuthenticatedUser
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/user/packages/$package_type/$package_name/versions/$package_version_id?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/user/packages/$package_type/$package_name/versions/$package_version_id?$($Querys -join '&')"
     }
     else
     {

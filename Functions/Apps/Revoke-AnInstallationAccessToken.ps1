@@ -11,6 +11,9 @@ Setting toapplication/vnd.github.v3+json is recommended.
 
 .LINK
 https://docs.github.com/en/rest/reference/apps
+
+.OUTPUTS
+
 #>
 Function Revoke-AnInstallationAccessToken
 {
@@ -18,9 +21,10 @@ Function Revoke-AnInstallationAccessToken
     Param(
 		[Parameter(Mandatory=$FALSE)][string]$accept
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -31,9 +35,9 @@ Function Revoke-AnInstallationAccessToken
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/installation/token?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/installation/token?$($Querys -join '&')"
     }
     else
     {

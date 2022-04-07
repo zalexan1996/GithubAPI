@@ -33,6 +33,57 @@ Default: 30
 
 .LINK
 https://docs.github.com/en/rest/reference/secret-scanning
+
+.OUTPUTS
+ [
+  {
+    "number": 2,
+    "created_at": "2020-11-06T18:48:51Z",
+    "url": "https://api.github.com/repos/owner/private-repo/secret-scanning/alerts/2",
+    "html_url": "https://github.com/owner/private-repo/security/secret-scanning/2",
+    "locations_url": "https://api.github.com/repos/owner/private-repo/secret-scanning/alerts/2/locations",
+    "state": "resolved",
+    "resolution": "false_positive",
+    "resolved_at": "2020-11-07T02:47:13Z",
+    "resolved_by": {
+      "login": "monalisa",
+      "id": 2,
+      "node_id": "MDQ6VXNlcjI=",
+      "avatar_url": "https://alambic.github.com/avatars/u/2?",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/monalisa",
+      "html_url": "https://github.com/monalisa",
+      "followers_url": "https://api.github.com/users/monalisa/followers",
+      "following_url": "https://api.github.com/users/monalisa/following{/other_user}",
+      "gists_url": "https://api.github.com/users/monalisa/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/monalisa/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/monalisa/subscriptions",
+      "organizations_url": "https://api.github.com/users/monalisa/orgs",
+      "repos_url": "https://api.github.com/users/monalisa/repos",
+      "events_url": "https://api.github.com/users/monalisa/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/monalisa/received_events",
+      "type": "User",
+      "site_admin": true
+    },
+    "secret_type": "adafruit_io_key",
+    "secret_type_display_name": "Adafruit IO Key",
+    "secret": "aio_XXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+  },
+  {
+    "number": 1,
+    "created_at": "2020-11-06T18:18:30Z",
+    "url": "https://api.github.com/repos/owner/repo/secret-scanning/alerts/1",
+    "html_url": "https://github.com/owner/repo/security/secret-scanning/1",
+    "locations_url": "https://api.github.com/repos/owner/private-repo/secret-scanning/alerts/1/locations",
+    "state": "open",
+    "resolution": null,
+    "resolved_at": null,
+    "resolved_by": null,
+    "secret_type": "mailchimp_api_key",
+    "secret_type_display_name": "Mailchimp API Key",
+    "secret": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX-us2"
+  }
+]
 #>
 Function List-SecretScanningAlertsForARepository
 {
@@ -47,13 +98,14 @@ Function List-SecretScanningAlertsForARepository
 		[Parameter(Mandatory=$FALSE)][int]$page,
 		[Parameter(Mandatory=$FALSE)][int]$per_page
     )
+    $Querys = @()
     $QueryStrings = @(
-        "state=$state",
-		"secret_type=$secret_type",
-		"resolution=$resolution",
-		"page=$page",
-		"per_page=$per_page"
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+        "state",
+		"secret_type",
+		"resolution",
+		"page",
+		"per_page"
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -64,9 +116,9 @@ Function List-SecretScanningAlertsForARepository
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/repos/$owner/$repo/secret-scanning/alerts?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/repos/$owner/$repo/secret-scanning/alerts?$($Querys -join '&')"
     }
     else
     {

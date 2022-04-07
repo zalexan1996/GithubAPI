@@ -18,6 +18,23 @@ Required. Can be one of opt_in (large files will be stored using Git LFS) or opt
 
 .LINK
 https://docs.github.com/en/rest/reference/migrations
+
+.OUTPUTS
+ {
+  "vcs": "subversion",
+  "use_lfs": true,
+  "vcs_url": "http://svn.mycompany.com/svn/myproject",
+  "status": "complete",
+  "status_text": "Done",
+  "has_large_files": true,
+  "large_files_size": 132331036,
+  "large_files_count": 1,
+  "authors_count": 4,
+  "url": "https://api.github.com/repos/octocat/socm/import",
+  "html_url": "https://import.github.com/octocat/socm/import",
+  "authors_url": "https://api.github.com/repos/octocat/socm/import/authors",
+  "repository_url": "https://api.github.com/repos/octocat/socm"
+}
 #>
 Function Update-GitLFSPreference
 {
@@ -28,9 +45,10 @@ Function Update-GitLFSPreference
 		[Parameter(Mandatory=$FALSE)][string]$repo,
 		[Parameter(Mandatory=$FALSE)][string]$use_lfs
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -41,9 +59,9 @@ Function Update-GitLFSPreference
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/repos/$owner/$repo/import/lfs?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/repos/$owner/$repo/import/lfs?$($Querys -join '&')"
     }
     else
     {

@@ -24,6 +24,17 @@ A short description of the label. Must be 100 characters or fewer.
 
 .LINK
 https://docs.github.com/en/rest/reference/issues
+
+.OUTPUTS
+ {
+  "id": 208045946,
+  "node_id": "MDU6TGFiZWwyMDgwNDU5NDY=",
+  "url": "https://api.github.com/repos/octocat/Hello-World/labels/bug",
+  "name": "bug",
+  "description": "Something isn't working",
+  "color": "f29513",
+  "default": true
+}
 #>
 Function Create-ALabel
 {
@@ -36,9 +47,10 @@ Function Create-ALabel
 		[Parameter(Mandatory=$FALSE)][string]$color,
 		[Parameter(Mandatory=$FALSE)][string]$description
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -51,9 +63,9 @@ Function Create-ALabel
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/repos/$owner/$repo/labels?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/repos/$owner/$repo/labels?$($Querys -join '&')"
     }
     else
     {

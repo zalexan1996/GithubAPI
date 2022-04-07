@@ -26,6 +26,9 @@ JSON payload with extra information about the webhook event that your action or 
 
 .LINK
 https://docs.github.com/en/rest/reference/repos
+
+.OUTPUTS
+
 #>
 Function Create-ARepositoryDispatchEvent
 {
@@ -37,9 +40,10 @@ Function Create-ARepositoryDispatchEvent
 		[Parameter(Mandatory=$FALSE)][string]$event_type,
 		[Parameter(Mandatory=$FALSE)][object]$client_payload
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -51,9 +55,9 @@ Function Create-ARepositoryDispatchEvent
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/repos/$owner/$repo/dispatches?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/repos/$owner/$repo/dispatches?$($Querys -join '&')"
     }
     else
     {

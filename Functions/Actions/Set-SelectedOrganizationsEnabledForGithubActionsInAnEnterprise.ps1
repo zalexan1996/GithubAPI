@@ -16,6 +16,9 @@ Required. List of organization IDs to enable for GitHub Actions.
 
 .LINK
 https://docs.github.com/en/rest/reference/actions
+
+.OUTPUTS
+
 #>
 Function Set-SelectedOrganizationsEnabledForGithubActionsInAnEnterprise
 {
@@ -25,9 +28,10 @@ Function Set-SelectedOrganizationsEnabledForGithubActionsInAnEnterprise
 		[Parameter(Mandatory=$FALSE)][string]$enterprise,
 		[Parameter(Mandatory=$FALSE)][int[]]$selected_organization_ids
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -38,9 +42,9 @@ Function Set-SelectedOrganizationsEnabledForGithubActionsInAnEnterprise
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/enterprises/$enterprise/actions/permissions/organizations?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/enterprises/$enterprise/actions/permissions/organizations?$($Querys -join '&')"
     }
     else
     {

@@ -1,13 +1,38 @@
-. "$PSScriptRoot\Get-FunctionFromDiv.ps1"
-. "$PSScriptRoot\New-FunctionFromObject.ps1"
+<#
+.SYNOPSIS
+Given a section url (https://docs.github.com/en/rest/reference/actions), it will scrape the webpage and return an array of PSCustomObjects
+that represent the functions in the section
 
+.OUTPUTS
+Returns all endpoint objects for the specified section:
+
+[PSCustomObject[]]@{
+    Synopsis = The Synopsis text of the endpoint
+    FunctionName = The name of the function. 
+    Method = The HTTP method of the function
+    Parameters = @(
+            @{
+                Name = The name of the parameter
+                Type = The datatype of the parameter
+                In = Where the parameter is supplied to (Header, Body, Query, Path)
+                Description = A short description of the paramater. Not all parameters have a scrapable Description field
+                Default = "N/A"
+            }
+        }
+    )
+    Uri = The URI of the endpoint
+    ExpectedOutput = The text from the Response box of the documentation page.
+    Code = The generated powershell code of this function
+}
+#>
 Function Get-Endpoints
 {
     [CmdletBinding()]
     Param(
         [Parameter(Mandatory=$TRUE)][string]$SectionUrl
     )
-    
+    . "$PSScriptRoot\Get-FunctionFromDiv.ps1"
+    . "$PSScriptRoot\New-FunctionFromObject.ps1"
 
     # Navigate to the section URL
     Enter-SeUrl -Driver $Driver -Url $SectionUrl

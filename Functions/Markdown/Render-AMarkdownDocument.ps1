@@ -19,6 +19,9 @@ The repository context to use when creating references in gfm mode. For example,
 
 .LINK
 https://docs.github.com/en/rest/reference/markdown
+
+.OUTPUTS
+
 #>
 Function Render-AMarkdownDocument
 {
@@ -29,9 +32,10 @@ Function Render-AMarkdownDocument
 		[Parameter(Mandatory=$FALSE)][string]$mode,
 		[Parameter(Mandatory=$FALSE)][string]$context
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -44,9 +48,9 @@ Function Render-AMarkdownDocument
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/markdown?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/markdown?$($Querys -join '&')"
     }
     else
     {

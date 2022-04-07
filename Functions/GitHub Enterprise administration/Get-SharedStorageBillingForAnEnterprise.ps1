@@ -14,6 +14,13 @@ The slug version of the enterprise name. You can also substitute this value with
 
 .LINK
 https://docs.github.com/en/rest/reference/enterprise-admin
+
+.OUTPUTS
+ {
+  "days_left_in_billing_cycle": 20,
+  "estimated_paid_storage_for_month": 15,
+  "estimated_storage_for_month": 40
+}
 #>
 Function Get-SharedStorageBillingForAnEnterprise
 {
@@ -22,9 +29,10 @@ Function Get-SharedStorageBillingForAnEnterprise
 		[Parameter(Mandatory=$FALSE)][string]$accept,
 		[Parameter(Mandatory=$FALSE)][string]$enterprise
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -35,9 +43,9 @@ Function Get-SharedStorageBillingForAnEnterprise
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/enterprises/$enterprise/settings/billing/shared-storage?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/enterprises/$enterprise/settings/billing/shared-storage?$($Querys -join '&')"
     }
     else
     {

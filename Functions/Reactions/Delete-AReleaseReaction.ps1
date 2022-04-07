@@ -22,6 +22,9 @@ release_id parameter
 
 .LINK
 https://docs.github.com/en/rest/reference/reactions
+
+.OUTPUTS
+
 #>
 Function Delete-AReleaseReaction
 {
@@ -33,9 +36,10 @@ Function Delete-AReleaseReaction
 		[Parameter(Mandatory=$FALSE)][int]$release_id,
 		[Parameter(Mandatory=$FALSE)][int]$reaction_id
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -46,9 +50,9 @@ Function Delete-AReleaseReaction
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/repos/$owner/$repo/releases/$release_id/reactions/$reaction_id?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/repos/$owner/$repo/releases/$release_id/reactions/$reaction_id?$($Querys -join '&')"
     }
     else
     {

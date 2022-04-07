@@ -21,6 +21,9 @@ The attempt number of the workflow run.
 
 .LINK
 https://docs.github.com/en/rest/reference/actions
+
+.OUTPUTS
+
 #>
 Function Download-WorkflowRunAttemptLogs
 {
@@ -32,9 +35,10 @@ Function Download-WorkflowRunAttemptLogs
 		[Parameter(Mandatory=$FALSE)][int]$run_id,
 		[Parameter(Mandatory=$FALSE)][int]$attempt_number
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -45,9 +49,9 @@ Function Download-WorkflowRunAttemptLogs
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/repos/$owner/$repo/actions/runs/$run_id/attempts/$attempt_number/logs?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/repos/$owner/$repo/actions/runs/$run_id/attempts/$attempt_number/logs?$($Querys -join '&')"
     }
     else
     {

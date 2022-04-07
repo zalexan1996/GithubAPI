@@ -17,6 +17,22 @@ team_slug parameter
 
 .LINK
 https://docs.github.com/en/rest/reference/teams
+
+.OUTPUTS
+ {
+  "groups": [
+    {
+      "group_id": "123",
+      "group_name": "Octocat admins",
+      "group_description": "The people who configure your octoworld."
+    },
+    {
+      "group_id": "456",
+      "group_name": "Octocat docs members",
+      "group_description": "The people who make your octoworld come to life."
+    }
+  ]
+}
 #>
 Function List-IdpGroupsForATeam
 {
@@ -26,9 +42,10 @@ Function List-IdpGroupsForATeam
 		[Parameter(Mandatory=$FALSE)][string]$org,
 		[Parameter(Mandatory=$FALSE)][string]$team_slug
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -39,9 +56,9 @@ Function List-IdpGroupsForATeam
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/orgs/$org/teams/$team_slug/team-sync/group-mappings?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/orgs/$org/teams/$team_slug/team-sync/group-mappings?$($Querys -join '&')"
     }
     else
     {

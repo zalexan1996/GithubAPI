@@ -19,6 +19,9 @@ Unique identifier of the package version.
 
 .LINK
 https://docs.github.com/en/rest/reference/packages
+
+.OUTPUTS
+
 #>
 Function Delete-APackageVersionForTheAuthenticatedUser
 {
@@ -29,9 +32,10 @@ Function Delete-APackageVersionForTheAuthenticatedUser
 		[Parameter(Mandatory=$FALSE)][string]$package_name,
 		[Parameter(Mandatory=$FALSE)][int]$package_version_id
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -42,9 +46,9 @@ Function Delete-APackageVersionForTheAuthenticatedUser
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/user/packages/$package_type/$package_name/versions/$package_version_id?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/user/packages/$package_type/$package_name/versions/$package_version_id?$($Querys -join '&')"
     }
     else
     {

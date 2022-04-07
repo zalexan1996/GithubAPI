@@ -23,6 +23,33 @@ Limits the list of credentials authorizations for an organization to a specific 
 
 .LINK
 https://docs.github.com/en/rest/reference/orgs
+
+.OUTPUTS
+ [
+  {
+    "login": "octocat",
+    "credential_id": 161195,
+    "credential_type": "personal access token",
+    "token_last_eight": "71c3fc11",
+    "credential_authorized_at": "2011-01-26T19:06:43Z",
+    "authorized_credential_expires_at": "2011-02-25T19:06:43Z",
+    "scopes": [
+      "user",
+      "repo"
+    ]
+  },
+  {
+    "login": "hubot",
+    "credential_id": 161196,
+    "credential_type": "personal access token",
+    "token_last_eight": "Ae178B4a",
+    "credential_authorized_at": "2019-03-29T19:06:43Z",
+    "authorized_credential_expires_at": "2019-04-28T19:06:43Z",
+    "scopes": [
+      "repo"
+    ]
+  }
+]
 #>
 Function List-SAMLSSOAuthorizationsForAnOrganization
 {
@@ -34,11 +61,12 @@ Function List-SAMLSSOAuthorizationsForAnOrganization
 		[Parameter(Mandatory=$FALSE)][int]$page,
 		[Parameter(Mandatory=$FALSE)][string]$login
     )
+    $Querys = @()
     $QueryStrings = @(
-        "per_page=$per_page",
-		"page=$page",
-		"login=$login"
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+        "per_page",
+		"page",
+		"login"
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -49,9 +77,9 @@ Function List-SAMLSSOAuthorizationsForAnOrganization
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/orgs/$org/credential-authorizations?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/orgs/$org/credential-authorizations?$($Querys -join '&')"
     }
     else
     {

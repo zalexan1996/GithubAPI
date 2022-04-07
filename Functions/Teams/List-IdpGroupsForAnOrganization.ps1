@@ -20,6 +20,22 @@ Page token
 
 .LINK
 https://docs.github.com/en/rest/reference/teams
+
+.OUTPUTS
+ {
+  "groups": [
+    {
+      "group_id": "123",
+      "group_name": "Octocat admins",
+      "group_description": "The people who configure your octoworld."
+    },
+    {
+      "group_id": "456",
+      "group_name": "Octocat docs members",
+      "group_description": "The people who make your octoworld come to life."
+    }
+  ]
+}
 #>
 Function List-IdpGroupsForAnOrganization
 {
@@ -30,10 +46,11 @@ Function List-IdpGroupsForAnOrganization
 		[Parameter(Mandatory=$FALSE)][int]$per_page,
 		[Parameter(Mandatory=$FALSE)][string]$page
     )
+    $Querys = @()
     $QueryStrings = @(
-        "per_page=$per_page",
-		"page=$page"
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+        "per_page",
+		"page"
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -44,9 +61,9 @@ Function List-IdpGroupsForAnOrganization
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/orgs/$org/team-sync/groups?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/orgs/$org/team-sync/groups?$($Querys -join '&')"
     }
     else
     {

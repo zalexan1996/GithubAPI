@@ -22,6 +22,9 @@ team_slug parameter
 
 .LINK
 https://docs.github.com/en/rest/reference/reactions
+
+.OUTPUTS
+
 #>
 Function Delete-TeamDiscussionReaction
 {
@@ -33,9 +36,10 @@ Function Delete-TeamDiscussionReaction
 		[Parameter(Mandatory=$FALSE)][int]$discussion_number,
 		[Parameter(Mandatory=$FALSE)][int]$reaction_id
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -46,9 +50,9 @@ Function Delete-TeamDiscussionReaction
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/orgs/$org/teams/$team_slug/discussions/$discussion_number/reactions/$reaction_id?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/orgs/$org/teams/$team_slug/discussions/$discussion_number/reactions/$reaction_id?$($Querys -join '&')"
     }
     else
     {

@@ -1,4 +1,3 @@
-
 <#
 .SYNOPSIS
 Given a valid web driver, it will navigate to the GitHub API reference page and return a list of sections in the reference.

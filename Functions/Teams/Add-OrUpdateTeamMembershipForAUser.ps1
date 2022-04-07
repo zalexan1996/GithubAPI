@@ -29,6 +29,13 @@ Default: member
 
 .LINK
 https://docs.github.com/en/rest/reference/teams
+
+.OUTPUTS
+ {
+  "url": "https://api.github.com/teams/1/memberships/octocat",
+  "role": "member",
+  "state": "pending"
+}
 #>
 Function Add-OrUpdateTeamMembershipForAUser
 {
@@ -40,9 +47,10 @@ Function Add-OrUpdateTeamMembershipForAUser
 		[Parameter(Mandatory=$FALSE)][string]$username,
 		[Parameter(Mandatory=$FALSE)][string]$role
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -53,9 +61,9 @@ Function Add-OrUpdateTeamMembershipForAUser
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/orgs/$org/teams/$team_slug/memberships/$username?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/orgs/$org/teams/$team_slug/memberships/$username?$($Querys -join '&')"
     }
     else
     {

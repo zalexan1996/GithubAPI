@@ -20,6 +20,32 @@ Default: 1
 
 .LINK
 https://docs.github.com/en/rest/reference/dependabot
+
+.OUTPUTS
+ {
+  "total_count": 3,
+  "secrets": [
+    {
+      "name": "MY_ARTIFACTORY_PASSWORD",
+      "created_at": "2021-08-10T14:59:22Z",
+      "updated_at": "2021-12-10T14:59:22Z",
+      "visibility": "private"
+    },
+    {
+      "name": "NPM_TOKEN",
+      "created_at": "2021-08-10T14:59:22Z",
+      "updated_at": "2021-12-10T14:59:22Z",
+      "visibility": "all"
+    },
+    {
+      "name": "GH_TOKEN",
+      "created_at": "2021-08-10T14:59:22Z",
+      "updated_at": "2021-12-10T14:59:22Z",
+      "visibility": "selected",
+      "selected_repositories_url": "https://api.github.com/orgs/octo-org/dependabot/secrets/SUPER_SECRET/repositories"
+    }
+  ]
+}
 #>
 Function List-OrganizationSecrets
 {
@@ -30,10 +56,11 @@ Function List-OrganizationSecrets
 		[Parameter(Mandatory=$FALSE)][int]$per_page,
 		[Parameter(Mandatory=$FALSE)][int]$page
     )
+    $Querys = @()
     $QueryStrings = @(
-        "per_page=$per_page",
-		"page=$page"
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+        "per_page",
+		"page"
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -44,9 +71,9 @@ Function List-OrganizationSecrets
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/orgs/$org/dependabot/secrets?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/orgs/$org/dependabot/secrets?$($Querys -join '&')"
     }
     else
     {

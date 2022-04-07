@@ -12,6 +12,9 @@ The words to show in Octocat's speech bubble
 
 .LINK
 https://docs.github.com/en/rest/reference/meta
+
+.OUTPUTS
+
 #>
 Function Get-Octocat
 {
@@ -20,9 +23,10 @@ Function Get-Octocat
 		[Parameter(Mandatory=$FALSE)][string]$accept,
 		[Parameter(Mandatory=$FALSE)][string]$s
     )
+    $Querys = @()
     $QueryStrings = @(
-        "s=$s"
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+        "s"
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -33,9 +37,9 @@ Function Get-Octocat
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/octocat?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/octocat?$($Querys -join '&')"
     }
     else
     {

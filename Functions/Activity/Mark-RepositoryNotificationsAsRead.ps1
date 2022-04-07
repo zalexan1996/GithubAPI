@@ -18,6 +18,9 @@ Describes the last point that notifications were checked. Anything updated since
 
 .LINK
 https://docs.github.com/en/rest/reference/activity
+
+.OUTPUTS
+
 #>
 Function Mark-RepositoryNotificationsAsRead
 {
@@ -28,9 +31,10 @@ Function Mark-RepositoryNotificationsAsRead
 		[Parameter(Mandatory=$FALSE)][string]$repo,
 		[Parameter(Mandatory=$FALSE)][string]$last_read_at
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -41,9 +45,9 @@ Function Mark-RepositoryNotificationsAsRead
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/repos/$owner/$repo/notifications?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/repos/$owner/$repo/notifications?$($Querys -join '&')"
     }
     else
     {

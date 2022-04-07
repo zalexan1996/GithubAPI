@@ -74,6 +74,9 @@ ID of the key you used to encrypt the secret.
 
 .LINK
 https://docs.github.com/en/rest/reference/dependabot
+
+.OUTPUTS
+
 #>
 Function Create-OrUpdateARepositorySecret
 {
@@ -86,9 +89,10 @@ Function Create-OrUpdateARepositorySecret
 		[Parameter(Mandatory=$FALSE)][string]$encrypted_value,
 		[Parameter(Mandatory=$FALSE)][string]$key_id
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -100,9 +104,9 @@ Function Create-OrUpdateARepositorySecret
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/repos/$owner/$repo/dependabot/secrets/$secret_name?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/repos/$owner/$repo/dependabot/secrets/$secret_name?$($Querys -join '&')"
     }
     else
     {

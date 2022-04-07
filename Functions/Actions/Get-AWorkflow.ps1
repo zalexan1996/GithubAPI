@@ -18,6 +18,20 @@ The ID of the workflow. You can also pass the workflow file name as a string.
 
 .LINK
 https://docs.github.com/en/rest/reference/actions
+
+.OUTPUTS
+ {
+  "id": 161335,
+  "node_id": "MDg6V29ya2Zsb3cxNjEzMzU=",
+  "name": "CI",
+  "path": ".github/workflows/blank.yaml",
+  "state": "active",
+  "created_at": "2020-01-08T23:48:37.000-08:00",
+  "updated_at": "2020-01-08T23:50:21.000-08:00",
+  "url": "https://api.github.com/repos/octo-org/octo-repo/actions/workflows/161335",
+  "html_url": "https://github.com/octo-org/octo-repo/blob/master/.github/workflows/161335",
+  "badge_url": "https://github.com/octo-org/octo-repo/workflows/CI/badge.svg"
+}
 #>
 Function Get-AWorkflow
 {
@@ -28,9 +42,10 @@ Function Get-AWorkflow
 		[Parameter(Mandatory=$FALSE)][string]$repo,
 		[Parameter(Mandatory=$FALSE)][string]$workflow_id
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -41,9 +56,9 @@ Function Get-AWorkflow
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/repos/$owner/$repo/actions/workflows/$workflow_id?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/repos/$owner/$repo/actions/workflows/$workflow_id?$($Querys -join '&')"
     }
     else
     {

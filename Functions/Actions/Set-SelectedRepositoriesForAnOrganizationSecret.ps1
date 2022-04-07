@@ -18,6 +18,9 @@ Required. An array of repository ids that can access the organization secret. Yo
 
 .LINK
 https://docs.github.com/en/rest/reference/actions
+
+.OUTPUTS
+
 #>
 Function Set-SelectedRepositoriesForAnOrganizationSecret
 {
@@ -28,9 +31,10 @@ Function Set-SelectedRepositoriesForAnOrganizationSecret
 		[Parameter(Mandatory=$FALSE)][string]$secret_name,
 		[Parameter(Mandatory=$FALSE)][int[]]$selected_repository_ids
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -41,9 +45,9 @@ Function Set-SelectedRepositoriesForAnOrganizationSecret
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/orgs/$org/actions/secrets/$secret_name/repositories?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/orgs/$org/actions/secrets/$secret_name/repositories?$($Querys -join '&')"
     }
     else
     {

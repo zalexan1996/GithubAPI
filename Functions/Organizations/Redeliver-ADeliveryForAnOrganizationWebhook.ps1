@@ -18,6 +18,9 @@ Setting toapplication/vnd.github.v3+json is recommended.
 
 .LINK
 https://docs.github.com/en/rest/reference/orgs
+
+.OUTPUTS
+
 #>
 Function Redeliver-ADeliveryForAnOrganizationWebhook
 {
@@ -28,9 +31,10 @@ Function Redeliver-ADeliveryForAnOrganizationWebhook
 		[Parameter(Mandatory=$FALSE)][int]$hook_id,
 		[Parameter(Mandatory=$FALSE)][int]$delivery_id
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -41,9 +45,9 @@ Function Redeliver-ADeliveryForAnOrganizationWebhook
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/orgs/$org/hooks/$hook_id/deliveries/$delivery_id/attempts?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/orgs/$org/hooks/$hook_id/deliveries/$delivery_id/attempts?$($Querys -join '&')"
     }
     else
     {

@@ -15,6 +15,9 @@ scim_user_id parameter
 
 .LINK
 https://docs.github.com/en/rest/reference/enterprise-admin
+
+.OUTPUTS
+
 #>
 Function Delete-ASCIMUserFromAnEnterprise
 {
@@ -24,9 +27,10 @@ Function Delete-ASCIMUserFromAnEnterprise
 		[Parameter(Mandatory=$FALSE)][string]$enterprise,
 		[Parameter(Mandatory=$FALSE)][string]$scim_user_id
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -37,9 +41,9 @@ Function Delete-ASCIMUserFromAnEnterprise
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/scim/v2/enterprises/$enterprise/Users/$scim_user_id?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/scim/v2/enterprises/$enterprise/Users/$scim_user_id?$($Querys -join '&')"
     }
     else
     {

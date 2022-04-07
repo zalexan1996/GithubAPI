@@ -30,6 +30,13 @@ Merge method to use. Possible values are merge, squash or rebase. Default is mer
 
 .LINK
 https://docs.github.com/en/rest/reference/pulls
+
+.OUTPUTS
+ {
+  "sha": "6dcb09b5b57875f334f61aebed695e2e4193db5e",
+  "merged": true,
+  "message": "Pull Request successfully merged"
+}
 #>
 Function Merge-APullRequest
 {
@@ -44,9 +51,10 @@ Function Merge-APullRequest
 		[Parameter(Mandatory=$FALSE)][string]$sha,
 		[Parameter(Mandatory=$FALSE)][string]$merge_method
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -60,9 +68,9 @@ Function Merge-APullRequest
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/repos/$owner/$repo/pulls/$pull_number/merge?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/repos/$owner/$repo/pulls/$pull_number/merge?$($Querys -join '&')"
     }
     else
     {

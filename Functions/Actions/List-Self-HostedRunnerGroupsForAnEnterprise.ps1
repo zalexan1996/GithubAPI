@@ -21,6 +21,51 @@ Default: 1
 
 .LINK
 https://docs.github.com/en/rest/reference/actions
+
+.OUTPUTS
+ {
+  "total_count": 3,
+  "runner_groups": [
+    {
+      "id": 1,
+      "name": "Default",
+      "visibility": "all",
+      "default": true,
+      "runners_url": "https://api.github.com/enterprises/octo-corp/actions/runner_groups/1/runners",
+      "allows_public_repositories": false,
+      "restricted_to_workflows": false,
+      "selected_workflows": [],
+      "workflow_restrictions_read_only": false
+    },
+    {
+      "id": 2,
+      "name": "octo-runner-group",
+      "visibility": "selected",
+      "default": false,
+      "selected_organizations_url": "https://api.github.com/enterprises/octo-corp/actions/runner_groups/2/organizations",
+      "runners_url": "https://api.github.com/enterprises/octo-corp/actions/runner_groups/2/runners",
+      "allows_public_repositories": true,
+      "restricted_to_workflows": true,
+      "selected_workflows": [
+        "octo-org/octo-repo/.github/workflows/deploy.yaml@refs/heads/main"
+      ],
+      "workflow_restrictions_read_only": false
+    },
+    {
+      "id": 3,
+      "name": "expensive-hardware",
+      "visibility": "private",
+      "default": false,
+      "runners_url": "https://api.github.com/enterprises/octo-corp/actions/runner_groups/3/runners",
+      "allows_public_repositories": true,
+      "restricted_to_workflows": false,
+      "selected_workflows": [
+        "octo-org/octo-repo/.github/workflows/deploy.yaml@refs/heads/main"
+      ],
+      "workflow_restrictions_read_only": false
+    }
+  ]
+}
 #>
 Function List-Self-HostedRunnerGroupsForAnEnterprise
 {
@@ -31,10 +76,11 @@ Function List-Self-HostedRunnerGroupsForAnEnterprise
 		[Parameter(Mandatory=$FALSE)][int]$per_page,
 		[Parameter(Mandatory=$FALSE)][int]$page
     )
+    $Querys = @()
     $QueryStrings = @(
-        "per_page=$per_page",
-		"page=$page"
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+        "per_page",
+		"page"
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -45,9 +91,9 @@ Function List-Self-HostedRunnerGroupsForAnEnterprise
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/enterprises/$enterprise/actions/runner-groups?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/enterprises/$enterprise/actions/runner-groups?$($Querys -join '&')"
     }
     else
     {

@@ -24,6 +24,9 @@ An array of team slugs that will be removed.
 
 .LINK
 https://docs.github.com/en/rest/reference/pulls
+
+.OUTPUTS
+
 #>
 Function Remove-RequestedReviewersFromAPullRequest
 {
@@ -36,9 +39,10 @@ Function Remove-RequestedReviewersFromAPullRequest
 		[Parameter(Mandatory=$FALSE)][string[]]$reviewers,
 		[Parameter(Mandatory=$FALSE)][string[]]$team_reviewers
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -50,9 +54,9 @@ Function Remove-RequestedReviewersFromAPullRequest
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/repos/$owner/$repo/pulls/$pull_number/requested_reviewers?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/repos/$owner/$repo/pulls/$pull_number/requested_reviewers?$($Querys -join '&')"
     }
     else
     {

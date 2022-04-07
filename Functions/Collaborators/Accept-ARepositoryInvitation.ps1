@@ -12,6 +12,9 @@ invitation_id parameter
 
 .LINK
 https://docs.github.com/en/rest/reference/collaborators
+
+.OUTPUTS
+
 #>
 Function Accept-ARepositoryInvitation
 {
@@ -20,9 +23,10 @@ Function Accept-ARepositoryInvitation
 		[Parameter(Mandatory=$FALSE)][string]$accept,
 		[Parameter(Mandatory=$FALSE)][int]$invitation_id
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -33,9 +37,9 @@ Function Accept-ARepositoryInvitation
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/user/repository_invitations/$invitation_id?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/user/repository_invitations/$invitation_id?$($Querys -join '&')"
     }
     else
     {

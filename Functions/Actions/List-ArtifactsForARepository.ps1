@@ -23,6 +23,37 @@ Default: 1
 
 .LINK
 https://docs.github.com/en/rest/reference/actions
+
+.OUTPUTS
+ {
+  "total_count": 2,
+  "artifacts": [
+    {
+      "id": 11,
+      "node_id": "MDg6QXJ0aWZhY3QxMQ==",
+      "name": "Rails",
+      "size_in_bytes": 556,
+      "url": "https://api.github.com/repos/octo-org/octo-docs/actions/artifacts/11",
+      "archive_download_url": "https://api.github.com/repos/octo-org/octo-docs/actions/artifacts/11/zip",
+      "expired": false,
+      "created_at": "2020-01-10T14:59:22Z",
+      "expires_at": "2020-03-21T14:59:22Z",
+      "updated_at": "2020-02-21T14:59:22Z"
+    },
+    {
+      "id": 13,
+      "node_id": "MDg6QXJ0aWZhY3QxMw==",
+      "name": "",
+      "size_in_bytes": 453,
+      "url": "https://api.github.com/repos/octo-org/octo-docs/actions/artifacts/13",
+      "archive_download_url": "https://api.github.com/repos/octo-org/octo-docs/actions/artifacts/13/zip",
+      "expired": false,
+      "created_at": "2020-01-10T14:59:22Z",
+      "expires_at": "2020-03-21T14:59:22Z",
+      "updated_at": "2020-02-21T14:59:22Z"
+    }
+  ]
+}
 #>
 Function List-ArtifactsForARepository
 {
@@ -34,10 +65,11 @@ Function List-ArtifactsForARepository
 		[Parameter(Mandatory=$FALSE)][int]$per_page,
 		[Parameter(Mandatory=$FALSE)][int]$page
     )
+    $Querys = @()
     $QueryStrings = @(
-        "per_page=$per_page",
-		"page=$page"
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+        "per_page",
+		"page"
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -48,9 +80,9 @@ Function List-ArtifactsForARepository
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/repos/$owner/$repo/actions/artifacts?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/repos/$owner/$repo/actions/artifacts?$($Querys -join '&')"
     }
     else
     {

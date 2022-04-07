@@ -37,6 +37,23 @@ Setting toapplication/vnd.github.v3+json is recommended.
 
 .LINK
 https://docs.github.com/en/rest/reference/migrations
+
+.OUTPUTS
+ {
+  "vcs": "subversion",
+  "use_lfs": true,
+  "vcs_url": "http://svn.mycompany.com/svn/myproject",
+  "status": "complete",
+  "status_text": "Done",
+  "has_large_files": true,
+  "large_files_size": 132331036,
+  "large_files_count": 1,
+  "authors_count": 4,
+  "url": "https://api.github.com/repos/octocat/socm/import",
+  "html_url": "https://import.github.com/octocat/socm/import",
+  "authors_url": "https://api.github.com/repos/octocat/socm/import/authors",
+  "repository_url": "https://api.github.com/repos/octocat/socm"
+}
 #>
 Function Get-AnImportStatus
 {
@@ -46,9 +63,10 @@ Function Get-AnImportStatus
 		[Parameter(Mandatory=$FALSE)][string]$owner,
 		[Parameter(Mandatory=$FALSE)][string]$repo
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -59,9 +77,9 @@ Function Get-AnImportStatus
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/repos/$owner/$repo/import?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/repos/$owner/$repo/import?$($Querys -join '&')"
     }
     else
     {

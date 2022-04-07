@@ -13,6 +13,21 @@ Setting toapplication/vnd.github.v3+json is recommended.
 
 .LINK
 https://docs.github.com/en/rest/reference/orgs
+
+.OUTPUTS
+ {
+  "total_count": 2,
+  "custom_roles": [
+    {
+      "id": 8030,
+      "name": "Developer"
+    },
+    {
+      "id": 8031,
+      "name": "Designer"
+    }
+  ]
+}
 #>
 Function List-CustomRepositoryRolesInAnOrganization
 {
@@ -21,9 +36,10 @@ Function List-CustomRepositoryRolesInAnOrganization
 		[Parameter(Mandatory=$FALSE)][string]$accept,
 		[Parameter(Mandatory=$FALSE)][string]$organization_id
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -34,9 +50,9 @@ Function List-CustomRepositoryRolesInAnOrganization
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/organizations/$organization_id/custom_roles?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/organizations/$organization_id/custom_roles?$($Querys -join '&')"
     }
     else
     {

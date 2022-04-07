@@ -40,6 +40,12 @@ The name of the tool used to generate the code scanning analysis. If this parame
 
 .LINK
 https://docs.github.com/en/rest/reference/code-scanning
+
+.OUTPUTS
+ {
+  "id": "47177e22-5596-11eb-80a1-c1e54ef945c6",
+  "url": "https://api.github.com/repos/octocat/hello-world/code-scanning/sarifs/47177e22-5596-11eb-80a1-c1e54ef945c6"
+}
 #>
 Function Upload-AnAnalysisAsSARIFData
 {
@@ -55,9 +61,10 @@ Function Upload-AnAnalysisAsSARIFData
 		[Parameter(Mandatory=$FALSE)][string]$started_at,
 		[Parameter(Mandatory=$FALSE)][string]$tool_name
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -73,9 +80,9 @@ Function Upload-AnAnalysisAsSARIFData
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/repos/$owner/$repo/code-scanning/sarifs?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/repos/$owner/$repo/code-scanning/sarifs?$($Querys -join '&')"
     }
     else
     {

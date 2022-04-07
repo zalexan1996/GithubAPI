@@ -34,6 +34,9 @@ Default: push
 
 .LINK
 https://docs.github.com/en/rest/reference/teams
+
+.OUTPUTS
+
 #>
 Function Add-OrUpdateTeamRepositoryPermissions
 {
@@ -46,9 +49,10 @@ Function Add-OrUpdateTeamRepositoryPermissions
 		[Parameter(Mandatory=$FALSE)][string]$repo,
 		[Parameter(Mandatory=$FALSE)][string]$permission
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -59,9 +63,9 @@ Function Add-OrUpdateTeamRepositoryPermissions
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/orgs/$org/teams/$team_slug/repos/$owner/$repo?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/orgs/$org/teams/$team_slug/repos/$owner/$repo?$($Querys -join '&')"
     }
     else
     {

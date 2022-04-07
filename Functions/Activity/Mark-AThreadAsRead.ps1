@@ -12,6 +12,9 @@ thread_id parameter
 
 .LINK
 https://docs.github.com/en/rest/reference/activity
+
+.OUTPUTS
+
 #>
 Function Mark-AThreadAsRead
 {
@@ -20,9 +23,10 @@ Function Mark-AThreadAsRead
 		[Parameter(Mandatory=$FALSE)][string]$accept,
 		[Parameter(Mandatory=$FALSE)][int]$thread_id
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -33,9 +37,9 @@ Function Mark-AThreadAsRead
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/notifications/threads/$thread_id?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/notifications/threads/$thread_id?$($Querys -join '&')"
     }
     else
     {

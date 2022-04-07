@@ -27,6 +27,9 @@ Configures access controls for the GitHub Pages site. If public is set to true, 
 
 .LINK
 https://docs.github.com/en/rest/reference/pages
+
+.OUTPUTS
+
 #>
 Function Update-InformationAboutAGithubPagesSite
 {
@@ -40,9 +43,10 @@ Function Update-InformationAboutAGithubPagesSite
 		[Parameter(Mandatory=$FALSE)][bool]$public,
 		[Parameter(Mandatory=$FALSE)][string]$source
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -56,9 +60,9 @@ Function Update-InformationAboutAGithubPagesSite
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/repos/$owner/$repo/pages?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/repos/$owner/$repo/pages?$($Querys -join '&')"
     }
     else
     {

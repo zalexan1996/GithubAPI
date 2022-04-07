@@ -13,6 +13,9 @@ Setting toapplication/vnd.github.v3+json is recommended.
 
 .LINK
 https://docs.github.com/en/rest/reference/users
+
+.OUTPUTS
+
 #>
 Function Follow-AUser
 {
@@ -21,9 +24,10 @@ Function Follow-AUser
 		[Parameter(Mandatory=$FALSE)][string]$accept,
 		[Parameter(Mandatory=$FALSE)][string]$username
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -34,9 +38,9 @@ Function Follow-AUser
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/user/following/$username?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/user/following/$username?$($Querys -join '&')"
     }
     else
     {

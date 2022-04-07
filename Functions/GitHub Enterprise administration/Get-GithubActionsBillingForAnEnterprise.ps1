@@ -14,6 +14,18 @@ The slug version of the enterprise name. You can also substitute this value with
 
 .LINK
 https://docs.github.com/en/rest/reference/enterprise-admin
+
+.OUTPUTS
+ {
+  "total_minutes_used": 305,
+  "total_paid_minutes_used": 0,
+  "included_minutes": 3000,
+  "minutes_used_breakdown": {
+    "UBUNTU": 205,
+    "MACOS": 10,
+    "WINDOWS": 90
+  }
+}
 #>
 Function Get-GithubActionsBillingForAnEnterprise
 {
@@ -22,9 +34,10 @@ Function Get-GithubActionsBillingForAnEnterprise
 		[Parameter(Mandatory=$FALSE)][string]$accept,
 		[Parameter(Mandatory=$FALSE)][string]$enterprise
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -35,9 +48,9 @@ Function Get-GithubActionsBillingForAnEnterprise
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/enterprises/$enterprise/settings/billing/actions?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/enterprises/$enterprise/settings/billing/actions?$($Querys -join '&')"
     }
     else
     {

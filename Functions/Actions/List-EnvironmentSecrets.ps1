@@ -23,6 +23,23 @@ Default: 1
 
 .LINK
 https://docs.github.com/en/rest/reference/actions
+
+.OUTPUTS
+ {
+  "total_count": 2,
+  "secrets": [
+    {
+      "name": "GH_TOKEN",
+      "created_at": "2019-08-10T14:59:22Z",
+      "updated_at": "2020-01-10T14:59:22Z"
+    },
+    {
+      "name": "GIST_ID",
+      "created_at": "2020-01-10T10:59:22Z",
+      "updated_at": "2020-01-11T11:59:22Z"
+    }
+  ]
+}
 #>
 Function List-EnvironmentSecrets
 {
@@ -34,10 +51,11 @@ Function List-EnvironmentSecrets
 		[Parameter(Mandatory=$FALSE)][int]$per_page,
 		[Parameter(Mandatory=$FALSE)][int]$page
     )
+    $Querys = @()
     $QueryStrings = @(
-        "per_page=$per_page",
-		"page=$page"
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+        "per_page",
+		"page"
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -48,9 +66,9 @@ Function List-EnvironmentSecrets
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/repositories/$repository_id/environments/$environment_name/secrets?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/repositories/$repository_id/environments/$environment_name/secrets?$($Querys -join '&')"
     }
     else
     {

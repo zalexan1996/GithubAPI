@@ -19,6 +19,9 @@ autolink_id parameter
 
 .LINK
 https://docs.github.com/en/rest/reference/repos
+
+.OUTPUTS
+
 #>
 Function Delete-AnAutolinkReferenceFromARepository
 {
@@ -29,9 +32,10 @@ Function Delete-AnAutolinkReferenceFromARepository
 		[Parameter(Mandatory=$FALSE)][string]$repo,
 		[Parameter(Mandatory=$FALSE)][int]$autolink_id
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -42,9 +46,9 @@ Function Delete-AnAutolinkReferenceFromARepository
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/repos/$owner/$repo/autolinks/$autolink_id?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/repos/$owner/$repo/autolinks/$autolink_id?$($Querys -join '&')"
     }
     else
     {

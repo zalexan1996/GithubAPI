@@ -29,6 +29,30 @@ Default: 1
 
 .LINK
 https://docs.github.com/en/rest/reference/git
+
+.OUTPUTS
+ [
+  {
+    "ref": "refs/heads/feature-a",
+    "node_id": "MDM6UmVmcmVmcy9oZWFkcy9mZWF0dXJlLWE=",
+    "url": "https://api.github.com/repos/octocat/Hello-World/git/refs/heads/feature-a",
+    "object": {
+      "type": "commit",
+      "sha": "aa218f56b14c9653891f9e74264a383fa43fefbd",
+      "url": "https://api.github.com/repos/octocat/Hello-World/git/commits/aa218f56b14c9653891f9e74264a383fa43fefbd"
+    }
+  },
+  {
+    "ref": "refs/heads/feature-b",
+    "node_id": "MDM6UmVmcmVmcy9oZWFkcy9mZWF0dXJlLWI=",
+    "url": "https://api.github.com/repos/octocat/Hello-World/git/refs/heads/feature-b",
+    "object": {
+      "type": "commit",
+      "sha": "612077ae6dffb4d2fbd8ce0cccaa58893b07b5ac",
+      "url": "https://api.github.com/repos/octocat/Hello-World/git/commits/612077ae6dffb4d2fbd8ce0cccaa58893b07b5ac"
+    }
+  }
+]
 #>
 Function List-MatchingReferences
 {
@@ -41,10 +65,11 @@ Function List-MatchingReferences
 		[Parameter(Mandatory=$FALSE)][int]$per_page,
 		[Parameter(Mandatory=$FALSE)][int]$page
     )
+    $Querys = @()
     $QueryStrings = @(
-        "per_page=$per_page",
-		"page=$page"
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+        "per_page",
+		"page"
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -55,9 +80,9 @@ Function List-MatchingReferences
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/repos/$owner/$repo/git/matching-refs/$ref?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/repos/$owner/$repo/git/matching-refs/$ref?$($Querys -join '&')"
     }
     else
     {

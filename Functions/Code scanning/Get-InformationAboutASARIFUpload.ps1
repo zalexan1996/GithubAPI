@@ -18,6 +18,12 @@ The SARIF ID obtained after uploading.
 
 .LINK
 https://docs.github.com/en/rest/reference/code-scanning
+
+.OUTPUTS
+ {
+  "processing_status": "complete",
+  "analyses_url": "https://api.github.com/repos/octocat/hello-world/code-scanning/analyses?sarif_id=47177e22-5596-11eb-80a1-c1e54ef945c6"
+}
 #>
 Function Get-InformationAboutASARIFUpload
 {
@@ -28,9 +34,10 @@ Function Get-InformationAboutASARIFUpload
 		[Parameter(Mandatory=$FALSE)][string]$repo,
 		[Parameter(Mandatory=$FALSE)][string]$sarif_id
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -41,9 +48,9 @@ Function Get-InformationAboutASARIFUpload
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/repos/$owner/$repo/code-scanning/sarifs/$sarif_id?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/repos/$owner/$repo/code-scanning/sarifs/$sarif_id?$($Querys -join '&')"
     }
     else
     {

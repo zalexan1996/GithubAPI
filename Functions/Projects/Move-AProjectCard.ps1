@@ -18,6 +18,9 @@ The unique identifier of the column the card should be moved to
 
 .LINK
 https://docs.github.com/en/rest/reference/projects
+
+.OUTPUTS
+
 #>
 Function Move-AProjectCard
 {
@@ -28,9 +31,10 @@ Function Move-AProjectCard
 		[Parameter(Mandatory=$FALSE)][string]$position,
 		[Parameter(Mandatory=$FALSE)][int]$column_id
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -42,9 +46,9 @@ Function Move-AProjectCard
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/projects/columns/cards/$card_id/moves?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/projects/columns/cards/$card_id/moves?$($Querys -join '&')"
     }
     else
     {

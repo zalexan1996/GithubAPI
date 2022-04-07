@@ -19,6 +19,9 @@ check_suite_id parameter
 
 .LINK
 https://docs.github.com/en/rest/reference/checks
+
+.OUTPUTS
+
 #>
 Function Rerequest-ACheckSuite
 {
@@ -29,9 +32,10 @@ Function Rerequest-ACheckSuite
 		[Parameter(Mandatory=$FALSE)][string]$repo,
 		[Parameter(Mandatory=$FALSE)][int]$check_suite_id
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -42,9 +46,9 @@ Function Rerequest-ACheckSuite
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/repos/$owner/$repo/check-suites/$check_suite_id/rerequest?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/repos/$owner/$repo/check-suites/$check_suite_id/rerequest?$($Querys -join '&')"
     }
     else
     {

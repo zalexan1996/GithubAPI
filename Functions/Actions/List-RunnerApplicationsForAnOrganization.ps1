@@ -13,6 +13,40 @@ Setting toapplication/vnd.github.v3+json is recommended.
 
 .LINK
 https://docs.github.com/en/rest/reference/actions
+
+.OUTPUTS
+ [
+  {
+    "os": "osx",
+    "architecture": "x64",
+    "download_url": "https://github.com/actions/runner/releases/download/v2.164.0/actions-runner-osx-x64-2.164.0.tar.gz",
+    "filename": "actions-runner-osx-x64-2.164.0.tar.gz"
+  },
+  {
+    "os": "linux",
+    "architecture": "x64",
+    "download_url": "https://github.com/actions/runner/releases/download/v2.164.0/actions-runner-linux-x64-2.164.0.tar.gz",
+    "filename": "actions-runner-linux-x64-2.164.0.tar.gz"
+  },
+  {
+    "os": "linux",
+    "architecture": "arm",
+    "download_url": "https://github.com/actions/runner/releases/download/v2.164.0/actions-runner-linux-arm-2.164.0.tar.gz",
+    "filename": "actions-runner-linux-arm-2.164.0.tar.gz"
+  },
+  {
+    "os": "win",
+    "architecture": "x64",
+    "download_url": "https://github.com/actions/runner/releases/download/v2.164.0/actions-runner-win-x64-2.164.0.zip",
+    "filename": "actions-runner-win-x64-2.164.0.zip"
+  },
+  {
+    "os": "linux",
+    "architecture": "arm64",
+    "download_url": "https://github.com/actions/runner/releases/download/v2.164.0/actions-runner-linux-arm64-2.164.0.tar.gz",
+    "filename": "actions-runner-linux-arm64-2.164.0.tar.gz"
+  }
+]
 #>
 Function List-RunnerApplicationsForAnOrganization
 {
@@ -21,9 +55,10 @@ Function List-RunnerApplicationsForAnOrganization
 		[Parameter(Mandatory=$FALSE)][string]$accept,
 		[Parameter(Mandatory=$FALSE)][string]$org
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -34,9 +69,9 @@ Function List-RunnerApplicationsForAnOrganization
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/orgs/$org/actions/runners/downloads?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/orgs/$org/actions/runners/downloads?$($Querys -join '&')"
     }
     else
     {

@@ -19,6 +19,30 @@ A branch, tag or commit name used to determine which version of the CODEOWNERS f
 
 .LINK
 https://docs.github.com/en/rest/reference/repos
+
+.OUTPUTS
+ {
+  "errors": [
+    {
+      "line": 3,
+      "column": 1,
+      "kind": "Invalid pattern",
+      "source": "***/*.rb @monalisa",
+      "suggestion": "Did you mean `**/*.rb`?",
+      "message": "Invalid pattern on line 3: Did you mean `**/*.rb`?\n\n  ***/*.rb @monalisa\n  ^",
+      "path": ".github/CODEOWNERS"
+    },
+    {
+      "line": 7,
+      "column": 7,
+      "kind": "Invalid owner",
+      "source": "*.txt docs@",
+      "suggestion": null,
+      "message": "Invalid owner on line 7:\n\n  *.txt docs@\n        ^",
+      "path": ".github/CODEOWNERS"
+    }
+  ]
+}
 #>
 Function List-CODEOWNERSErrors
 {
@@ -29,9 +53,10 @@ Function List-CODEOWNERSErrors
 		[Parameter(Mandatory=$FALSE)][string]$repo,
 		[Parameter(Mandatory=$FALSE)][string]$ref
     )
+    $Querys = @()
     $QueryStrings = @(
-        "ref=$ref"
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+        "ref"
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -42,9 +67,9 @@ Function List-CODEOWNERSErrors
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/repos/$owner/$repo/codeowners/errors?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/repos/$owner/$repo/codeowners/errors?$($Querys -join '&')"
     }
     else
     {

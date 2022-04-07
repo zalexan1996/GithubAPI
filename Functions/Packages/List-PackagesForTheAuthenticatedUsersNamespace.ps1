@@ -16,6 +16,72 @@ The selected visibility of the packages. Can be one of public, private, or inter
 
 .LINK
 https://docs.github.com/en/rest/reference/packages
+
+.OUTPUTS
+ [
+  {
+    "id": 197,
+    "name": "hello_docker",
+    "package_type": "container",
+    "owner": {
+      "login": "monalisa",
+      "id": 9919,
+      "node_id": "MDEyOk9yZ2FuaXphdGlvbjk5MTk=",
+      "avatar_url": "https://avatars.monalisausercontent.com/u/9919?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/monalisa",
+      "html_url": "https://github.com/github",
+      "followers_url": "https://api.github.com/users/github/followers",
+      "following_url": "https://api.github.com/users/github/following{/other_user}",
+      "gists_url": "https://api.github.com/users/github/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/github/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/github/subscriptions",
+      "organizations_url": "https://api.github.com/users/github/orgs",
+      "repos_url": "https://api.github.com/users/github/repos",
+      "events_url": "https://api.github.com/users/github/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/github/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "version_count": 1,
+    "visibility": "private",
+    "url": "https://api.github.com/orgs/github/packages/container/hello_docker",
+    "created_at": "2020-05-19T22:19:11Z",
+    "updated_at": "2020-05-19T22:19:11Z",
+    "html_url": "https://github.com/orgs/github/packages/container/package/hello_docker"
+  },
+  {
+    "id": 198,
+    "name": "goodbye_docker",
+    "package_type": "container",
+    "owner": {
+      "login": "github",
+      "id": 9919,
+      "node_id": "MDEyOk9yZ2FuaXphdGlvbjk5MTk=",
+      "avatar_url": "https://avatars.githubusercontent.com/u/9919?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/monalisa",
+      "html_url": "https://github.com/github",
+      "followers_url": "https://api.github.com/users/github/followers",
+      "following_url": "https://api.github.com/users/github/following{/other_user}",
+      "gists_url": "https://api.github.com/users/github/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/github/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/github/subscriptions",
+      "organizations_url": "https://api.github.com/users/github/orgs",
+      "repos_url": "https://api.github.com/users/github/repos",
+      "events_url": "https://api.github.com/users/github/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/github/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "version_count": 2,
+    "visibility": "private",
+    "url": "https://api.github.com/user/monalisa/packages/container/goodbye_docker",
+    "created_at": "2020-05-20T22:19:11Z",
+    "updated_at": "2020-05-20T22:19:11Z",
+    "html_url": "https://github.com/user/monalisa/packages/container/package/goodbye_docker"
+  }
+]
 #>
 Function List-PackagesForTheAuthenticatedUsersNamespace
 {
@@ -25,10 +91,11 @@ Function List-PackagesForTheAuthenticatedUsersNamespace
 		[Parameter(Mandatory=$FALSE)][string]$package_type,
 		[Parameter(Mandatory=$FALSE)][string]$visibility
     )
+    $Querys = @()
     $QueryStrings = @(
-        "package_type=$package_type",
-		"visibility=$visibility"
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+        "package_type",
+		"visibility"
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -39,9 +106,9 @@ Function List-PackagesForTheAuthenticatedUsersNamespace
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/user/packages?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/user/packages?$($Querys -join '&')"
     }
     else
     {

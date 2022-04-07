@@ -27,6 +27,52 @@ Default: 30
 
 .LINK
 https://docs.github.com/en/rest/reference/secret-scanning
+
+.OUTPUTS
+ [
+  {
+    "type": "commit",
+    "details": {
+      "path": "/example/secrets.txt",
+      "start_line": 1,
+      "end_line": 1,
+      "start_column": 1,
+      "end_column": 64,
+      "blob_sha": "af5626b4a114abcb82d63db7c8082c3c4756e51b",
+      "blob_url": "https://api.github.com/repos/octocat/hello-world/git/blobs/af5626b4a114abcb82d63db7c8082c3c4756e51b",
+      "commit_sha": "f14d7debf9775f957cf4f1e8176da0786431f72b",
+      "commit_url": "https://api.github.com/repos/octocat/hello-world/git/commits/f14d7debf9775f957cf4f1e8176da0786431f72b"
+    }
+  },
+  {
+    "type": "commit",
+    "details": {
+      "path": "/example/secrets.txt",
+      "start_line": 5,
+      "end_line": 5,
+      "start_column": 1,
+      "end_column": 64,
+      "blob_sha": "9def38117ab2d8355b982429aa924e268b4b0065",
+      "blob_url": "https://api.github.com/repos/octocat/hello-world/git/blobs/9def38117ab2d8355b982429aa924e268b4b0065",
+      "commit_sha": "588483b99a46342501d99e3f10630cfc1219ea32",
+      "commit_url": "https://api.github.com/repos/octocat/hello-world/git/commits/588483b99a46342501d99e3f10630cfc1219ea32"
+    }
+  },
+  {
+    "type": "commit",
+    "details": {
+      "path": "/example/secrets.txt",
+      "start_line": 12,
+      "end_line": 12,
+      "start_column": 1,
+      "end_column": 64,
+      "blob_sha": "0b33e9c66e19f7fb15137a82ff1c04c10cba6caf",
+      "blob_url": "https://api.github.com/repos/octocat/hello-world/git/blobs/0b33e9c66e19f7fb15137a82ff1c04c10cba6caf",
+      "commit_sha": "9def38117ab2d8355b982429aa924e268b4b0065",
+      "commit_url": "https://api.github.com/repos/octocat/hello-world/git/commits/9def38117ab2d8355b982429aa924e268b4b0065"
+    }
+  }
+]
 #>
 Function List-LocationsForASecretScanningAlert
 {
@@ -39,10 +85,11 @@ Function List-LocationsForASecretScanningAlert
 		[Parameter(Mandatory=$FALSE)][int]$page,
 		[Parameter(Mandatory=$FALSE)][int]$per_page
     )
+    $Querys = @()
     $QueryStrings = @(
-        "page=$page",
-		"per_page=$per_page"
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+        "page",
+		"per_page"
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -53,9 +100,9 @@ Function List-LocationsForASecretScanningAlert
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/repos/$owner/$repo/secret-scanning/alerts/$alert_number/locations?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/repos/$owner/$repo/secret-scanning/alerts/$alert_number/locations?$($Querys -join '&')"
     }
     else
     {

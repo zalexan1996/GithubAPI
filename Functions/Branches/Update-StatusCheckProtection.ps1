@@ -28,6 +28,16 @@ The list of status checks to require in order to merge into this branch.
 
 .LINK
 https://docs.github.com/en/rest/reference/branches
+
+.OUTPUTS
+ {
+  "url": "https://api.github.com/repos/octocat/Hello-World/branches/master/protection/required_status_checks",
+  "strict": true,
+  "contexts": [
+    "continuous-integration/travis-ci"
+  ],
+  "contexts_url": "https://api.github.com/repos/octocat/Hello-World/branches/master/protection/required_status_checks/contexts"
+}
 #>
 Function Update-StatusCheckProtection
 {
@@ -41,9 +51,10 @@ Function Update-StatusCheckProtection
 		[Parameter(Mandatory=$FALSE)][string[]]$contexts,
 		[Parameter(Mandatory=$FALSE)][object[]]$checks
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -56,9 +67,9 @@ Function Update-StatusCheckProtection
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/repos/$owner/$repo/branches/$branch/protection/required_status_checks?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/repos/$owner/$repo/branches/$branch/protection/required_status_checks?$($Querys -join '&')"
     }
     else
     {

@@ -18,6 +18,13 @@ secret_name parameter
 
 .LINK
 https://docs.github.com/en/rest/reference/dependabot
+
+.OUTPUTS
+ {
+  "name": "MY_ARTIFACTORY_PASSWORD",
+  "created_at": "2019-08-10T14:59:22Z",
+  "updated_at": "2020-01-10T14:59:22Z"
+}
 #>
 Function Get-ARepositorySecret
 {
@@ -28,9 +35,10 @@ Function Get-ARepositorySecret
 		[Parameter(Mandatory=$FALSE)][string]$repo,
 		[Parameter(Mandatory=$FALSE)][string]$secret_name
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -41,9 +49,9 @@ Function Get-ARepositorySecret
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/repos/$owner/$repo/dependabot/secrets/$secret_name?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/repos/$owner/$repo/dependabot/secrets/$secret_name?$($Querys -join '&')"
     }
     else
     {

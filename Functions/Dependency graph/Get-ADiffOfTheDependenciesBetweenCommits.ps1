@@ -21,6 +21,50 @@ The full path, relative to the repository root, of the dependency manifest file.
 
 .LINK
 https://docs.github.com/en/rest/reference/dependency-graph
+
+.OUTPUTS
+ [
+  {
+    "change_type": "removed",
+    "manifest": "package.json",
+    "ecosystem": "npm",
+    "name": "helmet",
+    "version": "4.6.0",
+    "package_url": "pkg:npm/helmet@4.6.0",
+    "license": "MIT",
+    "source_repository_url": "https://github.com/helmetjs/helmet",
+    "vulnerabilities": []
+  },
+  {
+    "change_type": "added",
+    "manifest": "package.json",
+    "ecosystem": "npm",
+    "name": "helmet",
+    "version": "5.0.0",
+    "package_url": "pkg:npm/helmet@5.0.0",
+    "license": "MIT",
+    "source_repository_url": "https://github.com/helmetjs/helmet",
+    "vulnerabilities": []
+  },
+  {
+    "change_type": "added",
+    "manifest": "Gemfile",
+    "ecosystem": "rubygems",
+    "name": "ruby-openid",
+    "version": "2.7.0",
+    "package_url": "pkg:gem/ruby-openid@2.7.0",
+    "license": null,
+    "source_repository_url": "https://github.com/openid/ruby-openid",
+    "vulnerabilities": [
+      {
+        "severity": "critical",
+        "advisory_ghsa_id": "GHSA-fqfj-cmh6-hj49",
+        "advisory_summary": "Ruby OpenID",
+        "advisory_url": "https://github.com/advisories/GHSA-fqfj-cmh6-hj49"
+      }
+    ]
+  }
+]
 #>
 Function Get-ADiffOfTheDependenciesBetweenCommits
 {
@@ -32,9 +76,10 @@ Function Get-ADiffOfTheDependenciesBetweenCommits
 		[Parameter(Mandatory=$FALSE)][string]$basehead,
 		[Parameter(Mandatory=$FALSE)][string]$name
     )
+    $Querys = @()
     $QueryStrings = @(
-        "name=$name"
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+        "name"
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -45,9 +90,9 @@ Function Get-ADiffOfTheDependenciesBetweenCommits
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/repos/$owner/$repo/dependency-graph/compare/$basehead?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/repos/$owner/$repo/dependency-graph/compare/$basehead?$($Querys -join '&')"
     }
     else
     {

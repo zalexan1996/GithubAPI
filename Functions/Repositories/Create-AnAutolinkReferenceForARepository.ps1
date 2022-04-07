@@ -21,6 +21,13 @@ Required. The URL must contain for the reference number.
 
 .LINK
 https://docs.github.com/en/rest/reference/repos
+
+.OUTPUTS
+ {
+  "id": 1,
+  "key_prefix": "TICKET-",
+  "url_template": "https://example.com/TICKET?query=<num>"
+}
 #>
 Function Create-AnAutolinkReferenceForARepository
 {
@@ -32,9 +39,10 @@ Function Create-AnAutolinkReferenceForARepository
 		[Parameter(Mandatory=$FALSE)][string]$key_prefix,
 		[Parameter(Mandatory=$FALSE)][string]$url_template
     )
+    $Querys = @()
     $QueryStrings = @(
         
-    ) | ? { $PSBoundParameters.ContainsKey($_) }
+    ) | ? { $PSBoundParameters.ContainsKey($_) } | % { $Querys = $Querys + "$($_)=$($PSBoundParameters[$_])" }
 
 
     $Body = @{}
@@ -46,9 +54,9 @@ Function Create-AnAutolinkReferenceForARepository
 
 
     
-    if (![String]::IsNullOrEmpty($QueryStrings))
+    if (![String]::IsNullOrEmpty($Querys))
     {
-        $FinalURL = "https://api.github.com/repos/$owner/$repo/autolinks?$($QueryStrings -join '&')"
+        $FinalURL = "https://api.github.com/repos/$owner/$repo/autolinks?$($Querys -join '&')"
     }
     else
     {
