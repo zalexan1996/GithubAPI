@@ -4,18 +4,25 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "echo",
+            "label": "Unit Test: All",
             "type": "shell",
-            "command": "echo Hello",
+            "command": "${workspaceFolder}/Tests/_All.tests.ps1",
             "problemMatcher": [],
             "group": "build"
         },
         {
-            "label": "echo2",
+            "label": "Unit Test: Branches",
             "type": "shell",
-            "command": "echo Hello2",
+            "command": "${workspaceFolder}/Tests/Branches.tests.ps1",
             "problemMatcher": [],
             "group": "build"
         },
+        {
+            "label": "Unit Test: Repositories",
+            "type": "shell",
+            "command": "${workspaceFolder}/Tests/Repositories.tests.ps1",
+            "problemMatcher": [],
+            "group": "build"
+        }
     ]
 }
